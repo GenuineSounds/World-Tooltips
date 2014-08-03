@@ -34,3 +34,11 @@ Icon
 # Files that might appear on external disk
 .Spotlight-V100
 .Trashes
+
+.gradle
+.settings
+.project
+.classpath
+build.bat
+bin
+eclipse
