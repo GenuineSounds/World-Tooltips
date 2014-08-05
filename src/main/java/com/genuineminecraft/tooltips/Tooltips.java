@@ -20,8 +20,8 @@ public class Tooltips {
 	@Instance("Tooltips")
 	public static Tooltips instance;
 	public static final String MODID = "Tooltips";
-	public static final String NAME = "Tooltips";
-	public static final String VERSION = "1.3";
+	public static final String NAME = "[Genuine] Tooltips";
+	public static final String VERSION = "1.6";
 	public static final String DESC = "This is a color in hex form (ie: 0xab12CD or #ab12CD), one can always lookup your favorite colors online.";
 	public static String color1, color2;
 	private boolean enabled = true;
