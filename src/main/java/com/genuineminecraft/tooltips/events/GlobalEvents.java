@@ -28,10 +28,17 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ItemAxe;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.ItemFood;
+import net.minecraft.item.ItemPotion;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemTool;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -47,8 +54,8 @@ public class GlobalEvents {
 	private Method info;
 	private boolean useNei = false;
 	private int mainColor, outlineColor, secondaryColor;
-	private EntityItem item;
-	private EntityPlayer entity;
+	private EntityItem entityItem;
+	private EntityPlayer entityPlayer;
 	private FontRenderer fr;
 	private float deltaTime;
 
@@ -73,19 +80,19 @@ public class GlobalEvents {
 		catch (NumberFormatException e) {
 			outlineColor = 0x5000FF;
 		}
-		mainColor = (mainColor & 0xFFFFFF) | 0xC0000000;
-		outlineColor = (outlineColor & 0xFFFFFF) | 0x50000000;
+		mainColor = (mainColor & 0xFFFFFF) | 0xD0000000;
+		outlineColor = (outlineColor & 0xFFFFFF) | 0x90000000;
 		secondaryColor = (outlineColor & 0xFEFEFE) >> 1 | outlineColor & 0xFF000000;
 	}
 
 	@SubscribeEvent
 	public void hook(RenderWorldLastEvent event) {
-		entity = Minecraft.getMinecraft().thePlayer;
+		entityPlayer = Minecraft.getMinecraft().thePlayer;
 		deltaTime = event.partialTicks;
-		item = getMouseOver();
-		if (item == null)
+		entityItem = getMouseOver();
+		if (entityItem == null)
 			return;
-		fr = item.getEntityItem().getItem().getFontRenderer(item.getEntityItem());
+		fr = entityItem.getEntityItem().getItem().getFontRenderer(entityItem.getEntityItem());
 		if (fr == null)
 			fr = Minecraft.getMinecraft().fontRenderer;
 		renderEntityItem();
@@ -97,9 +104,9 @@ public class GlobalEvents {
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		double x = RenderManager.instance.viewerPosX - (item.posX - ((item.prevPosX - item.posX) * deltaTime));
-		double y = RenderManager.instance.viewerPosY - (item.posY - ((item.prevPosY - item.posY) * deltaTime)) - item.height - 0.5;
-		double z = RenderManager.instance.viewerPosZ - (item.posZ - ((item.prevPosZ - item.posZ) * deltaTime));
+		double x = RenderManager.instance.viewerPosX - (entityItem.posX - ((entityItem.prevPosX - entityItem.posX) * deltaTime));
+		double y = RenderManager.instance.viewerPosY - (entityItem.posY - ((entityItem.prevPosY - entityItem.posY) * deltaTime)) - entityItem.height - 0.5;
+		double z = RenderManager.instance.viewerPosZ - (entityItem.posZ - ((entityItem.prevPosZ - entityItem.posZ) * deltaTime));
 		glTranslated(-x, -y, -z);
 		glRotatef(-RenderManager.instance.playerViewY + 180, 0.0F, 1.0F, 0.0F);
 		glRotatef(-RenderManager.instance.playerViewX, 1.0F, 0.0F, 0.0F);
@@ -121,21 +128,18 @@ public class GlobalEvents {
 		List<String> list = null;
 		if (useNei) {
 			try {
-				list = (List<String>) info.invoke(null, item.getEntityItem(), null, false);
+				list = (List<String>) info.invoke(null, entityItem.getEntityItem(), null, false);
 			}
 			catch (Exception e) {}
 		}
 		if (list == null)
-			list = item.getEntityItem().getTooltip(entity, false);
+			list = entityItem.getEntityItem().getTooltip(entityPlayer, false);
 		if (list == null)
 			return;
-		if (item.getEntityItem().getItem() instanceof ItemArmor) {
-			ItemArmor armor = (ItemArmor) item.getEntityItem().getItem();
-			list.add("Armor Strength: " + armor.damageReduceAmount);
-		}
+		// addInfo(list);
 		if (list.size() > 0) {
-			if (item.getEntityItem().stackSize > 1)
-				list.set(0, item.getEntityItem().stackSize + " x " + list.get(0));
+			if (entityItem.getEntityItem().stackSize > 1)
+				list.set(0, entityItem.getEntityItem().stackSize + " x " + list.get(0));
 			int maxwidth = 0;
 			for (int line = 0; line < list.size(); line++) {
 				int swidth = fr.getStringWidth(list.get(line));
@@ -161,13 +165,33 @@ public class GlobalEvents {
 			for (int i = 0; i < list.size(); i++) {
 				String s = (String) list.get(i);
 				if (i == 0)
-					s = item.getEntityItem().getRarity().rarityColor.toString() + s;
+					s = entityItem.getEntityItem().getRarity().rarityColor.toString() + s;
 				fr.drawStringWithShadow(s, drawx, drawy, -1);
 				if (i == 0)
 					drawy += 2;
 				drawy += 10;
 			}
 			glTranslated(0, 0, -1);
+		}
+	}
+
+	private void addInfo(List<String> list) {
+		if (entityItem.getEntityItem().getItem() instanceof ItemArmor) {
+			ItemArmor item = (ItemArmor) entityItem.getEntityItem().getItem();
+			list.add("Armor Strength: " + item.damageReduceAmount);
+		} else if (entityItem.getEntityItem().getItem() instanceof ItemTool) {
+			ItemTool item = (ItemTool) entityItem.getEntityItem().getItem();
+			list.add("Material: " + item.getToolMaterialName());
+		} else if (entityItem.getEntityItem().getItem() instanceof ItemFood) {
+			ItemFood item = (ItemFood) entityItem.getEntityItem().getItem();
+			list.add("Hunger: " + item.func_150905_g(entityItem.getEntityItem()));
+			list.add("Saturation: " + item.func_150906_h(entityItem.getEntityItem()));
+		} else if (entityItem.getEntityItem().getItem() instanceof ItemPotion) {
+			ItemPotion item = (ItemPotion) entityItem.getEntityItem().getItem();
+			List<PotionEffect> effects = (List<PotionEffect>) item.getEffects(entityItem.getEntityItem());
+			if (effects != null)
+				for (PotionEffect effect : effects)
+					list.add("Potion Effect: " + I18n.format(effect.getEffectName()));
 		}
 	}
 
@@ -204,15 +228,15 @@ public class GlobalEvents {
 
 	public EntityItem getMouseOver() {
 		double findDistance = 16.0D;
-		MovingObjectPosition objectMouseOver = entity.rayTrace(findDistance, deltaTime);
+		MovingObjectPosition objectMouseOver = entityPlayer.rayTrace(findDistance, deltaTime);
 		double findDistanceCap = findDistance;
-		Vec3 positionVector = entity.getPosition(deltaTime);
+		Vec3 positionVector = entityPlayer.getPosition(deltaTime);
 		if (objectMouseOver != null)
 			findDistanceCap = objectMouseOver.hitVec.distanceTo(positionVector);
-		Vec3 lookVector = entity.getLook(deltaTime);
+		Vec3 lookVector = entityPlayer.getLook(deltaTime);
 		Vec3 lookingAtVector = positionVector.addVector(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance);
 		float viewDistanceExpansion = 5.0F;
-		List<EntityItem> entityList = (List<EntityItem>) entity.worldObj.getEntitiesWithinAABB(EntityItem.class, entity.boundingBox.addCoord(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance).expand(viewDistanceExpansion, viewDistanceExpansion, viewDistanceExpansion));
+		List<EntityItem> entityList = (List<EntityItem>) entityPlayer.worldObj.getEntitiesWithinAABB(EntityItem.class, entityPlayer.boundingBox.addCoord(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance).expand(viewDistanceExpansion, viewDistanceExpansion, viewDistanceExpansion));
 		double difference = 0.0D;
 		EntityItem target = null;
 		for (int i = 0; i < entityList.size(); i++) {
