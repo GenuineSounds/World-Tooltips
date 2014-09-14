@@ -19,7 +19,7 @@ apply plugin: 'forge'
 
 version = "1.7.10-r1"
 group = "com.genuineminecraft.tooltips"
-archivesBaseName = "Tooltips"
+archivesBaseName = "WorldTooltips"
 
 minecraft {
     version = "1.7.10-10.13.0.1208"
