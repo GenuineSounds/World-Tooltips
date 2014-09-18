@@ -40,13 +40,18 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemTool;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 
 import com.genuineminecraft.tooltips.Tooltips;
 
+import cpw.mods.fml.common.ModContainer;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.registry.GameData;
+import cpw.mods.fml.common.registry.GameRegistry;
+import cpw.mods.fml.common.registry.GameRegistry.UniqueIdentifier;
 
 public class GlobalEvents {
 
@@ -128,7 +133,7 @@ public class GlobalEvents {
 		List<String> list = null;
 		if (useNei) {
 			try {
-				list = (List<String>) info.invoke(null, entityItem.getEntityItem(), null, false);
+				list = (List<String>) info.invoke(null, entityItem.getEntityItem(), null, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
 			}
 			catch (Exception e) {}
 		}
@@ -137,6 +142,7 @@ public class GlobalEvents {
 		if (list == null)
 			return;
 		// addInfo(list);
+		addModInfo(list);
 		if (list.size() > 0) {
 			if (entityItem.getEntityItem().stackSize > 1)
 				list.set(0, entityItem.getEntityItem().stackSize + " x " + list.get(0));
@@ -172,6 +178,24 @@ public class GlobalEvents {
 				drawy += 10;
 			}
 			glTranslated(0, 0, -1);
+		}
+	}
+
+	private void addModInfo(List<String> list) {
+		String modName = nameFromStack(entityItem.getEntityItem());
+		if (!modName.isEmpty())
+			list.add(EnumChatFormatting.BLUE.toString() + EnumChatFormatting.ITALIC.toString() + modName + EnumChatFormatting.RESET.toString());
+	}
+
+	public static String nameFromStack(ItemStack stack) {
+		try {
+			UniqueIdentifier ui = GameRegistry.findUniqueIdentifierFor(stack.getItem());
+			ModContainer mod = GameData.findModOwner(GameData.getItemRegistry().getNameForObject(stack.getItem()));
+			String modname = mod == null ? "Minecraft" : mod.getName();
+			return modname;
+		}
+		catch (Exception e) {
+			return "";
 		}
 	}
 
