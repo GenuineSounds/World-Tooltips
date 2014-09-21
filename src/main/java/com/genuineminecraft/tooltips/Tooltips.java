@@ -17,11 +17,11 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 @Mod(modid = Tooltips.MODID, name = Tooltips.NAME, version = Tooltips.VERSION)
 public class Tooltips {
 
-	@Instance("WorldTooltips")
+	@Instance(Tooltips.MODID)
 	public static Tooltips instance;
-	public static final String MODID = "WorldTooltips";
-	public static final String NAME = "[Genuine] World Tooltips";
-	public static final String VERSION = "1.7.10-r1";
+	public static final String MODID = "GenuineWorldTooltips";
+	public static final String NAME = "World Tooltips";
+	public static final String VERSION = "1.7.10-r2";
 	public static final String DESC = "This is a color in hex form (ie: 0xab12CD or #ab12CD), one can always lookup your favorite colors online.";
 	public static String color1, color2;
 	private boolean enabled = true;
