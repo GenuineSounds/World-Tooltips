@@ -1,6 +1,6 @@
 [
 {
-  "modid": "GenuineWorldTooltips",
+  "modid": "WorldTooltips",
   "name": "World Tooltips",
   "description": "World Tooltips is a client mod that adds in-world tooltips over items on the ground... So you can see what you're picking up.",
   "version": "1.7.10-r2",
