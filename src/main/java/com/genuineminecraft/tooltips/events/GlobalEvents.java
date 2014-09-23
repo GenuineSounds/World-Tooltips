@@ -69,18 +69,15 @@ public class GlobalEvents {
 				info = nei.getDeclaredMethod("itemDisplayNameMultiline", ItemStack.class, GuiContainer.class, boolean.class);
 				useNei = true;
 			}
-		}
-		catch (Exception e) {}
+		} catch (Exception e) {}
 		try {
 			mainColor = Integer.decode(Tooltips.color1);
-		}
-		catch (NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			mainColor = 0x100010;
 		}
 		try {
 			outlineColor = Integer.decode(Tooltips.color2);
-		}
-		catch (NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			outlineColor = 0x5000FF;
 		}
 		mainColor = (mainColor & 0xFFFFFF) | 0xD0000000;
@@ -132,8 +129,7 @@ public class GlobalEvents {
 		if (useNei) {
 			try {
 				list = (List<String>) info.invoke(null, entityItem.getEntityItem(), null, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
-			}
-			catch (Exception e) {}
+			} catch (Exception e) {}
 		}
 		if (list == null)
 			list = entityItem.getEntityItem().getTooltip(entityPlayer, false);
@@ -191,8 +187,7 @@ public class GlobalEvents {
 			ModContainer mod = GameData.findModOwner(GameData.getItemRegistry().getNameForObject(stack.getItem()));
 			String modname = mod == null ? "Minecraft" : mod.getName();
 			return modname;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			return "";
 		}
 	}
