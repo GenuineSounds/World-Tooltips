@@ -1,4 +1,4 @@
-package com.genuineminecraft.tooltips.events;
+package com.genuineminecraft.tooltips.system;
 
 import static org.lwjgl.opengl.GL11.GL_ALPHA_TEST;
 import static org.lwjgl.opengl.GL11.GL_BLEND;
@@ -51,7 +51,7 @@ import cpw.mods.fml.common.registry.GameData;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.GameRegistry.UniqueIdentifier;
 
-public class GlobalEvents {
+public class TooltipSystem {
 
 	private Class nei;
 	private Method info;
@@ -62,7 +62,7 @@ public class GlobalEvents {
 	private FontRenderer fr;
 	private float deltaTime;
 
-	public GlobalEvents() {
+	public TooltipSystem() {
 		try {
 			nei = Class.forName("codechicken.nei.guihook.GuiContainerManager");
 			if (nei != null) {

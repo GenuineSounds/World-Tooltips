@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 
-import com.genuineminecraft.tooltips.events.GlobalEvents;
+import com.genuineminecraft.tooltips.system.TooltipSystem;
 
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -21,10 +21,9 @@ public class Tooltips {
 	public static Tooltips instance;
 	public static final String MODID = "WorldTooltips";
 	public static final String NAME = "World Tooltips";
-	public static final String VERSION = "1.7.10-r2";
+	public static final String VERSION = "1.7.10-r3";
 	public static final String DESC = "This is a color in hex form (ie: 0xab12CD or #ab12CD), one can always lookup your favorite colors online.";
 	public static String color1, color2;
-	private boolean enabled = true;
 	private Pattern pattern = Pattern.compile("((0[xX])|(#))[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]");
 
 	@EventHandler
@@ -33,14 +32,12 @@ public class Tooltips {
 		Configuration config = new Configuration(event.getSuggestedConfigurationFile());
 		color1 = config.getString("background", "Colors", "0x100010", DESC, pattern);
 		color2 = config.getString("outline", "Colors", "0x5000FF", DESC, pattern);
-		enabled = config.getBoolean("enable", "Options", true, "Set to false to disable this mod completely");
 		config.save();
 	}
 
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
-		if (enabled)
-			MinecraftForge.EVENT_BUS.register(new GlobalEvents());
+		MinecraftForge.EVENT_BUS.register(new TooltipSystem());
 	}
 
 	@EventHandler
