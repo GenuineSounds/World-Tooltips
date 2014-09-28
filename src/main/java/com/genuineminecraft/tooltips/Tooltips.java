@@ -28,7 +28,6 @@ public class Tooltips {
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
-		this.instance = this;
 		Configuration config = new Configuration(event.getSuggestedConfigurationFile());
 		color1 = config.getString("background", "Colors", "0x100010", DESC, pattern);
 		color2 = config.getString("outline", "Colors", "0x5000FF", DESC, pattern);

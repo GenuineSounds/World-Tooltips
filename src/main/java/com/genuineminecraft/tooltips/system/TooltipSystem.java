@@ -163,7 +163,7 @@ public class TooltipSystem {
 			drawGradientRect(drawx - 3, drawy + h + 2, w + 6, 1, secondaryColor, secondaryColor);
 			glTranslated(0, 0, 1);
 			for (int i = 0; i < list.size(); i++) {
-				String s = (String) list.get(i);
+				String s = list.get(i);
 				if (i == 0)
 					s = entityItem.getEntityItem().getRarity().rarityColor.toString() + s;
 				fr.drawStringWithShadow(s, drawx, drawy, -1);
@@ -205,7 +205,7 @@ public class TooltipSystem {
 			list.add("Saturation: " + item.func_150906_h(entityItem.getEntityItem()));
 		} else if (entityItem.getEntityItem().getItem() instanceof ItemPotion) {
 			ItemPotion item = (ItemPotion) entityItem.getEntityItem().getItem();
-			List<PotionEffect> effects = (List<PotionEffect>) item.getEffects(entityItem.getEntityItem());
+			List<PotionEffect> effects = item.getEffects(entityItem.getEntityItem());
 			if (effects != null)
 				for (PotionEffect effect : effects)
 					list.add("Potion Effect: " + I18n.format(effect.getEffectName()));
@@ -215,14 +215,14 @@ public class TooltipSystem {
 	protected void drawGradientRect(int x, int y, int w, int h, int color1, int color2) {
 		w += x;
 		h += y;
-		float alpha1 = (float) (color1 >> 24 & 0xff) / 255F;
-		float red1 = (float) (color1 >> 16 & 0xff) / 255F;
-		float green1 = (float) (color1 >> 8 & 0xff) / 255F;
-		float blue1 = (float) (color1 & 0xff) / 255F;
-		float alpha2 = (float) (color2 >> 24 & 0xff) / 255F;
-		float red2 = (float) (color2 >> 16 & 0xff) / 255F;
-		float green2 = (float) (color2 >> 8 & 0xff) / 255F;
-		float blue2 = (float) (color2 & 0xff) / 255F;
+		float alpha1 = (color1 >> 24 & 0xff) / 255F;
+		float red1 = (color1 >> 16 & 0xff) / 255F;
+		float green1 = (color1 >> 8 & 0xff) / 255F;
+		float blue1 = (color1 & 0xff) / 255F;
+		float alpha2 = (color2 >> 24 & 0xff) / 255F;
+		float red2 = (color2 >> 16 & 0xff) / 255F;
+		float green2 = (color2 >> 8 & 0xff) / 255F;
+		float blue2 = (color2 & 0xff) / 255F;
 		glDisable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
 		glDisable(GL_ALPHA_TEST);
@@ -253,7 +253,7 @@ public class TooltipSystem {
 		Vec3 lookVector = entityPlayer.getLook(deltaTime);
 		Vec3 lookingAtVector = positionVector.addVector(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance);
 		float viewDistanceExpansion = 5.0F;
-		List<EntityItem> entityList = (List<EntityItem>) entityPlayer.worldObj.getEntitiesWithinAABB(EntityItem.class, entityPlayer.boundingBox.addCoord(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance).expand(viewDistanceExpansion, viewDistanceExpansion, viewDistanceExpansion));
+		List<EntityItem> entityList = entityPlayer.worldObj.getEntitiesWithinAABB(EntityItem.class, entityPlayer.boundingBox.addCoord(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance).expand(viewDistanceExpansion, viewDistanceExpansion, viewDistanceExpansion));
 		double difference = 0.0D;
 		EntityItem target = null;
 		for (int i = 0; i < entityList.size(); i++) {
