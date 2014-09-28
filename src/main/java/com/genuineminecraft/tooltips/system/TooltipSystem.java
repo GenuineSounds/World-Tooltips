@@ -53,134 +53,6 @@ import cpw.mods.fml.common.registry.GameRegistry.UniqueIdentifier;
 
 public class TooltipSystem {
 
-	private Class nei;
-	private Method info;
-	private boolean useNei = false;
-	private int mainColor, outlineColor, secondaryColor;
-	private EntityItem entityItem;
-	private EntityPlayer entityPlayer;
-	private FontRenderer fr;
-	private float deltaTime;
-
-	public TooltipSystem() {
-		try {
-			nei = Class.forName("codechicken.nei.guihook.GuiContainerManager");
-			if (nei != null) {
-				info = nei.getDeclaredMethod("itemDisplayNameMultiline", ItemStack.class, GuiContainer.class, boolean.class);
-				useNei = true;
-			}
-		} catch (Exception e) {}
-		try {
-			mainColor = Integer.decode(Tooltips.color1);
-		} catch (NumberFormatException e) {
-			mainColor = 0x100010;
-		}
-		try {
-			outlineColor = Integer.decode(Tooltips.color2);
-		} catch (NumberFormatException e) {
-			outlineColor = 0x5000FF;
-		}
-		mainColor = (mainColor & 0xFFFFFF) | 0xD0000000;
-		outlineColor = (outlineColor & 0xFFFFFF) | 0x90000000;
-		secondaryColor = (outlineColor & 0xFEFEFE) >> 1 | outlineColor & 0xFF000000;
-	}
-
-	@SubscribeEvent
-	public void hook(RenderWorldLastEvent event) {
-		entityPlayer = Minecraft.getMinecraft().thePlayer;
-		deltaTime = event.partialTicks;
-		entityItem = getMouseOver();
-		if (entityItem == null)
-			return;
-		fr = entityItem.getEntityItem().getItem().getFontRenderer(entityItem.getEntityItem());
-		if (fr == null)
-			fr = Minecraft.getMinecraft().fontRenderer;
-		renderEntityItem();
-	}
-
-	public void renderEntityItem() {
-		glPushMatrix();
-		glDisable(GL_LIGHTING);
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		double x = RenderManager.instance.viewerPosX - (entityItem.posX - ((entityItem.prevPosX - entityItem.posX) * deltaTime));
-		double y = RenderManager.instance.viewerPosY - (entityItem.posY - ((entityItem.prevPosY - entityItem.posY) * deltaTime)) - entityItem.height - 0.5;
-		double z = RenderManager.instance.viewerPosZ - (entityItem.posZ - ((entityItem.prevPosZ - entityItem.posZ) * deltaTime));
-		glTranslated(-x, -y, -z);
-		glRotatef(-RenderManager.instance.playerViewY + 180, 0.0F, 1.0F, 0.0F);
-		glRotatef(-RenderManager.instance.playerViewX, 1.0F, 0.0F, 0.0F);
-		float scale = 0.02F;
-		glScalef(scale, -scale, scale);
-		drawItemTip();
-		glScalef(1F / scale, 1F / -scale, 1F / scale);
-		glRotatef(RenderManager.instance.playerViewX, 1.0F, 0.0F, 0.0F);
-		glRotatef(RenderManager.instance.playerViewY - 180, 0.0F, 1.0F, 0.0F);
-		glTranslated(x, y, z);
-		glColor4f(1, 1, 1, 1);
-		glDisable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_LIGHTING);
-		glPopMatrix();
-	}
-
-	private void drawItemTip() {
-		List<String> list = null;
-		if (useNei) {
-			try {
-				list = (List<String>) info.invoke(null, entityItem.getEntityItem(), null, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
-			} catch (Exception e) {}
-		}
-		if (list == null)
-			list = entityItem.getEntityItem().getTooltip(entityPlayer, false);
-		if (list == null)
-			return;
-		// addInfo(list);
-		addModInfo(list);
-		if (list.size() > 0) {
-			if (entityItem.getEntityItem().stackSize > 1)
-				list.set(0, entityItem.getEntityItem().stackSize + " x " + list.get(0));
-			int maxwidth = 0;
-			for (int line = 0; line < list.size(); line++) {
-				int swidth = fr.getStringWidth(list.get(line));
-				if (swidth > maxwidth)
-					maxwidth = swidth;
-			}
-			int w = maxwidth;
-			int h = 8;
-			if (list.size() > 1)
-				h += 2 + (list.size() - 1) * 10;
-			int drawx = -w / 2;
-			int drawy = -h;
-			drawGradientRect(drawx - 3, drawy - 4, w + 6, 1, mainColor, mainColor);
-			drawGradientRect(drawx - 3, drawy + h + 3, w + 6, 1, mainColor, mainColor);
-			drawGradientRect(drawx - 3, drawy - 3, w + 6, h + 6, mainColor, mainColor);
-			drawGradientRect(drawx - 4, drawy - 3, 1, h + 6, mainColor, mainColor);
-			drawGradientRect(drawx + w + 3, drawy - 3, 1, h + 6, mainColor, mainColor);
-			drawGradientRect(drawx - 3, drawy - 2, 1, h + 4, outlineColor, secondaryColor);
-			drawGradientRect(drawx + w + 2, drawy - 2, 1, h + 4, outlineColor, secondaryColor);
-			drawGradientRect(drawx - 3, drawy - 3, w + 6, 1, outlineColor, outlineColor);
-			drawGradientRect(drawx - 3, drawy + h + 2, w + 6, 1, secondaryColor, secondaryColor);
-			glTranslated(0, 0, 1);
-			for (int i = 0; i < list.size(); i++) {
-				String s = list.get(i);
-				if (i == 0)
-					s = entityItem.getEntityItem().getRarity().rarityColor.toString() + s;
-				fr.drawStringWithShadow(s, drawx, drawy, -1);
-				if (i == 0)
-					drawy += 2;
-				drawy += 10;
-			}
-			glTranslated(0, 0, -1);
-		}
-	}
-
-	private void addModInfo(List<String> list) {
-		String modName = nameFromStack(entityItem.getEntityItem());
-		if (!modName.isEmpty())
-			list.add(EnumChatFormatting.BLUE.toString() + EnumChatFormatting.ITALIC.toString() + modName + EnumChatFormatting.RESET.toString());
-	}
-
 	public static String nameFromStack(ItemStack stack) {
 		try {
 			UniqueIdentifier ui = GameRegistry.findUniqueIdentifierFor(stack.getItem());
@@ -192,24 +64,62 @@ public class TooltipSystem {
 		}
 	}
 
+	private Class nei;
+	private Method info;
+	private boolean useNei = false;
+	private int mainColor, outlineColor, secondaryColor;
+	private EntityItem entityItem;
+	private EntityPlayer entityPlayer;
+	private FontRenderer fr;
+	private float deltaTime;
+
+	public TooltipSystem() {
+		try {
+			this.nei = Class.forName("codechicken.nei.guihook.GuiContainerManager");
+			if (this.nei != null) {
+				this.info = this.nei.getDeclaredMethod("itemDisplayNameMultiline", ItemStack.class, GuiContainer.class, boolean.class);
+				this.useNei = true;
+			}
+		} catch (Exception e) {}
+		try {
+			this.mainColor = Integer.decode(Tooltips.color1);
+		} catch (NumberFormatException e) {
+			this.mainColor = 0x100010;
+		}
+		try {
+			this.outlineColor = Integer.decode(Tooltips.color2);
+		} catch (NumberFormatException e) {
+			this.outlineColor = 0x5000FF;
+		}
+		this.mainColor = (this.mainColor & 0xFFFFFF) | 0xD0000000;
+		this.outlineColor = (this.outlineColor & 0xFFFFFF) | 0x90000000;
+		this.secondaryColor = (this.outlineColor & 0xFEFEFE) >> 1 | this.outlineColor & 0xFF000000;
+	}
+
 	private void addInfo(List<String> list) {
-		if (entityItem.getEntityItem().getItem() instanceof ItemArmor) {
-			ItemArmor item = (ItemArmor) entityItem.getEntityItem().getItem();
+		if (this.entityItem.getEntityItem().getItem() instanceof ItemArmor) {
+			ItemArmor item = (ItemArmor) this.entityItem.getEntityItem().getItem();
 			list.add("Armor Strength: " + item.damageReduceAmount);
-		} else if (entityItem.getEntityItem().getItem() instanceof ItemTool) {
-			ItemTool item = (ItemTool) entityItem.getEntityItem().getItem();
+		} else if (this.entityItem.getEntityItem().getItem() instanceof ItemTool) {
+			ItemTool item = (ItemTool) this.entityItem.getEntityItem().getItem();
 			list.add("Material: " + item.getToolMaterialName());
-		} else if (entityItem.getEntityItem().getItem() instanceof ItemFood) {
-			ItemFood item = (ItemFood) entityItem.getEntityItem().getItem();
-			list.add("Hunger: " + item.func_150905_g(entityItem.getEntityItem()));
-			list.add("Saturation: " + item.func_150906_h(entityItem.getEntityItem()));
-		} else if (entityItem.getEntityItem().getItem() instanceof ItemPotion) {
-			ItemPotion item = (ItemPotion) entityItem.getEntityItem().getItem();
-			List<PotionEffect> effects = item.getEffects(entityItem.getEntityItem());
+		} else if (this.entityItem.getEntityItem().getItem() instanceof ItemFood) {
+			ItemFood item = (ItemFood) this.entityItem.getEntityItem().getItem();
+			list.add("Hunger: " + item.func_150905_g(this.entityItem.getEntityItem()));
+			list.add("Saturation: " + item.func_150906_h(this.entityItem.getEntityItem()));
+		} else if (this.entityItem.getEntityItem().getItem() instanceof ItemPotion) {
+			ItemPotion item = (ItemPotion) this.entityItem.getEntityItem().getItem();
+			List<PotionEffect> effects = item.getEffects(this.entityItem.getEntityItem());
 			if (effects != null)
 				for (PotionEffect effect : effects)
 					list.add("Potion Effect: " + I18n.format(effect.getEffectName()));
 		}
+	}
+
+	private void addModInfo(List<String> list) {
+		String modName = nameFromStack(this.entityItem.getEntityItem());
+		if (!modName.isEmpty())
+			list.add(EnumChatFormatting.BLUE.toString() + EnumChatFormatting.ITALIC.toString() + modName + EnumChatFormatting.RESET.toString());
 	}
 
 	protected void drawGradientRect(int x, int y, int w, int h, int color1, int color2) {
@@ -243,17 +153,68 @@ public class TooltipSystem {
 		glEnable(GL_TEXTURE_2D);
 	}
 
+	private void drawItemTip() {
+		List<String> list = null;
+		if (this.useNei) {
+			try {
+				list = (List<String>) this.info.invoke(null, this.entityItem.getEntityItem(), null, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
+			} catch (Exception e) {}
+		}
+		if (list == null)
+			list = this.entityItem.getEntityItem().getTooltip(this.entityPlayer, false);
+		if (list == null)
+			return;
+		// addInfo(list);
+		this.addModInfo(list);
+		if (list.size() > 0) {
+			if (this.entityItem.getEntityItem().stackSize > 1)
+				list.set(0, this.entityItem.getEntityItem().stackSize + " x " + list.get(0));
+			int maxwidth = 0;
+			for (int line = 0; line < list.size(); line++) {
+				int swidth = this.fr.getStringWidth(list.get(line));
+				if (swidth > maxwidth)
+					maxwidth = swidth;
+			}
+			int w = maxwidth;
+			int h = 8;
+			if (list.size() > 1)
+				h += 2 + (list.size() - 1) * 10;
+			int drawx = -w / 2;
+			int drawy = -h;
+			this.drawGradientRect(drawx - 3, drawy - 4, w + 6, 1, this.mainColor, this.mainColor);
+			this.drawGradientRect(drawx - 3, drawy + h + 3, w + 6, 1, this.mainColor, this.mainColor);
+			this.drawGradientRect(drawx - 3, drawy - 3, w + 6, h + 6, this.mainColor, this.mainColor);
+			this.drawGradientRect(drawx - 4, drawy - 3, 1, h + 6, this.mainColor, this.mainColor);
+			this.drawGradientRect(drawx + w + 3, drawy - 3, 1, h + 6, this.mainColor, this.mainColor);
+			this.drawGradientRect(drawx - 3, drawy - 2, 1, h + 4, this.outlineColor, this.secondaryColor);
+			this.drawGradientRect(drawx + w + 2, drawy - 2, 1, h + 4, this.outlineColor, this.secondaryColor);
+			this.drawGradientRect(drawx - 3, drawy - 3, w + 6, 1, this.outlineColor, this.outlineColor);
+			this.drawGradientRect(drawx - 3, drawy + h + 2, w + 6, 1, this.secondaryColor, this.secondaryColor);
+			glTranslated(0, 0, 1);
+			for (int i = 0; i < list.size(); i++) {
+				String s = list.get(i);
+				if (i == 0)
+					s = this.entityItem.getEntityItem().getRarity().rarityColor.toString() + s;
+				this.fr.drawStringWithShadow(s, drawx, drawy, -1);
+				if (i == 0)
+					drawy += 2;
+				drawy += 10;
+			}
+			glTranslated(0, 0, -1);
+		}
+	}
+
 	public EntityItem getMouseOver() {
 		double findDistance = 16.0D;
-		MovingObjectPosition objectMouseOver = entityPlayer.rayTrace(findDistance, deltaTime);
+		MovingObjectPosition objectMouseOver = this.entityPlayer.rayTrace(findDistance, this.deltaTime);
 		double findDistanceCap = findDistance;
-		Vec3 positionVector = entityPlayer.getPosition(deltaTime);
+		Vec3 positionVector = this.entityPlayer.getPosition(this.deltaTime);
 		if (objectMouseOver != null)
 			findDistanceCap = objectMouseOver.hitVec.distanceTo(positionVector);
-		Vec3 lookVector = entityPlayer.getLook(deltaTime);
+		Vec3 lookVector = this.entityPlayer.getLook(this.deltaTime);
 		Vec3 lookingAtVector = positionVector.addVector(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance);
 		float viewDistanceExpansion = 5.0F;
-		List<EntityItem> entityList = entityPlayer.worldObj.getEntitiesWithinAABB(EntityItem.class, entityPlayer.boundingBox.addCoord(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance).expand(viewDistanceExpansion, viewDistanceExpansion, viewDistanceExpansion));
+		List<EntityItem> entityList = this.entityPlayer.worldObj.getEntitiesWithinAABB(EntityItem.class, this.entityPlayer.boundingBox.addCoord(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance).expand(viewDistanceExpansion, viewDistanceExpansion, viewDistanceExpansion));
 		double difference = 0.0D;
 		EntityItem target = null;
 		for (int i = 0; i < entityList.size(); i++) {
@@ -275,5 +236,44 @@ public class TooltipSystem {
 			}
 		}
 		return target;
+	}
+
+	@SubscribeEvent
+	public void hook(RenderWorldLastEvent event) {
+		this.entityPlayer = Minecraft.getMinecraft().thePlayer;
+		this.deltaTime = event.partialTicks;
+		this.entityItem = this.getMouseOver();
+		if (this.entityItem == null)
+			return;
+		this.fr = this.entityItem.getEntityItem().getItem().getFontRenderer(this.entityItem.getEntityItem());
+		if (this.fr == null)
+			this.fr = Minecraft.getMinecraft().fontRenderer;
+		this.renderEntityItem();
+	}
+
+	public void renderEntityItem() {
+		glPushMatrix();
+		glDisable(GL_LIGHTING);
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		double x = RenderManager.instance.viewerPosX - (this.entityItem.posX - ((this.entityItem.prevPosX - this.entityItem.posX) * this.deltaTime));
+		double y = RenderManager.instance.viewerPosY - (this.entityItem.posY - ((this.entityItem.prevPosY - this.entityItem.posY) * this.deltaTime)) - this.entityItem.height - 0.5;
+		double z = RenderManager.instance.viewerPosZ - (this.entityItem.posZ - ((this.entityItem.prevPosZ - this.entityItem.posZ) * this.deltaTime));
+		glTranslated(-x, -y, -z);
+		glRotatef(-RenderManager.instance.playerViewY + 180, 0.0F, 1.0F, 0.0F);
+		glRotatef(-RenderManager.instance.playerViewX, 1.0F, 0.0F, 0.0F);
+		float scale = 0.02F;
+		glScalef(scale, -scale, scale);
+		this.drawItemTip();
+		glScalef(1F / scale, 1F / -scale, 1F / scale);
+		glRotatef(RenderManager.instance.playerViewX, 1.0F, 0.0F, 0.0F);
+		glRotatef(RenderManager.instance.playerViewY - 180, 0.0F, 1.0F, 0.0F);
+		glTranslated(x, y, z);
+		glColor4f(1, 1, 1, 1);
+		glDisable(GL_BLEND);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_LIGHTING);
+		glPopMatrix();
 	}
 }

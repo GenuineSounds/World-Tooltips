@@ -27,18 +27,18 @@ public class Tooltips {
 	private Pattern pattern = Pattern.compile("((0[xX])|(#))[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]");
 
 	@EventHandler
-	public void preInit(FMLPreInitializationEvent event) {
-		Configuration config = new Configuration(event.getSuggestedConfigurationFile());
-		color1 = config.getString("background", "Colors", "0x100010", DESC, pattern);
-		color2 = config.getString("outline", "Colors", "0x5000FF", DESC, pattern);
-		config.save();
-	}
-
-	@EventHandler
 	public void init(FMLInitializationEvent event) {
 		MinecraftForge.EVENT_BUS.register(new TooltipSystem());
 	}
 
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event) {}
+
+	@EventHandler
+	public void preInit(FMLPreInitializationEvent event) {
+		Configuration config = new Configuration(event.getSuggestedConfigurationFile());
+		color1 = config.getString("background", "Colors", "0x100010", DESC, this.pattern);
+		color2 = config.getString("outline", "Colors", "0x5000FF", DESC, this.pattern);
+		config.save();
+	}
 }
