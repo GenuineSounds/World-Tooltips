@@ -59,7 +59,8 @@ public class TooltipSystem {
 			ModContainer mod = GameData.findModOwner(GameData.getItemRegistry().getNameForObject(stack.getItem()));
 			String modname = mod == null ? "Minecraft" : mod.getName();
 			return modname;
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			return "";
 		}
 	}
@@ -80,15 +81,18 @@ public class TooltipSystem {
 				this.info = this.nei.getDeclaredMethod("itemDisplayNameMultiline", ItemStack.class, GuiContainer.class, boolean.class);
 				this.useNei = true;
 			}
-		} catch (Exception e) {}
+		}
+		catch (Exception e) {}
 		try {
 			this.mainColor = Integer.decode(Tooltips.color1);
-		} catch (NumberFormatException e) {
+		}
+		catch (NumberFormatException e) {
 			this.mainColor = 0x100010;
 		}
 		try {
 			this.outlineColor = Integer.decode(Tooltips.color2);
-		} catch (NumberFormatException e) {
+		}
+		catch (NumberFormatException e) {
 			this.outlineColor = 0x5000FF;
 		}
 		this.mainColor = (this.mainColor & 0xFFFFFF) | 0xD0000000;
@@ -158,7 +162,8 @@ public class TooltipSystem {
 		if (this.useNei) {
 			try {
 				list = (List<String>) this.info.invoke(null, this.entityItem.getEntityItem(), null, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
-			} catch (Exception e) {}
+			}
+			catch (Exception e) {}
 		}
 		if (list == null)
 			list = this.entityItem.getEntityItem().getTooltip(this.entityPlayer, false);
