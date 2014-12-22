@@ -16,7 +16,7 @@ import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glPopMatrix;
 import static org.lwjgl.opengl.GL11.glPushMatrix;
 import static org.lwjgl.opengl.GL11.glRotatef;
-import static org.lwjgl.opengl.GL11.glScalef;
+import static org.lwjgl.opengl.GL11.glScaled;
 import static org.lwjgl.opengl.GL11.glShadeModel;
 import static org.lwjgl.opengl.GL11.glTranslated;
 
@@ -210,7 +210,7 @@ public class TooltipSystem {
 	}
 
 	public EntityItem getMouseOver() {
-		double findDistance = 16.0D;
+		double findDistance = 32;
 		MovingObjectPosition objectMouseOver = this.entityPlayer.rayTrace(findDistance, this.deltaTime);
 		double findDistanceCap = findDistance;
 		Vec3 positionVector = this.entityPlayer.getPosition(this.deltaTime);
@@ -218,9 +218,9 @@ public class TooltipSystem {
 			findDistanceCap = objectMouseOver.hitVec.distanceTo(positionVector);
 		Vec3 lookVector = this.entityPlayer.getLook(this.deltaTime);
 		Vec3 lookingAtVector = positionVector.addVector(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance);
-		float viewDistanceExpansion = 5.0F;
+		float viewDistanceExpansion = 5;
 		List<EntityItem> entityList = this.entityPlayer.worldObj.getEntitiesWithinAABB(EntityItem.class, this.entityPlayer.boundingBox.addCoord(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance).expand(viewDistanceExpansion, viewDistanceExpansion, viewDistanceExpansion));
-		double difference = 0.0D;
+		double difference = 0;
 		EntityItem target = null;
 		for (int i = 0; i < entityList.size(); i++) {
 			EntityItem entity = entityList.get(i);
@@ -230,7 +230,7 @@ public class TooltipSystem {
 			if (entityCollisionBox.isVecInside(positionVector)) {
 				if (0.0D <= difference) {
 					target = entity;
-					difference = 0.0D;
+					difference = 0;
 				}
 			} else if (objectInVector != null) {
 				double distance = positionVector.distanceTo(objectInVector.hitVec);
@@ -262,19 +262,22 @@ public class TooltipSystem {
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		double x = RenderManager.instance.viewerPosX - (this.entityItem.posX - ((this.entityItem.prevPosX - this.entityItem.posX) * this.deltaTime));
-		double y = RenderManager.instance.viewerPosY - (this.entityItem.posY - ((this.entityItem.prevPosY - this.entityItem.posY) * this.deltaTime)) - this.entityItem.height - 0.5;
-		double z = RenderManager.instance.viewerPosZ - (this.entityItem.posZ - ((this.entityItem.prevPosZ - this.entityItem.posZ) * this.deltaTime));
-		glTranslated(-x, -y, -z);
-		glRotatef(-RenderManager.instance.playerViewY + 180, 0.0F, 1.0F, 0.0F);
-		glRotatef(-RenderManager.instance.playerViewX, 1.0F, 0.0F, 0.0F);
-		float scale = 0.02F;
-		glScalef(scale, -scale, scale);
+		double interpX = RenderManager.instance.renderPosX - (this.entityItem.posX - ((this.entityItem.prevPosX - this.entityItem.posX) * this.deltaTime));
+		double interpY = RenderManager.instance.renderPosY - (this.entityItem.posY - ((this.entityItem.prevPosY - this.entityItem.posY) * this.deltaTime));
+		double interpZ = RenderManager.instance.renderPosZ - (this.entityItem.posZ - ((this.entityItem.prevPosZ - this.entityItem.posZ) * this.deltaTime));
+		double interpDistance = Math.sqrt(interpX * interpX + interpY * interpY + interpZ * interpZ);
+		glTranslated(-interpX, -(interpY - this.entityItem.height - 0.5), -interpZ);
+		glRotatef(-RenderManager.instance.playerViewY + 180, 0, 1, 0);
+		glRotatef(-RenderManager.instance.playerViewX, 1, 0, 0);
+		double scale = interpDistance / 256;
+		if (scale <= 0.01)
+			scale = 0.01;
+		glScaled(scale, -scale, scale);
 		this.drawItemTip();
-		glScalef(1F / scale, 1F / -scale, 1F / scale);
-		glRotatef(RenderManager.instance.playerViewX, 1.0F, 0.0F, 0.0F);
-		glRotatef(RenderManager.instance.playerViewY - 180, 0.0F, 1.0F, 0.0F);
-		glTranslated(x, y, z);
+		glScaled(1F / scale, 1F / -scale, 1F / scale);
+		glRotatef(RenderManager.instance.playerViewX, 1, 0, 0);
+		glRotatef(RenderManager.instance.playerViewY - 180, 0, 1, 0);
+		glTranslated(interpX, interpY - this.entityItem.height - 0.5, interpZ);
 		glColor4f(1, 1, 1, 1);
 		glDisable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
