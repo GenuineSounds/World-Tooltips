@@ -11,7 +11,6 @@ import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 
 @Mod(modid = Tooltips.MODID, name = Tooltips.NAME, version = Tooltips.VERSION)
@@ -29,8 +28,8 @@ public class Tooltips {
 	@EventHandler
 	public void pre(FMLPreInitializationEvent event) {
 		Configuration config = new Configuration(event.getSuggestedConfigurationFile());
-		color1 = config.getString("background", "Colors", "0x100010", DESC, this.pattern);
-		color2 = config.getString("outline", "Colors", "0x5000FF", DESC, this.pattern);
+		Tooltips.color1 = config.getString("background", "Colors", "0x100010", Tooltips.DESC, pattern);
+		Tooltips.color2 = config.getString("outline", "Colors", "0x5000FF", Tooltips.DESC, pattern);
 		config.save();
 	}
 

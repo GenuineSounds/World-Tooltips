@@ -1,25 +1,5 @@
 package com.genuineminecraft.tooltips.system;
 
-import static org.lwjgl.opengl.GL11.GL_ALPHA_TEST;
-import static org.lwjgl.opengl.GL11.GL_BLEND;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
-import static org.lwjgl.opengl.GL11.GL_FLAT;
-import static org.lwjgl.opengl.GL11.GL_LIGHTING;
-import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
-import static org.lwjgl.opengl.GL11.GL_SMOOTH;
-import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.glBlendFunc;
-import static org.lwjgl.opengl.GL11.glColor4f;
-import static org.lwjgl.opengl.GL11.glDisable;
-import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL11.glPopMatrix;
-import static org.lwjgl.opengl.GL11.glPushMatrix;
-import static org.lwjgl.opengl.GL11.glRotatef;
-import static org.lwjgl.opengl.GL11.glScaled;
-import static org.lwjgl.opengl.GL11.glShadeModel;
-import static org.lwjgl.opengl.GL11.glTranslated;
-
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -42,6 +22,8 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+
+import org.lwjgl.opengl.GL11;
 
 import com.genuineminecraft.tooltips.Tooltips;
 
@@ -76,44 +58,44 @@ public class TooltipSystem {
 
 	public TooltipSystem() {
 		try {
-			this.nei = Class.forName("codechicken.nei.guihook.GuiContainerManager");
-			if (this.nei != null) {
-				this.info = this.nei.getDeclaredMethod("itemDisplayNameMultiline", ItemStack.class, GuiContainer.class, boolean.class);
-				this.useNei = true;
+			nei = Class.forName("codechicken.nei.guihook.GuiContainerManager");
+			if (nei != null) {
+				info = nei.getDeclaredMethod("itemDisplayNameMultiline", ItemStack.class, GuiContainer.class, boolean.class);
+				useNei = true;
 			}
 		}
 		catch (Exception e) {}
 		try {
-			this.mainColor = Integer.decode(Tooltips.color1);
+			mainColor = Integer.decode(Tooltips.color1);
 		}
 		catch (NumberFormatException e) {
-			this.mainColor = 0x100010;
+			mainColor = 0x100010;
 		}
 		try {
-			this.outlineColor = Integer.decode(Tooltips.color2);
+			outlineColor = Integer.decode(Tooltips.color2);
 		}
 		catch (NumberFormatException e) {
-			this.outlineColor = 0x5000FF;
+			outlineColor = 0x5000FF;
 		}
-		this.mainColor = (this.mainColor & 0xFFFFFF) | 0xD0000000;
-		this.outlineColor = (this.outlineColor & 0xFFFFFF) | 0x90000000;
-		this.secondaryColor = (this.outlineColor & 0xFEFEFE) >> 1 | this.outlineColor & 0xFF000000;
+		mainColor = mainColor & 0xFFFFFF | 0xD0000000;
+		outlineColor = outlineColor & 0xFFFFFF | 0x90000000;
+		secondaryColor = (outlineColor & 0xFEFEFE) >> 1 | outlineColor & 0xFF000000;
 	}
 
 	private void addInfo(List<String> list) {
-		if (this.entityItem.getEntityItem().getItem() instanceof ItemArmor) {
-			ItemArmor item = (ItemArmor) this.entityItem.getEntityItem().getItem();
+		if (entityItem.getEntityItem().getItem() instanceof ItemArmor) {
+			ItemArmor item = (ItemArmor) entityItem.getEntityItem().getItem();
 			list.add("Armor Strength: " + item.damageReduceAmount);
-		} else if (this.entityItem.getEntityItem().getItem() instanceof ItemTool) {
-			ItemTool item = (ItemTool) this.entityItem.getEntityItem().getItem();
+		} else if (entityItem.getEntityItem().getItem() instanceof ItemTool) {
+			ItemTool item = (ItemTool) entityItem.getEntityItem().getItem();
 			list.add("Material: " + item.getToolMaterialName());
-		} else if (this.entityItem.getEntityItem().getItem() instanceof ItemFood) {
-			ItemFood item = (ItemFood) this.entityItem.getEntityItem().getItem();
-			list.add("Hunger: " + item.func_150905_g(this.entityItem.getEntityItem()));
-			list.add("Saturation: " + item.func_150906_h(this.entityItem.getEntityItem()));
-		} else if (this.entityItem.getEntityItem().getItem() instanceof ItemPotion) {
-			ItemPotion item = (ItemPotion) this.entityItem.getEntityItem().getItem();
-			List<PotionEffect> effects = item.getEffects(this.entityItem.getEntityItem());
+		} else if (entityItem.getEntityItem().getItem() instanceof ItemFood) {
+			ItemFood item = (ItemFood) entityItem.getEntityItem().getItem();
+			list.add("Hunger: " + item.func_150905_g(entityItem.getEntityItem()));
+			list.add("Saturation: " + item.func_150906_h(entityItem.getEntityItem()));
+		} else if (entityItem.getEntityItem().getItem() instanceof ItemPotion) {
+			ItemPotion item = (ItemPotion) entityItem.getEntityItem().getItem();
+			List<PotionEffect> effects = item.getEffects(entityItem.getEntityItem());
 			if (effects != null)
 				for (PotionEffect effect : effects)
 					list.add("Potion Effect: " + I18n.format(effect.getEffectName()));
@@ -121,7 +103,7 @@ public class TooltipSystem {
 	}
 
 	private void addModInfo(List<String> list) {
-		String modName = nameFromStack(this.entityItem.getEntityItem());
+		String modName = TooltipSystem.nameFromStack(entityItem.getEntityItem());
 		if (!modName.isEmpty())
 			list.add(EnumChatFormatting.BLUE.toString() + EnumChatFormatting.ITALIC.toString() + modName + EnumChatFormatting.RESET.toString());
 	}
@@ -137,11 +119,11 @@ public class TooltipSystem {
 		float red2 = (color2 >> 16 & 0xff) / 255F;
 		float green2 = (color2 >> 8 & 0xff) / 255F;
 		float blue2 = (color2 & 0xff) / 255F;
-		glDisable(GL_TEXTURE_2D);
-		glEnable(GL_BLEND);
-		glDisable(GL_ALPHA_TEST);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glShadeModel(GL_SMOOTH);
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glDisable(GL11.GL_ALPHA_TEST);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		GL11.glShadeModel(GL11.GL_SMOOTH);
 		Tessellator tessellator = Tessellator.instance;
 		tessellator.startDrawingQuads();
 		tessellator.setColorRGBA_F(red1, green1, blue1, alpha1);
@@ -151,32 +133,31 @@ public class TooltipSystem {
 		tessellator.addVertex(x, h, 0);
 		tessellator.addVertex(w, h, 0);
 		tessellator.draw();
-		glShadeModel(GL_FLAT);
-		glDisable(GL_BLEND);
-		glEnable(GL_ALPHA_TEST);
-		glEnable(GL_TEXTURE_2D);
+		GL11.glShadeModel(GL11.GL_FLAT);
+		GL11.glDisable(GL11.GL_BLEND);
+		GL11.glEnable(GL11.GL_ALPHA_TEST);
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 
 	private void drawItemTip() {
 		List<String> list = null;
-		if (this.useNei) {
+		if (useNei)
 			try {
-				list = (List<String>) this.info.invoke(null, this.entityItem.getEntityItem(), null, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
+				list = (List<String>) info.invoke(null, entityItem.getEntityItem(), null, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
 			}
 			catch (Exception e) {}
-		}
 		if (list == null)
-			list = this.entityItem.getEntityItem().getTooltip(this.entityPlayer, false);
+			list = entityItem.getEntityItem().getTooltip(entityPlayer, false);
 		if (list == null)
 			return;
 		// addInfo(list);
-		this.addModInfo(list);
+		addModInfo(list);
 		if (list.size() > 0) {
-			if (this.entityItem.getEntityItem().stackSize > 1)
-				list.set(0, this.entityItem.getEntityItem().stackSize + " x " + list.get(0));
+			if (entityItem.getEntityItem().stackSize > 1)
+				list.set(0, entityItem.getEntityItem().stackSize + " x " + list.get(0));
 			int maxwidth = 0;
 			for (int line = 0; line < list.size(); line++) {
-				int swidth = this.fr.getStringWidth(list.get(line));
+				int swidth = fr.getStringWidth(list.get(line));
 				if (swidth > maxwidth)
 					maxwidth = swidth;
 			}
@@ -186,40 +167,40 @@ public class TooltipSystem {
 				h += 2 + (list.size() - 1) * 10;
 			int drawx = -w / 2;
 			int drawy = -h;
-			this.drawGradientRect(drawx - 3, drawy - 4, w + 6, 1, this.mainColor, this.mainColor);
-			this.drawGradientRect(drawx - 3, drawy + h + 3, w + 6, 1, this.mainColor, this.mainColor);
-			this.drawGradientRect(drawx - 3, drawy - 3, w + 6, h + 6, this.mainColor, this.mainColor);
-			this.drawGradientRect(drawx - 4, drawy - 3, 1, h + 6, this.mainColor, this.mainColor);
-			this.drawGradientRect(drawx + w + 3, drawy - 3, 1, h + 6, this.mainColor, this.mainColor);
-			this.drawGradientRect(drawx - 3, drawy - 2, 1, h + 4, this.outlineColor, this.secondaryColor);
-			this.drawGradientRect(drawx + w + 2, drawy - 2, 1, h + 4, this.outlineColor, this.secondaryColor);
-			this.drawGradientRect(drawx - 3, drawy - 3, w + 6, 1, this.outlineColor, this.outlineColor);
-			this.drawGradientRect(drawx - 3, drawy + h + 2, w + 6, 1, this.secondaryColor, this.secondaryColor);
-			glTranslated(0, 0, 1);
+			drawGradientRect(drawx - 3, drawy - 4, w + 6, 1, mainColor, mainColor);
+			drawGradientRect(drawx - 3, drawy + h + 3, w + 6, 1, mainColor, mainColor);
+			drawGradientRect(drawx - 3, drawy - 3, w + 6, h + 6, mainColor, mainColor);
+			drawGradientRect(drawx - 4, drawy - 3, 1, h + 6, mainColor, mainColor);
+			drawGradientRect(drawx + w + 3, drawy - 3, 1, h + 6, mainColor, mainColor);
+			drawGradientRect(drawx - 3, drawy - 2, 1, h + 4, outlineColor, secondaryColor);
+			drawGradientRect(drawx + w + 2, drawy - 2, 1, h + 4, outlineColor, secondaryColor);
+			drawGradientRect(drawx - 3, drawy - 3, w + 6, 1, outlineColor, outlineColor);
+			drawGradientRect(drawx - 3, drawy + h + 2, w + 6, 1, secondaryColor, secondaryColor);
+			GL11.glTranslated(0, 0, 1);
 			for (int i = 0; i < list.size(); i++) {
 				String s = list.get(i);
 				if (i == 0)
-					s = this.entityItem.getEntityItem().getRarity().rarityColor.toString() + s;
-				this.fr.drawStringWithShadow(s, drawx, drawy, -1);
+					s = entityItem.getEntityItem().getRarity().rarityColor.toString() + s;
+				fr.drawStringWithShadow(s, drawx, drawy, -1);
 				if (i == 0)
 					drawy += 2;
 				drawy += 10;
 			}
-			glTranslated(0, 0, -1);
+			GL11.glTranslated(0, 0, -1);
 		}
 	}
 
 	public EntityItem getMouseOver() {
 		double findDistance = 32;
-		MovingObjectPosition objectMouseOver = this.entityPlayer.rayTrace(findDistance, this.deltaTime);
+		MovingObjectPosition objectMouseOver = entityPlayer.rayTrace(findDistance, deltaTime);
 		double findDistanceCap = findDistance;
-		Vec3 positionVector = this.entityPlayer.getPosition(this.deltaTime);
+		Vec3 positionVector = entityPlayer.getPosition(deltaTime);
 		if (objectMouseOver != null)
 			findDistanceCap = objectMouseOver.hitVec.distanceTo(positionVector);
-		Vec3 lookVector = this.entityPlayer.getLook(this.deltaTime);
+		Vec3 lookVector = entityPlayer.getLook(deltaTime);
 		Vec3 lookingAtVector = positionVector.addVector(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance);
 		float viewDistanceExpansion = 5;
-		List<EntityItem> entityList = this.entityPlayer.worldObj.getEntitiesWithinAABB(EntityItem.class, this.entityPlayer.boundingBox.addCoord(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance).expand(viewDistanceExpansion, viewDistanceExpansion, viewDistanceExpansion));
+		List<EntityItem> entityList = entityPlayer.worldObj.getEntitiesWithinAABB(EntityItem.class, entityPlayer.boundingBox.addCoord(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance).expand(viewDistanceExpansion, viewDistanceExpansion, viewDistanceExpansion));
 		double difference = 0;
 		EntityItem target = null;
 		for (int i = 0; i < entityList.size(); i++) {
@@ -245,43 +226,43 @@ public class TooltipSystem {
 
 	@SubscribeEvent
 	public void hook(RenderWorldLastEvent event) {
-		this.entityPlayer = Minecraft.getMinecraft().thePlayer;
-		this.deltaTime = event.partialTicks;
-		this.entityItem = this.getMouseOver();
-		if (this.entityItem == null)
+		entityPlayer = Minecraft.getMinecraft().thePlayer;
+		deltaTime = event.partialTicks;
+		entityItem = getMouseOver();
+		if (entityItem == null)
 			return;
-		this.fr = this.entityItem.getEntityItem().getItem().getFontRenderer(this.entityItem.getEntityItem());
-		if (this.fr == null)
-			this.fr = Minecraft.getMinecraft().fontRenderer;
-		this.renderEntityItem();
+		fr = entityItem.getEntityItem().getItem().getFontRenderer(entityItem.getEntityItem());
+		if (fr == null)
+			fr = Minecraft.getMinecraft().fontRenderer;
+		renderEntityItem();
 	}
 
 	public void renderEntityItem() {
-		glPushMatrix();
-		glDisable(GL_LIGHTING);
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		double interpX = RenderManager.instance.renderPosX - (this.entityItem.posX - ((this.entityItem.prevPosX - this.entityItem.posX) * this.deltaTime));
-		double interpY = RenderManager.instance.renderPosY - (this.entityItem.posY - ((this.entityItem.prevPosY - this.entityItem.posY) * this.deltaTime));
-		double interpZ = RenderManager.instance.renderPosZ - (this.entityItem.posZ - ((this.entityItem.prevPosZ - this.entityItem.posZ) * this.deltaTime));
+		GL11.glPushMatrix();
+		GL11.glDisable(GL11.GL_LIGHTING);
+		GL11.glDisable(GL11.GL_DEPTH_TEST);
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		double interpX = RenderManager.renderPosX - (entityItem.posX - (entityItem.prevPosX - entityItem.posX) * deltaTime);
+		double interpY = RenderManager.renderPosY - (entityItem.posY - (entityItem.prevPosY - entityItem.posY) * deltaTime);
+		double interpZ = RenderManager.renderPosZ - (entityItem.posZ - (entityItem.prevPosZ - entityItem.posZ) * deltaTime);
 		double interpDistance = Math.sqrt(interpX * interpX + interpY * interpY + interpZ * interpZ);
-		glTranslated(-interpX, -(interpY - this.entityItem.height - 0.5), -interpZ);
-		glRotatef(-RenderManager.instance.playerViewY + 180, 0, 1, 0);
-		glRotatef(-RenderManager.instance.playerViewX, 1, 0, 0);
+		GL11.glTranslated(-interpX, -(interpY - entityItem.height - 0.5), -interpZ);
+		GL11.glRotatef(-RenderManager.instance.playerViewY + 180, 0, 1, 0);
+		GL11.glRotatef(-RenderManager.instance.playerViewX, 1, 0, 0);
 		double scale = interpDistance / 256;
 		if (scale <= 0.01)
 			scale = 0.01;
-		glScaled(scale, -scale, scale);
-		this.drawItemTip();
-		glScaled(1F / scale, 1F / -scale, 1F / scale);
-		glRotatef(RenderManager.instance.playerViewX, 1, 0, 0);
-		glRotatef(RenderManager.instance.playerViewY - 180, 0, 1, 0);
-		glTranslated(interpX, interpY - this.entityItem.height - 0.5, interpZ);
-		glColor4f(1, 1, 1, 1);
-		glDisable(GL_BLEND);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_LIGHTING);
-		glPopMatrix();
+		GL11.glScaled(scale, -scale, scale);
+		drawItemTip();
+		GL11.glScaled(1F / scale, 1F / -scale, 1F / scale);
+		GL11.glRotatef(RenderManager.instance.playerViewX, 1, 0, 0);
+		GL11.glRotatef(RenderManager.instance.playerViewY - 180, 0, 1, 0);
+		GL11.glTranslated(interpX, interpY - entityItem.height - 0.5, interpZ);
+		GL11.glColor4f(1, 1, 1, 1);
+		GL11.glDisable(GL11.GL_BLEND);
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
+		GL11.glEnable(GL11.GL_LIGHTING);
+		GL11.glPopMatrix();
 	}
 }
