@@ -1,4 +1,4 @@
-package com.genuineminecraft.tooltips.system;
+package com.genuineflix.wt.system;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -25,7 +25,7 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 
 import org.lwjgl.opengl.GL11;
 
-import com.genuineminecraft.tooltips.Tooltips;
+import com.genuineflix.wt.WorldTooltip;
 
 import cpw.mods.fml.common.ModContainer;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -35,14 +35,14 @@ import cpw.mods.fml.common.registry.GameRegistry.UniqueIdentifier;
 
 public class TooltipSystem {
 
-	public static String nameFromStack(ItemStack stack) {
+	public static String nameFromStack(final ItemStack stack) {
 		try {
-			UniqueIdentifier ui = GameRegistry.findUniqueIdentifierFor(stack.getItem());
-			ModContainer mod = GameData.findModOwner(GameData.getItemRegistry().getNameForObject(stack.getItem()));
-			String modname = mod == null ? "Minecraft" : mod.getName();
+			final UniqueIdentifier ui = GameRegistry.findUniqueIdentifierFor(stack.getItem());
+			final ModContainer mod = GameData.findModOwner(GameData.getItemRegistry().getNameForObject(stack.getItem()));
+			final String modname = mod == null ? "Minecraft" : mod.getName();
 			return modname;
 		}
-		catch (Exception e) {
+		catch (final Exception e) {
 			return "";
 		}
 	}
@@ -50,7 +50,8 @@ public class TooltipSystem {
 	private Class nei;
 	private Method info;
 	private boolean useNei = false;
-	private int mainColor, outlineColor, secondaryColor;
+	private int mainColor, outlineColor;
+	private final int secondaryColor;
 	private EntityItem entityItem;
 	private EntityPlayer entityPlayer;
 	private FontRenderer fr;
@@ -64,17 +65,17 @@ public class TooltipSystem {
 				useNei = true;
 			}
 		}
-		catch (Exception e) {}
+		catch (final Exception e) {}
 		try {
-			mainColor = Integer.decode(Tooltips.color1);
+			mainColor = Integer.decode(WorldTooltip.color1);
 		}
-		catch (NumberFormatException e) {
+		catch (final NumberFormatException e) {
 			mainColor = 0x100010;
 		}
 		try {
-			outlineColor = Integer.decode(Tooltips.color2);
+			outlineColor = Integer.decode(WorldTooltip.color2);
 		}
-		catch (NumberFormatException e) {
+		catch (final NumberFormatException e) {
 			outlineColor = 0x5000FF;
 		}
 		mainColor = mainColor & 0xFFFFFF | 0xD0000000;
@@ -82,49 +83,49 @@ public class TooltipSystem {
 		secondaryColor = (outlineColor & 0xFEFEFE) >> 1 | outlineColor & 0xFF000000;
 	}
 
-	private void addInfo(List<String> list) {
+	private void addInfo(final List<String> list) {
 		if (entityItem.getEntityItem().getItem() instanceof ItemArmor) {
-			ItemArmor item = (ItemArmor) entityItem.getEntityItem().getItem();
+			final ItemArmor item = (ItemArmor) entityItem.getEntityItem().getItem();
 			list.add("Armor Strength: " + item.damageReduceAmount);
 		} else if (entityItem.getEntityItem().getItem() instanceof ItemTool) {
-			ItemTool item = (ItemTool) entityItem.getEntityItem().getItem();
+			final ItemTool item = (ItemTool) entityItem.getEntityItem().getItem();
 			list.add("Material: " + item.getToolMaterialName());
 		} else if (entityItem.getEntityItem().getItem() instanceof ItemFood) {
-			ItemFood item = (ItemFood) entityItem.getEntityItem().getItem();
+			final ItemFood item = (ItemFood) entityItem.getEntityItem().getItem();
 			list.add("Hunger: " + item.func_150905_g(entityItem.getEntityItem()));
 			list.add("Saturation: " + item.func_150906_h(entityItem.getEntityItem()));
 		} else if (entityItem.getEntityItem().getItem() instanceof ItemPotion) {
-			ItemPotion item = (ItemPotion) entityItem.getEntityItem().getItem();
-			List<PotionEffect> effects = item.getEffects(entityItem.getEntityItem());
+			final ItemPotion item = (ItemPotion) entityItem.getEntityItem().getItem();
+			final List<PotionEffect> effects = item.getEffects(entityItem.getEntityItem());
 			if (effects != null)
-				for (PotionEffect effect : effects)
+				for (final PotionEffect effect : effects)
 					list.add("Potion Effect: " + I18n.format(effect.getEffectName()));
 		}
 	}
 
-	private void addModInfo(List<String> list) {
-		String modName = TooltipSystem.nameFromStack(entityItem.getEntityItem());
+	private void addModInfo(final List<String> list) {
+		final String modName = TooltipSystem.nameFromStack(entityItem.getEntityItem());
 		if (!modName.isEmpty())
 			list.add(EnumChatFormatting.BLUE.toString() + EnumChatFormatting.ITALIC.toString() + modName + EnumChatFormatting.RESET.toString());
 	}
 
-	protected void drawGradientRect(int x, int y, int w, int h, int color1, int color2) {
+	protected void drawGradientRect(final int x, final int y, int w, int h, final int color1, final int color2) {
 		w += x;
 		h += y;
-		float alpha1 = (color1 >> 24 & 0xff) / 255F;
-		float red1 = (color1 >> 16 & 0xff) / 255F;
-		float green1 = (color1 >> 8 & 0xff) / 255F;
-		float blue1 = (color1 & 0xff) / 255F;
-		float alpha2 = (color2 >> 24 & 0xff) / 255F;
-		float red2 = (color2 >> 16 & 0xff) / 255F;
-		float green2 = (color2 >> 8 & 0xff) / 255F;
-		float blue2 = (color2 & 0xff) / 255F;
+		final float alpha1 = (color1 >> 24 & 0xff) / 255F;
+		final float red1 = (color1 >> 16 & 0xff) / 255F;
+		final float green1 = (color1 >> 8 & 0xff) / 255F;
+		final float blue1 = (color1 & 0xff) / 255F;
+		final float alpha2 = (color2 >> 24 & 0xff) / 255F;
+		final float red2 = (color2 >> 16 & 0xff) / 255F;
+		final float green2 = (color2 >> 8 & 0xff) / 255F;
+		final float blue2 = (color2 & 0xff) / 255F;
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glDisable(GL11.GL_ALPHA_TEST);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glShadeModel(GL11.GL_SMOOTH);
-		Tessellator tessellator = Tessellator.instance;
+		final Tessellator tessellator = Tessellator.instance;
 		tessellator.startDrawingQuads();
 		tessellator.setColorRGBA_F(red1, green1, blue1, alpha1);
 		tessellator.addVertex(w, y, 0);
@@ -145,7 +146,7 @@ public class TooltipSystem {
 			try {
 				list = (List<String>) info.invoke(null, entityItem.getEntityItem(), null, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
 			}
-			catch (Exception e) {}
+		catch (final Exception e) {}
 		if (list == null)
 			list = entityItem.getEntityItem().getTooltip(entityPlayer, false);
 		if (list == null)
@@ -157,15 +158,15 @@ public class TooltipSystem {
 				list.set(0, entityItem.getEntityItem().stackSize + " x " + list.get(0));
 			int maxwidth = 0;
 			for (int line = 0; line < list.size(); line++) {
-				int swidth = fr.getStringWidth(list.get(line));
+				final int swidth = fr.getStringWidth(list.get(line));
 				if (swidth > maxwidth)
 					maxwidth = swidth;
 			}
-			int w = maxwidth;
+			final int w = maxwidth;
 			int h = 8;
 			if (list.size() > 1)
 				h += 2 + (list.size() - 1) * 10;
-			int drawx = -w / 2;
+			final int drawx = -w / 2;
 			int drawy = -h;
 			drawGradientRect(drawx - 3, drawy - 4, w + 6, 1, mainColor, mainColor);
 			drawGradientRect(drawx - 3, drawy + h + 3, w + 6, 1, mainColor, mainColor);
@@ -191,30 +192,30 @@ public class TooltipSystem {
 	}
 
 	public EntityItem getMouseOver() {
-		double findDistance = 32;
-		MovingObjectPosition objectMouseOver = entityPlayer.rayTrace(findDistance, deltaTime);
+		final double findDistance = 32;
+		final MovingObjectPosition objectMouseOver = entityPlayer.rayTrace(findDistance, deltaTime);
 		double findDistanceCap = findDistance;
-		Vec3 positionVector = entityPlayer.getPosition(deltaTime);
+		final Vec3 positionVector = entityPlayer.getPosition(deltaTime);
 		if (objectMouseOver != null)
 			findDistanceCap = objectMouseOver.hitVec.distanceTo(positionVector);
-		Vec3 lookVector = entityPlayer.getLook(deltaTime);
-		Vec3 lookingAtVector = positionVector.addVector(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance);
-		float viewDistanceExpansion = 5;
-		List<EntityItem> entityList = entityPlayer.worldObj.getEntitiesWithinAABB(EntityItem.class, entityPlayer.boundingBox.addCoord(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance).expand(viewDistanceExpansion, viewDistanceExpansion, viewDistanceExpansion));
+		final Vec3 lookVector = entityPlayer.getLook(deltaTime);
+		final Vec3 lookingAtVector = positionVector.addVector(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance);
+		final float viewDistanceExpansion = 5;
+		final List<EntityItem> entityList = entityPlayer.worldObj.getEntitiesWithinAABB(EntityItem.class, entityPlayer.boundingBox.addCoord(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance).expand(viewDistanceExpansion, viewDistanceExpansion, viewDistanceExpansion));
 		double difference = 0;
 		EntityItem target = null;
 		for (int i = 0; i < entityList.size(); i++) {
-			EntityItem entity = entityList.get(i);
-			float boundSize = 0.2f;
-			AxisAlignedBB entityCollisionBox = entity.boundingBox.expand(boundSize, boundSize, boundSize);
-			MovingObjectPosition objectInVector = entityCollisionBox.calculateIntercept(positionVector, lookingAtVector);
+			final EntityItem entity = entityList.get(i);
+			final float boundSize = 0.2f;
+			final AxisAlignedBB entityCollisionBox = entity.boundingBox.expand(boundSize, boundSize, boundSize);
+			final MovingObjectPosition objectInVector = entityCollisionBox.calculateIntercept(positionVector, lookingAtVector);
 			if (entityCollisionBox.isVecInside(positionVector)) {
 				if (0.0D <= difference) {
 					target = entity;
 					difference = 0;
 				}
 			} else if (objectInVector != null) {
-				double distance = positionVector.distanceTo(objectInVector.hitVec);
+				final double distance = positionVector.distanceTo(objectInVector.hitVec);
 				if (distance < difference || difference == 0.0D) {
 					target = entity;
 					difference = distance;
@@ -225,7 +226,7 @@ public class TooltipSystem {
 	}
 
 	@SubscribeEvent
-	public void hook(RenderWorldLastEvent event) {
+	public void hook(final RenderWorldLastEvent event) {
 		entityPlayer = Minecraft.getMinecraft().thePlayer;
 		deltaTime = event.partialTicks;
 		entityItem = getMouseOver();
@@ -243,10 +244,10 @@ public class TooltipSystem {
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		double interpX = RenderManager.renderPosX - (entityItem.posX - (entityItem.prevPosX - entityItem.posX) * deltaTime);
-		double interpY = RenderManager.renderPosY - (entityItem.posY - (entityItem.prevPosY - entityItem.posY) * deltaTime);
-		double interpZ = RenderManager.renderPosZ - (entityItem.posZ - (entityItem.prevPosZ - entityItem.posZ) * deltaTime);
-		double interpDistance = Math.sqrt(interpX * interpX + interpY * interpY + interpZ * interpZ);
+		final double interpX = RenderManager.renderPosX - (entityItem.posX - (entityItem.prevPosX - entityItem.posX) * deltaTime);
+		final double interpY = RenderManager.renderPosY - (entityItem.posY - (entityItem.prevPosY - entityItem.posY) * deltaTime);
+		final double interpZ = RenderManager.renderPosZ - (entityItem.posZ - (entityItem.prevPosZ - entityItem.posZ) * deltaTime);
+		final double interpDistance = Math.sqrt(interpX * interpX + interpY * interpY + interpZ * interpZ);
 		GL11.glTranslated(-interpX, -(interpY - entityItem.height - 0.5), -interpZ);
 		GL11.glRotatef(-RenderManager.instance.playerViewY + 180, 0, 1, 0);
 		GL11.glRotatef(-RenderManager.instance.playerViewX, 1, 0, 0);

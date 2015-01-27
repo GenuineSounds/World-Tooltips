@@ -17,9 +17,9 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "1.7.10-1.0.5"
-group = "com.genuineminecraft.tooltips"
-archivesBaseName = "WorldTooltips"
+version = "1.7.10-1.0.8"
+group = "com.genuineflix.wt"
+archivesBaseName = "WorldTooltip"
 
 minecraft {
 	version = "1.7.10-10.13.2.1272"
