@@ -146,7 +146,7 @@ public class TooltipSystem {
 			try {
 				list = (List<String>) info.invoke(null, entityItem.getEntityItem(), null, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
 			}
-		catch (final Exception e) {}
+			catch (final Exception e) {}
 		if (list == null)
 			list = entityItem.getEntityItem().getTooltip(entityPlayer, false);
 		if (list == null)
