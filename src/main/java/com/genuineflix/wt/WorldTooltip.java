@@ -26,15 +26,15 @@ public class WorldTooltip {
 	private final Pattern pattern = Pattern.compile("^(0[xX]|#)[0-9a-fA-F]{1,8}$");
 
 	@EventHandler
+	public void init(final FMLInitializationEvent event) {
+		MinecraftForge.EVENT_BUS.register(new TooltipSystem());
+	}
+
+	@EventHandler
 	public void pre(final FMLPreInitializationEvent event) {
 		final Configuration config = new Configuration(event.getSuggestedConfigurationFile());
 		WorldTooltip.color1 = config.getString("background", "Colors", "0x100010", WorldTooltip.DESC, pattern);
 		WorldTooltip.color2 = config.getString("outline", "Colors", "0x5000FF", WorldTooltip.DESC, pattern);
 		config.save();
-	}
-
-	@EventHandler
-	public void init(final FMLInitializationEvent event) {
-		MinecraftForge.EVENT_BUS.register(new TooltipSystem());
 	}
 }
