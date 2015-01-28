@@ -1,6 +1,6 @@
-World Tooltips
+World Tooltip
 ========
-[Genuine] World Tooltips is a mod for Minecraft that adds tooltips over items on the ground.
+[Genuine] WorldTooltips is a mod for Minecraft that adds tooltips over items on the ground.
 
 License
 =======
