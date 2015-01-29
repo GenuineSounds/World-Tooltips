@@ -1,4 +1,4 @@
-package com.genuineflix.wt.system;
+package com.genuineflix.tooltip.system;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -25,7 +25,7 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 
 import org.lwjgl.opengl.GL11;
 
-import com.genuineflix.wt.WorldTooltip;
+import com.genuineflix.tooltip.WorldTooltip;
 
 import cpw.mods.fml.common.ModContainer;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
