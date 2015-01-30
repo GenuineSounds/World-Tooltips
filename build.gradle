@@ -17,9 +17,11 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "1.7.10-1.0.11"
-group = "com.genuineflix"
 archivesBaseName = "WorldTooltip"
+
+group = "com.genuineflix"
+ext.revision = 'git rev-list --count HEAD'.execute().text.trim()
+version = "1.7.10-1.0.11-${revision}"
 
 minecraft {
 	version = "1.7.10-10.13.2.1272"
