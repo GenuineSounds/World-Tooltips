@@ -42,3 +42,20 @@ processResources {
 		exclude 'mcmod.info'
 	}
 }
+
+task deobfJar(type: Jar, dependsOn: 'classes') {
+	from sourceSets.main.output
+	classifier = 'dev'
+}
+
+task sourceJar(type: Jar, dependsOn: 'sourceMainJava') {
+	from sourceSets.main.allSource
+	classifier = 'src'
+}
+
+task javadocJar(type: Jar, dependsOn: 'javadoc') {
+	from javadoc.destinationDir
+	classifier = 'javadoc'
+}
+
+tasks.build.dependsOn deobfJar, sourceJar
