@@ -27,23 +27,49 @@ import org.lwjgl.opengl.GL11;
 
 import com.genuineflix.tooltip.WorldTooltip;
 
-import cpw.mods.fml.common.ModContainer;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.registry.GameData;
 import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.GameRegistry.UniqueIdentifier;
 
 public class TooltipSystem {
 
-	public static String nameFromStack(final ItemStack stack) {
+	private static void drawGradientRect(final int x, final int y, int w, int h, final int color1, final int color2) {
+		w += x;
+		h += y;
+		final float alpha1 = (color1 >> 24 & 0xff) / 255F;
+		final float red1 = (color1 >> 16 & 0xff) / 255F;
+		final float green1 = (color1 >> 8 & 0xff) / 255F;
+		final float blue1 = (color1 & 0xff) / 255F;
+		final float alpha2 = (color2 >> 24 & 0xff) / 255F;
+		final float red2 = (color2 >> 16 & 0xff) / 255F;
+		final float green2 = (color2 >> 8 & 0xff) / 255F;
+		final float blue2 = (color2 & 0xff) / 255F;
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glDisable(GL11.GL_ALPHA_TEST);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		GL11.glShadeModel(GL11.GL_SMOOTH);
+		final Tessellator tessellator = Tessellator.instance;
+		tessellator.startDrawingQuads();
+		tessellator.setColorRGBA_F(red1, green1, blue1, alpha1);
+		tessellator.addVertex(w, y, 0);
+		tessellator.addVertex(x, y, 0);
+		tessellator.setColorRGBA_F(red2, green2, blue2, alpha2);
+		tessellator.addVertex(x, h, 0);
+		tessellator.addVertex(w, h, 0);
+		tessellator.draw();
+		GL11.glShadeModel(GL11.GL_FLAT);
+		GL11.glDisable(GL11.GL_BLEND);
+		GL11.glEnable(GL11.GL_ALPHA_TEST);
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+	}
+
+	public static String modNameFromStack(final ItemStack stack) {
 		try {
-			final UniqueIdentifier ui = GameRegistry.findUniqueIdentifierFor(stack.getItem());
-			final ModContainer mod = GameData.findModOwner(GameData.getItemRegistry().getNameForObject(stack.getItem()));
-			final String modname = mod == null ? "Minecraft" : mod.getName();
-			return modname;
+			return Loader.instance().getIndexedModList().get(GameRegistry.findUniqueIdentifierFor(stack.getItem()).modId).getName();
 		}
 		catch (final Exception e) {
-			return "";
+			return "Minecraft";
 		}
 	}
 
@@ -103,43 +129,6 @@ public class TooltipSystem {
 		}
 	}
 
-	private void addModInfo(final List<String> list) {
-		final String modName = TooltipSystem.nameFromStack(entityItem.getEntityItem());
-		if (!modName.isEmpty())
-			list.add(EnumChatFormatting.BLUE.toString() + EnumChatFormatting.ITALIC.toString() + modName + EnumChatFormatting.RESET.toString());
-	}
-
-	protected void drawGradientRect(final int x, final int y, int w, int h, final int color1, final int color2) {
-		w += x;
-		h += y;
-		final float alpha1 = (color1 >> 24 & 0xff) / 255F;
-		final float red1 = (color1 >> 16 & 0xff) / 255F;
-		final float green1 = (color1 >> 8 & 0xff) / 255F;
-		final float blue1 = (color1 & 0xff) / 255F;
-		final float alpha2 = (color2 >> 24 & 0xff) / 255F;
-		final float red2 = (color2 >> 16 & 0xff) / 255F;
-		final float green2 = (color2 >> 8 & 0xff) / 255F;
-		final float blue2 = (color2 & 0xff) / 255F;
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glEnable(GL11.GL_BLEND);
-		GL11.glDisable(GL11.GL_ALPHA_TEST);
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glShadeModel(GL11.GL_SMOOTH);
-		final Tessellator tessellator = Tessellator.instance;
-		tessellator.startDrawingQuads();
-		tessellator.setColorRGBA_F(red1, green1, blue1, alpha1);
-		tessellator.addVertex(w, y, 0);
-		tessellator.addVertex(x, y, 0);
-		tessellator.setColorRGBA_F(red2, green2, blue2, alpha2);
-		tessellator.addVertex(x, h, 0);
-		tessellator.addVertex(w, h, 0);
-		tessellator.draw();
-		GL11.glShadeModel(GL11.GL_FLAT);
-		GL11.glDisable(GL11.GL_BLEND);
-		GL11.glEnable(GL11.GL_ALPHA_TEST);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-	}
-
 	private void drawItemTip() {
 		List<String> list = null;
 		if (useNei)
@@ -148,11 +137,11 @@ public class TooltipSystem {
 			}
 			catch (final Exception e) {}
 		if (list == null)
-			list = entityItem.getEntityItem().getTooltip(entityPlayer, false);
+			list = entityItem.getEntityItem().getTooltip(entityPlayer, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
 		if (list == null)
 			return;
 		// addInfo(list);
-		addModInfo(list);
+		list.add(EnumChatFormatting.BLUE.toString() + EnumChatFormatting.ITALIC.toString() + TooltipSystem.modNameFromStack(entityItem.getEntityItem()) + EnumChatFormatting.RESET.toString());
 		if (list.size() > 0) {
 			if (entityItem.getEntityItem().stackSize > 1)
 				list.set(0, entityItem.getEntityItem().stackSize + " x " + list.get(0));
