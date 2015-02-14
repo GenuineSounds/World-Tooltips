@@ -73,7 +73,7 @@ public class TooltipSystem {
 		}
 	}
 
-	private Class nei;
+	private Class<?> nei;
 	private Method info;
 	private boolean useNei = false;
 	private int mainColor, outlineColor;
@@ -109,6 +109,9 @@ public class TooltipSystem {
 		secondaryColor = (outlineColor & 0xFEFEFE) >> 1 | outlineColor & 0xFF000000;
 	}
 
+	@SuppressWarnings({
+			"unused", "unchecked"
+	})
 	private void addInfo(final List<String> list) {
 		if (entityItem.getEntityItem().getItem() instanceof ItemArmor) {
 			final ItemArmor item = (ItemArmor) entityItem.getEntityItem().getItem();
@@ -129,6 +132,7 @@ public class TooltipSystem {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private void drawItemTip() {
 		List<String> list = null;
 		if (useNei)
@@ -157,15 +161,15 @@ public class TooltipSystem {
 				h += 2 + (list.size() - 1) * 10;
 			final int drawx = -w / 2;
 			int drawy = -h;
-			drawGradientRect(drawx - 3, drawy - 4, w + 6, 1, mainColor, mainColor);
-			drawGradientRect(drawx - 3, drawy + h + 3, w + 6, 1, mainColor, mainColor);
-			drawGradientRect(drawx - 3, drawy - 3, w + 6, h + 6, mainColor, mainColor);
-			drawGradientRect(drawx - 4, drawy - 3, 1, h + 6, mainColor, mainColor);
-			drawGradientRect(drawx + w + 3, drawy - 3, 1, h + 6, mainColor, mainColor);
-			drawGradientRect(drawx - 3, drawy - 2, 1, h + 4, outlineColor, secondaryColor);
-			drawGradientRect(drawx + w + 2, drawy - 2, 1, h + 4, outlineColor, secondaryColor);
-			drawGradientRect(drawx - 3, drawy - 3, w + 6, 1, outlineColor, outlineColor);
-			drawGradientRect(drawx - 3, drawy + h + 2, w + 6, 1, secondaryColor, secondaryColor);
+			TooltipSystem.drawGradientRect(drawx - 3, drawy - 4, w + 6, 1, mainColor, mainColor);
+			TooltipSystem.drawGradientRect(drawx - 3, drawy + h + 3, w + 6, 1, mainColor, mainColor);
+			TooltipSystem.drawGradientRect(drawx - 3, drawy - 3, w + 6, h + 6, mainColor, mainColor);
+			TooltipSystem.drawGradientRect(drawx - 4, drawy - 3, 1, h + 6, mainColor, mainColor);
+			TooltipSystem.drawGradientRect(drawx + w + 3, drawy - 3, 1, h + 6, mainColor, mainColor);
+			TooltipSystem.drawGradientRect(drawx - 3, drawy - 2, 1, h + 4, outlineColor, secondaryColor);
+			TooltipSystem.drawGradientRect(drawx + w + 2, drawy - 2, 1, h + 4, outlineColor, secondaryColor);
+			TooltipSystem.drawGradientRect(drawx - 3, drawy - 3, w + 6, 1, outlineColor, outlineColor);
+			TooltipSystem.drawGradientRect(drawx - 3, drawy + h + 2, w + 6, 1, secondaryColor, secondaryColor);
 			GL11.glTranslated(0, 0, 1);
 			for (int i = 0; i < list.size(); i++) {
 				String s = list.get(i);
@@ -180,13 +184,10 @@ public class TooltipSystem {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public EntityItem getMouseOver() {
-		final double findDistance = 32;
-		final MovingObjectPosition objectMouseOver = entityPlayer.rayTrace(findDistance, deltaTime);
-		double findDistanceCap = findDistance;
+		final double findDistance = 16;
 		final Vec3 positionVector = entityPlayer.getPosition(deltaTime);
-		if (objectMouseOver != null)
-			findDistanceCap = objectMouseOver.hitVec.distanceTo(positionVector);
 		final Vec3 lookVector = entityPlayer.getLook(deltaTime);
 		final Vec3 lookingAtVector = positionVector.addVector(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance);
 		final float viewDistanceExpansion = 5;
