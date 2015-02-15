@@ -20,7 +20,7 @@ public class WorldTooltip {
 	public static WorldTooltip instance;
 	public static final String MODID = "WorldTooltip";
 	public static final String NAME = "WorldTooltip";
-	public static final String VERSION = "1.0.11";
+	public static final String VERSION = "1.0.15";
 	public static final String DESC = "This is a color in hex form (ie: 0xAB12cd or #AB12cd), one can always lookup your favorite colors online.";
 	public static String color1, color2;
 	private final Pattern pattern = Pattern.compile("^(0[xX]|#)[0-9a-fA-F]{1,8}$");
