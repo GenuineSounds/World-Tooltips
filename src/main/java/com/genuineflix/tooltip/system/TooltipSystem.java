@@ -109,9 +109,7 @@ public class TooltipSystem {
 		secondaryColor = (outlineColor & 0xFEFEFE) >> 1 | outlineColor & 0xFF000000;
 	}
 
-	@SuppressWarnings({
-			"unused", "unchecked"
-	})
+	@SuppressWarnings("unchecked")
 	private void addInfo(final List<String> list) {
 		if (entityItem.getEntityItem().getItem() instanceof ItemArmor) {
 			final ItemArmor item = (ItemArmor) entityItem.getEntityItem().getItem();

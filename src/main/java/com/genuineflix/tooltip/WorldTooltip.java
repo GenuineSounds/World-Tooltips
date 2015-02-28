@@ -2,6 +2,7 @@ package com.genuineflix.tooltip;
 
 import java.util.regex.Pattern;
 
+import net.minecraft.init.Blocks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 
@@ -26,15 +27,26 @@ public class WorldTooltip {
 	private final Pattern pattern = Pattern.compile("^(0[xX]|#)[0-9a-fA-F]{1,8}$");
 
 	@EventHandler
-	public void init(final FMLInitializationEvent event) {
-		MinecraftForge.EVENT_BUS.register(new TooltipSystem());
-	}
-
-	@EventHandler
 	public void pre(final FMLPreInitializationEvent event) {
 		final Configuration config = new Configuration(event.getSuggestedConfigurationFile());
 		WorldTooltip.color1 = config.getString("background", "Colors", "0x100010", WorldTooltip.DESC, pattern);
 		WorldTooltip.color2 = config.getString("outline", "Colors", "0x5000FF", WorldTooltip.DESC, pattern);
 		config.save();
+		Blocks.brick_block.setHarvestLevel("pickaxe", 0);
+		Blocks.brick_stairs.setHarvestLevel("pickaxe", 0);
+		Blocks.double_stone_slab.setHarvestLevel("pickaxe", 0);
+		Blocks.nether_brick.setHarvestLevel("pickaxe", 0);
+		Blocks.nether_brick_stairs.setHarvestLevel("pickaxe", 0);
+		Blocks.sandstone.setHarvestLevel("pickaxe", 0);
+		Blocks.sandstone_stairs.setHarvestLevel("pickaxe", 0);
+		Blocks.stonebrick.setHarvestLevel("pickaxe", 0);
+		Blocks.stone_brick_stairs.setHarvestLevel("pickaxe", 0);
+		Blocks.stone_slab.setHarvestLevel("pickaxe", 0);
+		Blocks.stone_stairs.setHarvestLevel("pickaxe", 0);
+	}
+
+	@EventHandler
+	public void init(final FMLInitializationEvent event) {
+		MinecraftForge.EVENT_BUS.register(new TooltipSystem());
 	}
 }
