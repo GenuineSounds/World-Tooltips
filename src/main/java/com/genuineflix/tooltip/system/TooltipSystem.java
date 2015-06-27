@@ -66,7 +66,8 @@ public class TooltipSystem {
 
 	public static String modNameFromStack(final ItemStack stack) {
 		try {
-			return Loader.instance().getIndexedModList().get(GameRegistry.findUniqueIdentifierFor(stack.getItem()).modId).getName();
+			return Loader.instance().getIndexedModList()
+					.get(GameRegistry.findUniqueIdentifierFor(stack.getItem()).modId).getName();
 		}
 		catch (final Exception e) {
 			return "Minecraft";
@@ -87,7 +88,8 @@ public class TooltipSystem {
 		try {
 			nei = Class.forName("codechicken.nei.guihook.GuiContainerManager");
 			if (nei != null) {
-				info = nei.getDeclaredMethod("itemDisplayNameMultiline", ItemStack.class, GuiContainer.class, boolean.class);
+				info = nei.getDeclaredMethod("itemDisplayNameMultiline", ItemStack.class, GuiContainer.class,
+						boolean.class);
 				useNei = true;
 			}
 		}
@@ -135,15 +137,18 @@ public class TooltipSystem {
 		List<String> list = null;
 		if (useNei)
 			try {
-				list = (List<String>) info.invoke(null, entityItem.getEntityItem(), null, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
+				list = (List<String>) info.invoke(null, entityItem.getEntityItem(), null,
+						Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
 			}
 			catch (final Exception e) {}
 		if (list == null)
-			list = entityItem.getEntityItem().getTooltip(entityPlayer, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
+			list = entityItem.getEntityItem().getTooltip(entityPlayer,
+					Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
 		if (list == null)
 			return;
 		// addInfo(list);
-		list.add(EnumChatFormatting.BLUE.toString() + EnumChatFormatting.ITALIC.toString() + TooltipSystem.modNameFromStack(entityItem.getEntityItem()) + EnumChatFormatting.RESET.toString());
+		list.add(EnumChatFormatting.BLUE.toString() + EnumChatFormatting.ITALIC.toString()
+				+ TooltipSystem.modNameFromStack(entityItem.getEntityItem()) + EnumChatFormatting.RESET.toString());
 		if (list.size() > 0) {
 			if (entityItem.getEntityItem().stackSize > 1)
 				list.set(0, entityItem.getEntityItem().stackSize + " x " + list.get(0));
@@ -184,26 +189,30 @@ public class TooltipSystem {
 
 	@SuppressWarnings("unchecked")
 	public EntityItem getMouseOver() {
-		final double findDistance = 16;
-		final Vec3 positionVector = entityPlayer.getPosition(deltaTime);
-		final Vec3 lookVector = entityPlayer.getLook(deltaTime);
-		final Vec3 lookingAtVector = positionVector.addVector(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance);
+		final double lDistance = 16;
+		final Vec3 pVec = entityPlayer.getPosition(deltaTime);
+		final Vec3 lVec = entityPlayer.getLook(deltaTime);
+		final Vec3 lAVec = pVec.addVector(lVec.xCoord * lDistance, lVec.yCoord * lDistance, lVec.zCoord * lDistance);
 		final float viewDistanceExpansion = 5;
-		final List<EntityItem> entityList = entityPlayer.worldObj.getEntitiesWithinAABB(EntityItem.class, entityPlayer.boundingBox.addCoord(lookVector.xCoord * findDistance, lookVector.yCoord * findDistance, lookVector.zCoord * findDistance).expand(viewDistanceExpansion, viewDistanceExpansion, viewDistanceExpansion));
+		final List<EntityItem> entityList = entityPlayer.worldObj.getEntitiesWithinAABB(
+				EntityItem.class,
+				entityPlayer.boundingBox.addCoord(lVec.xCoord * lDistance, lVec.yCoord * lDistance,
+						lVec.zCoord * lDistance).expand(viewDistanceExpansion, viewDistanceExpansion,
+						viewDistanceExpansion));
 		double difference = 0;
 		EntityItem target = null;
 		for (int i = 0; i < entityList.size(); i++) {
 			final EntityItem entity = entityList.get(i);
 			final float boundSize = 0.2f;
 			final AxisAlignedBB entityCollisionBox = entity.boundingBox.expand(boundSize, boundSize, boundSize);
-			final MovingObjectPosition objectInVector = entityCollisionBox.calculateIntercept(positionVector, lookingAtVector);
-			if (entityCollisionBox.isVecInside(positionVector)) {
+			final MovingObjectPosition objectInVector = entityCollisionBox.calculateIntercept(pVec, lAVec);
+			if (entityCollisionBox.isVecInside(pVec)) {
 				if (0.0D <= difference) {
 					target = entity;
 					difference = 0;
 				}
 			} else if (objectInVector != null) {
-				final double distance = positionVector.distanceTo(objectInVector.hitVec);
+				final double distance = pVec.distanceTo(objectInVector.hitVec);
 				if (distance < difference || difference == 0.0D) {
 					target = entity;
 					difference = distance;
@@ -232,9 +241,12 @@ public class TooltipSystem {
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		final double interpX = RenderManager.renderPosX - (entityItem.posX - (entityItem.prevPosX - entityItem.posX) * deltaTime);
-		final double interpY = RenderManager.renderPosY - (entityItem.posY - (entityItem.prevPosY - entityItem.posY) * deltaTime);
-		final double interpZ = RenderManager.renderPosZ - (entityItem.posZ - (entityItem.prevPosZ - entityItem.posZ) * deltaTime);
+		final double interpX = RenderManager.renderPosX
+				- (entityItem.posX - (entityItem.prevPosX - entityItem.posX) * deltaTime);
+		final double interpY = RenderManager.renderPosY
+				- (entityItem.posY - (entityItem.prevPosY - entityItem.posY) * deltaTime);
+		final double interpZ = RenderManager.renderPosZ
+				- (entityItem.posZ - (entityItem.prevPosZ - entityItem.posZ) * deltaTime);
 		final double interpDistance = Math.sqrt(interpX * interpX + interpY * interpY + interpZ * interpZ);
 		GL11.glTranslated(-interpX, -(interpY - entityItem.height - 0.5), -interpZ);
 		GL11.glRotatef(-RenderManager.instance.playerViewY + 180, 0, 1, 0);
