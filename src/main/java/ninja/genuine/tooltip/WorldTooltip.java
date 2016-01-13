@@ -1,13 +1,11 @@
-package com.genuineflix.tooltip;
+package ninja.genuine.tooltip;
 
 import java.util.regex.Pattern;
 
 import net.minecraft.init.Blocks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
-
-import com.genuineflix.tooltip.system.TooltipSystem;
-
+import ninja.genuine.tooltip.system.TooltipSystem;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -21,7 +19,7 @@ public class WorldTooltip {
 	public static WorldTooltip instance;
 	public static final String MODID = "WorldTooltip";
 	public static final String NAME = "WorldTooltip";
-	public static final String VERSION = "1.0.15";
+	public static final String VERSION = "1.0.16";
 	public static final String DESC = "This is a color in hex form (ie: 0xAB12cd or #AB12cd), one can always lookup your favorite colors online.";
 	public static String color1, color2;
 	private final Pattern pattern = Pattern.compile("^(0[xX]|#)[0-9a-fA-F]{1,8}$");

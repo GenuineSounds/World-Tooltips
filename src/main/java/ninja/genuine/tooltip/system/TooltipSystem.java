@@ -1,4 +1,4 @@
-package com.genuineflix.tooltip.system;
+package ninja.genuine.tooltip.system;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -22,10 +22,9 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import ninja.genuine.tooltip.WorldTooltip;
 
 import org.lwjgl.opengl.GL11;
-
-import com.genuineflix.tooltip.WorldTooltip;
 
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -66,10 +65,8 @@ public class TooltipSystem {
 
 	public static String modNameFromStack(final ItemStack stack) {
 		try {
-			return Loader.instance().getIndexedModList()
-					.get(GameRegistry.findUniqueIdentifierFor(stack.getItem()).modId).getName();
-		}
-		catch (final Exception e) {
+			return Loader.instance().getIndexedModList().get(GameRegistry.findUniqueIdentifierFor(stack.getItem()).modId).getName();
+		} catch (final Exception e) {
 			return "Minecraft";
 		}
 	}
@@ -88,22 +85,18 @@ public class TooltipSystem {
 		try {
 			nei = Class.forName("codechicken.nei.guihook.GuiContainerManager");
 			if (nei != null) {
-				info = nei.getDeclaredMethod("itemDisplayNameMultiline", ItemStack.class, GuiContainer.class,
-						boolean.class);
+				info = nei.getDeclaredMethod("itemDisplayNameMultiline", ItemStack.class, GuiContainer.class, boolean.class);
 				useNei = true;
 			}
-		}
-		catch (final Exception e) {}
+		} catch (final Exception e) {}
 		try {
 			mainColor = Integer.decode(WorldTooltip.color1);
-		}
-		catch (final NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			mainColor = 0x100010;
 		}
 		try {
 			outlineColor = Integer.decode(WorldTooltip.color2);
-		}
-		catch (final NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			outlineColor = 0x5000FF;
 		}
 		mainColor = mainColor & 0xFFFFFF | 0xD0000000;
@@ -111,7 +104,7 @@ public class TooltipSystem {
 		secondaryColor = (outlineColor & 0xFEFEFE) >> 1 | outlineColor & 0xFF000000;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "unused" })
 	private void addInfo(final List<String> list) {
 		if (entityItem.getEntityItem().getItem() instanceof ItemArmor) {
 			final ItemArmor item = (ItemArmor) entityItem.getEntityItem().getItem();
@@ -137,18 +130,14 @@ public class TooltipSystem {
 		List<String> list = null;
 		if (useNei)
 			try {
-				list = (List<String>) info.invoke(null, entityItem.getEntityItem(), null,
-						Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
-			}
-			catch (final Exception e) {}
+				list = (List<String>) info.invoke(null, entityItem.getEntityItem(), null, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
+			} catch (final Exception e) {}
 		if (list == null)
-			list = entityItem.getEntityItem().getTooltip(entityPlayer,
-					Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
+			list = entityItem.getEntityItem().getTooltip(entityPlayer, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
 		if (list == null)
 			return;
 		// addInfo(list);
-		list.add(EnumChatFormatting.BLUE.toString() + EnumChatFormatting.ITALIC.toString()
-				+ TooltipSystem.modNameFromStack(entityItem.getEntityItem()) + EnumChatFormatting.RESET.toString());
+		list.add(EnumChatFormatting.BLUE.toString() + EnumChatFormatting.ITALIC.toString() + TooltipSystem.modNameFromStack(entityItem.getEntityItem()) + EnumChatFormatting.RESET.toString());
 		if (list.size() > 0) {
 			if (entityItem.getEntityItem().stackSize > 1)
 				list.set(0, entityItem.getEntityItem().stackSize + " x " + list.get(0));
@@ -194,11 +183,8 @@ public class TooltipSystem {
 		final Vec3 lVec = entityPlayer.getLook(deltaTime);
 		final Vec3 lAVec = pVec.addVector(lVec.xCoord * lDistance, lVec.yCoord * lDistance, lVec.zCoord * lDistance);
 		final float viewDistanceExpansion = 5;
-		final List<EntityItem> entityList = entityPlayer.worldObj.getEntitiesWithinAABB(
-				EntityItem.class,
-				entityPlayer.boundingBox.addCoord(lVec.xCoord * lDistance, lVec.yCoord * lDistance,
-						lVec.zCoord * lDistance).expand(viewDistanceExpansion, viewDistanceExpansion,
-						viewDistanceExpansion));
+		final List<EntityItem> entityList = entityPlayer.worldObj.getEntitiesWithinAABB(EntityItem.class,
+				entityPlayer.boundingBox.addCoord(lVec.xCoord * lDistance, lVec.yCoord * lDistance, lVec.zCoord * lDistance).expand(viewDistanceExpansion, viewDistanceExpansion, viewDistanceExpansion));
 		double difference = 0;
 		EntityItem target = null;
 		for (int i = 0; i < entityList.size(); i++) {
@@ -241,12 +227,9 @@ public class TooltipSystem {
 		GL11.glDisable(GL11.GL_DEPTH_TEST);
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		final double interpX = RenderManager.renderPosX
-				- (entityItem.posX - (entityItem.prevPosX - entityItem.posX) * deltaTime);
-		final double interpY = RenderManager.renderPosY
-				- (entityItem.posY - (entityItem.prevPosY - entityItem.posY) * deltaTime);
-		final double interpZ = RenderManager.renderPosZ
-				- (entityItem.posZ - (entityItem.prevPosZ - entityItem.posZ) * deltaTime);
+		final double interpX = RenderManager.renderPosX - (entityItem.posX - (entityItem.prevPosX - entityItem.posX) * deltaTime);
+		final double interpY = RenderManager.renderPosY - (entityItem.posY - (entityItem.prevPosY - entityItem.posY) * deltaTime);
+		final double interpZ = RenderManager.renderPosZ - (entityItem.posZ - (entityItem.prevPosZ - entityItem.posZ) * deltaTime);
 		final double interpDistance = Math.sqrt(interpX * interpX + interpY * interpY + interpZ * interpZ);
 		GL11.glTranslated(-interpX, -(interpY - entityItem.height - 0.5), -interpZ);
 		GL11.glRotatef(-RenderManager.instance.playerViewY + 180, 0, 1, 0);
