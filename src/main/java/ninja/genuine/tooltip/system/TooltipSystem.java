@@ -231,10 +231,10 @@ public class TooltipSystem {
 		final double interpY = RenderManager.renderPosY - (entityItem.posY - (entityItem.prevPosY - entityItem.posY) * deltaTime);
 		final double interpZ = RenderManager.renderPosZ - (entityItem.posZ - (entityItem.prevPosZ - entityItem.posZ) * deltaTime);
 		final double interpDistance = Math.sqrt(interpX * interpX + interpY * interpY + interpZ * interpZ);
-		GL11.glTranslated(-interpX, -(interpY - entityItem.height - 0.5), -interpZ);
+		GL11.glTranslated(-interpX, -(interpY - 0.55), -interpZ);
 		GL11.glRotatef(-RenderManager.instance.playerViewY + 180, 0, 1, 0);
 		GL11.glRotatef(-RenderManager.instance.playerViewX, 1, 0, 0);
-		double scale = interpDistance / 256;
+		double scale = interpDistance / 512;
 		if (scale <= 0.01)
 			scale = 0.01;
 		GL11.glScaled(scale, -scale, scale);
