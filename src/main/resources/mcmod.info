@@ -3,7 +3,7 @@
   "modid": "WorldTooltip",
   "name": "WorldTooltip",
   "description": "WorldTooltip is a mod for Minecraft that adds tooltips over items on the ground making it easier to see what's on the ground from far away.",
-  "version": "1.0.16",
+  "version": "1.1.0",
   "mcversion": "1.7.10",
   "url": "",
   "updateUrl": "",
