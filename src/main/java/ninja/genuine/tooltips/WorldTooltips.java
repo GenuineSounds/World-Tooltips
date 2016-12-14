@@ -4,6 +4,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property.Type;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -25,11 +26,12 @@ public class WorldTooltips {
 	public static final String NAME = "World Tooltips";
 	public static final String URL = "http://genuine.ninja/world-tooltips/";
 	public static final String VERSION = "1.2.1";
-	public static final String DESC = "This is a color in hex form (ie: 0xAB12cd or #AB12cd), one can always lookup your favorite colors online.";
+	public static final String DESC = "Choose a color in hexidecimal (ie: 0xAB12cd or #AB12cd) \nYou can look up your favorite colors online.";
+	public static final String GUIID = "worldtooltipsgui";
 	public static int colorPrimary, colorOutline;
 	public static float alpha;
-	public RenderEvent re;
-	// private final Pattern pattern = Pattern.compile("^(0[xX]|#)[0-9a-fA-F]{1,8}$");
+	public RenderEvent events;
+	private static boolean enabled = false;
 
 	public WorldTooltips() {
 		instance = this;
@@ -41,27 +43,46 @@ public class WorldTooltips {
 		syncConfig();
 	}
 
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
-		re = new RenderEvent();
-		MinecraftForge.EVENT_BUS.register(re);
+		events = new RenderEvent();
+		enable();
+		FMLCommonHandler.instance().bus().register(this);
 	}
 
 	@EventHandler
 	public void post(FMLPostInitializationEvent event) {
-		re.post();
+		events.post();
+	}
+
+	public void enable() {
+		MinecraftForge.EVENT_BUS.register(events);
+		enabled = true;
 	}
 
 	@EventHandler
 	public void disable(FMLModDisabledEvent event) {
-		MinecraftForge.EVENT_BUS.unregister(re);
-		re.disable();
+		MinecraftForge.EVENT_BUS.unregister(events);
+		enabled = false;
 	}
 
 	@SubscribeEvent
-	public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent eventArgs) {
-		if (eventArgs.getModID().equals(MODID))
-			syncConfig();
+	public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
+		if (event.getModID().equals(MODID)) {
+			if (event.getConfigID().equals(GUIID)) {
+				boolean tmp = enabled;
+				enabled = config.get("Appearance", "enabled", true).getBoolean();
+				if (tmp != enabled) {
+					if (enabled)
+						enable();
+					else
+						disable(null);
+				}
+				syncConfig();
+				events.renderer.syncColors();
+			}
+		}
 	}
 
 	private void syncConfig() {
@@ -76,7 +97,6 @@ public class WorldTooltips {
 			colorOutline = 0x5000FF;
 		}
 		alpha = config.getFloat("transparency", "Appearance", 0.85F, 0.0F, 1.0F, "Set the opacity for the tooltips; 0 being completely invisible and 1 being completely opaque.");
-		if (config.hasChanged())
-			config.save();
+		config.save();
 	}
 }

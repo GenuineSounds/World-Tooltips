@@ -8,6 +8,6 @@ import ninja.genuine.tooltips.WorldTooltips;
 public class TooltipsConfigGUI extends GuiConfig {
 
 	public TooltipsConfigGUI(GuiScreen parent) {
-		super(parent, new ConfigElement(WorldTooltips.config.getCategory("Appearance")).getChildElements(), "World Tooltips", false, false, "World Tooltips - Settings");
+		super(parent, new ConfigElement(WorldTooltips.config.getCategory("Appearance")).getChildElements(), WorldTooltips.MODID, WorldTooltips.GUIID, false, false, "World Tooltips", "Appearance configuration");
 	}
 }

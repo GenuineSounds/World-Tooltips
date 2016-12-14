@@ -9,9 +9,13 @@ import ninja.genuine.tooltips.WorldTooltips;
 
 public class TooltipRenderer {
 
-	private final int colorPrimary, colorOutline, colorSecondary, alpha;
+	private int colorPrimary, colorOutline, colorSecondary, alpha;
 
 	public TooltipRenderer() {
+		syncColors();
+	}
+
+	public void syncColors() {
 		alpha = ((int) (WorldTooltips.alpha * 255) & 0xFF) << 24;
 		colorPrimary = WorldTooltips.colorPrimary & 0xFFFFFF;
 		colorOutline = WorldTooltips.colorOutline & 0xFFFFFF;
