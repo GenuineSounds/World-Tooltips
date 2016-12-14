@@ -5,17 +5,44 @@ import java.util.List;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
-import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.item.ItemStack;
 
 public class RenderHelper {
+
+	public static void renderTooltipText(List<String> tooltip, EntityItem item, int drawx, int drawy, int alpha) {
+		GlStateManager.pushMatrix();
+		GlStateManager.translate(0, 0, 1);
+		GlStateManager.enableBlend();
+		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+		for (int i = 0; i < tooltip.size(); i++) {
+			String s = tooltip.get(i);
+			if (i == 0)
+				s = item.getEntityItem().getRarity().rarityColor.toString() + s;
+			Minecraft.getMinecraft().fontRendererObj.drawString(s, drawx, drawy, 0xFFFFFF | alpha, true);
+			if (i == 0)
+				drawy += 2;
+			drawy += 10;
+		}
+		GlStateManager.disableBlend();
+		GlStateManager.translate(0, 0, -1);
+		GlStateManager.popMatrix();
+	}
+
+	public static void renderTooltipTile(int x, int y, int w, int h, int colorPrimary, int colorOutline, int colorSecondary) {
+		RenderHelper.drawGradientRect(x - 3, y - 4, w + 6, 1, colorPrimary, colorPrimary);
+		RenderHelper.drawGradientRect(x - 3, y + h + 3, w + 6, 1, colorPrimary, colorPrimary);
+		RenderHelper.drawGradientRect(x - 3, y - 3, w + 6, h + 6, colorPrimary, colorPrimary);
+		RenderHelper.drawGradientRect(x - 4, y - 3, 1, h + 6, colorPrimary, colorPrimary);
+		RenderHelper.drawGradientRect(x + w + 3, y - 3, 1, h + 6, colorPrimary, colorPrimary);
+		RenderHelper.drawGradientRect(x - 3, y - 2, 1, h + 4, colorOutline, colorSecondary);
+		RenderHelper.drawGradientRect(x + w + 2, y - 2, 1, h + 4, colorOutline, colorSecondary);
+		RenderHelper.drawGradientRect(x - 3, y - 3, w + 6, 1, colorOutline, colorOutline);
+		RenderHelper.drawGradientRect(x - 3, y + h + 2, w + 6, 1, colorSecondary, colorSecondary);
+	}
 
 	public static void start() {
 		GlStateManager.pushMatrix();
@@ -32,38 +59,6 @@ public class RenderHelper {
 		GlStateManager.disableAlpha();
 		GlStateManager.disableRescaleNormal();
 		GlStateManager.disableLighting();
-		GlStateManager.popAttrib();
-		GlStateManager.popMatrix();
-	}
-
-	public static void renderName(FontRenderer fr, ItemStack stack, int cols, int col, int rows, int row, int color) {
-		GlStateManager.pushMatrix();
-		GlStateManager.translate(0.4f * (cols / 2.0 - col) - 0.2f, 0.4f * (rows / 2.0 - row) - 0.15f, 0);
-		GlStateManager.pushAttrib();
-		GlStateManager.rotate(180, 0, 0, 1);
-		GlStateManager.translate(0.2, 0, -0.1);
-		GlStateManager.scale(0.01, 0.01, 0.01);
-		String size = Integer.toString(stack.func_190916_E());
-		int w = fr.getStringWidth(size);
-		fr.drawStringWithShadow(size, -w, 0, color);
-		GlStateManager.popAttrib();
-		GlStateManager.popMatrix();
-	}
-
-	public static void renderStack(RenderItem ri, ItemStack stack, int cols, int col, int rows, int row) {
-		GlStateManager.pushMatrix();
-		GlStateManager.pushAttrib();
-		GlStateManager.translate(0.4f * (cols / 2.0 - col) - 0.2f, 0.4f * (rows / 2.0 - row), 0);
-		GlStateManager.pushMatrix();
-		GlStateManager.rotate((float) (360.0 * (double) (System.currentTimeMillis() & 0x3FFFL) / (double) 0x3FFFL), 0, 1, 0);
-		GlStateManager.scale(0.45, 0.45, 0.45);
-		ri.renderItem(stack, ItemCameraTransforms.TransformType.FIXED);
-		if (stack.hasEffect()) {
-			GlStateManager.disableAlpha();
-			GlStateManager.disableRescaleNormal();
-			GlStateManager.disableLighting();
-		}
-		GlStateManager.popMatrix();
 		GlStateManager.popAttrib();
 		GlStateManager.popMatrix();
 	}
@@ -96,31 +91,5 @@ public class RenderHelper {
 		GlStateManager.disableBlend();
 		GlStateManager.enableAlpha();
 		GlStateManager.enableTexture2D();
-	}
-
-	public static void renderTooltipText(List<String> tooltip, EntityItem item, int drawx, int drawy) {
-		GlStateManager.translate(0, 0, 1);
-		for (int i = 0; i < tooltip.size(); i++) {
-			String s = tooltip.get(i);
-			if (i == 0)
-				s = item.getEntityItem().getRarity().rarityColor.toString() + s;
-			Minecraft.getMinecraft().fontRendererObj.drawStringWithShadow(s, drawx, drawy, -1);
-			if (i == 0)
-				drawy += 2;
-			drawy += 10;
-		}
-		GlStateManager.translate(0, 0, -1);
-	}
-
-	public static void renderTooltipTile(int x, int y, int w, int h, int colorPrimary, int colorOutline, int colorSecondary) {
-		RenderHelper.drawGradientRect(x - 3, y - 4, w + 6, 1, colorPrimary, colorPrimary);
-		RenderHelper.drawGradientRect(x - 3, y + h + 3, w + 6, 1, colorPrimary, colorPrimary);
-		RenderHelper.drawGradientRect(x - 3, y - 3, w + 6, h + 6, colorPrimary, colorPrimary);
-		RenderHelper.drawGradientRect(x - 4, y - 3, 1, h + 6, colorPrimary, colorPrimary);
-		RenderHelper.drawGradientRect(x + w + 3, y - 3, 1, h + 6, colorPrimary, colorPrimary);
-		RenderHelper.drawGradientRect(x - 3, y - 2, 1, h + 4, colorOutline, colorSecondary);
-		RenderHelper.drawGradientRect(x + w + 2, y - 2, 1, h + 4, colorOutline, colorSecondary);
-		RenderHelper.drawGradientRect(x - 3, y - 3, w + 6, 1, colorOutline, colorOutline);
-		RenderHelper.drawGradientRect(x - 3, y + h + 2, w + 6, 1, colorSecondary, colorSecondary);
 	}
 }

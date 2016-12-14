@@ -14,7 +14,7 @@ archivesBaseName = "World Tooltips"
 
 group = "ninja.genuine.worldtooltips"
 ext.revision = 'git rev-list --count HEAD'.execute().text.trim()
-version = "1.11-1.2.0-${revision}"
+version = "1.11-1.2.1-${revision}"
 
 sourceCompatibility = targetCompatibility = "1.6"
 compileJava {

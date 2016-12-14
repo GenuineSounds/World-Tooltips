@@ -3,8 +3,6 @@ package ninja.genuine.tooltips.client;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import com.mojang.realmsclient.gui.ChatFormatting;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.resources.I18n;
@@ -28,15 +26,10 @@ import ninja.genuine.tooltips.client.render.TooltipRenderer;
 public class RenderEvent {
 
 	private static Class<?> nei;
-
 	private static Method info;
-
 	private static boolean useNei = false;
-
 	private Minecraft mc;
-
 	private TooltipRenderer renderer;
-
 	private boolean enabled = true;
 
 	public RenderEvent() {}
@@ -58,8 +51,7 @@ public class RenderEvent {
 				info = nei.getDeclaredMethod("itemDisplayNameMultiline", ItemStack.class, GuiContainer.class, boolean.class);
 				useNei = true;
 			}
-		}
-		catch (final Exception e) {}
+		} catch (final Exception e) {}
 	}
 
 	public void disable() {
@@ -67,13 +59,13 @@ public class RenderEvent {
 		System.out.println("World Tooltips is now disabled.");
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<String> generateTooltip(Minecraft mc, EntityPlayer player, EntityItem item) {
 		List<String> list = null;
 		if (useNei)
 			try {
 				list = (List<String>) info.invoke(null, item.getEntityItem(), null, mc.gameSettings.advancedItemTooltips);
-			}
-			catch (final Exception e) {}
+			} catch (final Exception e) {}
 		if (list == null)
 			list = item.getEntityItem().getTooltip(player, mc.gameSettings.advancedItemTooltips);
 		// list.add(ChatFormatting.BLUE.toString() + ChatFormatting.ITALIC.toString() + modNameFromStack(item.getEntityItem()) + ChatFormatting.RESET.toString());
@@ -99,7 +91,6 @@ public class RenderEvent {
 			list.add("Hunger: " + item.getHealAmount(entityItem.getEntityItem()));
 			list.add("Saturation: " + item.getSaturationModifier(entityItem.getEntityItem()));
 		} else if (entityItem.getEntityItem().getItem() instanceof ItemPotion) {
-			final ItemPotion item = (ItemPotion) entityItem.getEntityItem().getItem();
 			final List<PotionEffect> effects = PotionUtils.getEffectsFromStack(entityItem.getEntityItem());
 			if (effects != null)
 				for (final PotionEffect effect : effects)
