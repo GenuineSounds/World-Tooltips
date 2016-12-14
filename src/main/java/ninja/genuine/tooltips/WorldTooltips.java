@@ -40,6 +40,7 @@ public class WorldTooltips {
 	@EventHandler
 	public void pre(FMLPreInitializationEvent event) {
 		config = new Configuration(event.getSuggestedConfigurationFile());
+		config.get("Appearance", "enabled", true).getBoolean();
 		syncConfig();
 	}
 
