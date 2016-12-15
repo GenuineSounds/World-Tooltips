@@ -80,7 +80,8 @@ public class RenderEvent {
 			} catch (final Exception e) {}
 		if (list == null)
 			list = item.getEntityItem().getTooltip(player, mc.gameSettings.advancedItemTooltips);
-		list.add(ChatFormatting.BLUE.toString() + ChatFormatting.ITALIC.toString() + getModName(item.getEntityItem().getItem()) + ChatFormatting.RESET.toString());
+		if (!Loader.isModLoaded("Waila"))
+			list.add(ChatFormatting.BLUE.toString() + ChatFormatting.ITALIC.toString() + getModName(item.getEntityItem().getItem()) + ChatFormatting.RESET.toString());
 		if (item.getEntityItem().getCount() > 1)
 			list.set(0, item.getEntityItem().getCount() + " x " + list.get(0));
 		return list;
