@@ -80,11 +80,15 @@ public class RenderEvent {
 			} catch (final Exception e) {}
 		if (list == null)
 			list = item.getEntityItem().getTooltip(player, mc.gameSettings.advancedItemTooltips);
-		if (!Loader.isModLoaded("Waila"))
+		if (!modsAreLoaded())
 			list.add(ChatFormatting.BLUE.toString() + ChatFormatting.ITALIC.toString() + getModName(item.getEntityItem().getItem()) + ChatFormatting.RESET.toString());
 		if (item.getEntityItem().getCount() > 1)
 			list.set(0, item.getEntityItem().getCount() + " x " + list.get(0));
 		return list;
+	}
+
+	private boolean modsAreLoaded() {
+		return Loader.isModLoaded("waila") | Loader.isModLoaded("nei") | Loader.isModLoaded("hwyla");
 	}
 
 	public String getModName(Item item) {
