@@ -10,9 +10,9 @@ buildscript {
 
 apply plugin: 'net.minecraftforge.gradle.forge'
 
-archivesBaseName = "World Tooltips"
+archivesBaseName = "World-Tooltips"
 
-group = "ninja.genuine.worldtooltips"
+group = "ninja.genuine.world-tooltips"
 ext.revision = 'git rev-list --count HEAD'.execute().text.trim()
 version = "1.11-1.2.2-${revision}"
 
@@ -24,8 +24,7 @@ compileJava {
 minecraft {
     version = "1.11-13.19.1.2189"
     runDir = "run"
-	mappings = "snapshot_20161214"
-    // mappings = "snapshot_20161111"
+	mappings = "snapshot_20161216"
 }
 
 dependencies {
