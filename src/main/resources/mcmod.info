@@ -10,7 +10,13 @@
 	"authorList": ["GenuineSounds"],
 	"credits": "",
 	"logoFile": "assets/world-tooltips/logo.png",
-	"screenshots": [],
+	"screenshots": [
+		"assets/world-tooltips/img/rarity-tooltips.png",
+		"assets/world-tooltips/img/common.png",
+		"assets/world-tooltips/img/uncommon.png",
+		"assets/world-tooltips/img/rare.png",
+		"assets/world-tooltips/img/epic.png"
+	],
 	"dependencies": []
 }
 ]
