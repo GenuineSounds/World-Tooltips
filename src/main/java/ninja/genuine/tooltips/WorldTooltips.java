@@ -14,6 +14,7 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import ninja.genuine.tooltips.client.RenderEvent;
+import ninja.genuine.tooltips.system.Tooltip;
 
 @Mod(modid = WorldTooltips.MODID, name = WorldTooltips.NAME, version = WorldTooltips.VERSION, canBeDeactivated = true, clientSideOnly = true, updateJSON = WorldTooltips.URL
 		+ "update.json", useMetadata = true, guiFactory = "ninja.genuine.tooltips.client.TooltipsGuiFactory")
@@ -28,9 +29,9 @@ public class WorldTooltips {
 	public static final String VERSION = "1.2.3";
 	public static final String DESC = "Choose a color in hexidecimal (ie: 0xAB12cd or #AB12cd) \nYou can look up your favorite colors online.";
 	public static final String GUIID = "worldtooltipsgui";
-	public static int colorPrimary, colorOutline;
+	public static int colorBackground, overrideOutlineColor;
 	public static float alpha;
-	public static boolean showModName;
+	public static boolean hideModName, overrideOutline;
 	public RenderEvent events;
 	private static boolean enabled = false;
 
@@ -49,7 +50,9 @@ public class WorldTooltips {
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
 		events = new RenderEvent();
-		enable();
+		Tooltip.init();
+		if (enabled)
+			enable();
 		FMLCommonHandler.instance().bus().register(this);
 	}
 
@@ -82,22 +85,23 @@ public class WorldTooltips {
 						disable(null);
 				}
 				syncConfig();
-				events.renderer.syncColors();
+				events.syncColors();
 			}
 		}
 	}
 
 	private void syncConfig() {
-		showModName = config.getBoolean("show_mod_name", "Appearance", enabled, "Display the mod of the item. This setting is overriden by having NEI/Waila/HWYLA installed.");
+		hideModName = config.getBoolean("hide_mod_name", "Appearance", false, "Hide mod names on tooltips.");
 		try {
-			colorPrimary = Integer.decode(config.get("Appearance", "primary", "0x100010", DESC, Type.COLOR).getString());
+			colorBackground = Integer.decode(config.get("Appearance", "background", "0x100010", DESC, Type.COLOR).getString());
 		} catch (NumberFormatException e) {
-			colorPrimary = 0x100010;
+			colorBackground = 0x100010;
 		}
+		overrideOutline = config.getBoolean("override_outline", "Appearance", enabled, "If enabled outline color will be override_outline_color instead of default behavior.");
 		try {
-			colorOutline = Integer.decode(config.get("Appearance", "outline", "0x5000FF", DESC, Type.COLOR).getString());
+			overrideOutlineColor = Integer.decode(config.get("Appearance", "override_outline_color", "0x5000FF", DESC, Type.COLOR).getString());
 		} catch (NumberFormatException e) {
-			colorOutline = 0x5000FF;
+			overrideOutlineColor = 0x5000FF;
 		}
 		alpha = config.getFloat("transparency", "Appearance", 0.85F, 0.0F, 1.0F, "Set the opacity for the tooltips; 0 being completely invisible and 1 being completely opaque.");
 		config.save();
