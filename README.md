@@ -1,6 +1,6 @@
-WorldTooltip
+World-Tooltips
 ========
-WorldTooltip is a mod for Minecraft that adds tooltips over items on the ground making it easier to see what's on the ground from far away.
+World-Tooltips is a mod for Minecraft that adds tooltips over items on the ground making it easier to see what's on the ground.
 
 License
 =======

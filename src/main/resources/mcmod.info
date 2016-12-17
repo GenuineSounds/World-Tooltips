@@ -1,16 +1,16 @@
 [
 {
-  "modid": "world-tooltips",
-  "name": "World-Tooltips",
-  "description": "World-Tooltips is a mod for Minecraft that adds tooltips over items on the ground making it easier to see what's on the ground from far away.",
-  "version": "1.2.2",
-  "mcversion": "1.11",
-  "url": "http://genuine.ninja/world-tooltips/",
-  "updateUrl": "update.json",
-  "authorList": ["GenuineSounds"],
-  "credits": "",
-  "logoFile": "assets/world-tooltips/logo.png",
-  "screenshots": [],
-  "dependencies": []
+	"modid": "world-tooltips",
+	"name": "World-Tooltips",
+	"description": "World-Tooltips is a mod for Minecraft that adds tooltips over items on the ground making it easier to see what's on the ground.",
+	"version": "1.2.3",
+	"mcversion": "1.11",
+	"url": "http://genuine.ninja/world-tooltips/",
+	"updateUrl": "update.json",
+	"authorList": ["GenuineSounds"],
+	"credits": "",
+	"logoFile": "assets/world-tooltips/logo.png",
+	"screenshots": [],
+	"dependencies": []
 }
 ]

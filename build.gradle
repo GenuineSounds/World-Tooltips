@@ -1,11 +1,11 @@
 buildscript {
-    repositories {
-        jcenter()
-        maven { url = "http://files.minecraftforge.net/maven" }
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
-    }
+	repositories {
+		jcenter()
+		maven { url = "http://files.minecraftforge.net/maven" }
+	}
+	dependencies {
+		classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+	}
 }
 
 apply plugin: 'net.minecraftforge.gradle.forge'
@@ -14,16 +14,16 @@ archivesBaseName = "World-Tooltips"
 
 group = "ninja.genuine.world-tooltips"
 ext.revision = 'git rev-list --count HEAD'.execute().text.trim()
-version = "1.11-1.2.2-${revision}"
+version = "1.11-1.2.3-${revision}"
 
 sourceCompatibility = targetCompatibility = "1.6"
 compileJava {
-    sourceCompatibility = targetCompatibility = "1.6"
+	sourceCompatibility = targetCompatibility = "1.6"
 }
 
 minecraft {
-    version = "1.11-13.19.1.2189"
-    runDir = "run"
+	version = "1.11-13.19.1.2189"
+	runDir = "run"
 	mappings = "snapshot_20161216"
 }
 
@@ -31,17 +31,17 @@ dependencies {
 }
 
 processResources {
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
+	inputs.property "version", project.version
+	inputs.property "mcversion", project.minecraft.version
 
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-        expand 'version':project.version, 'mcversion':project.minecraft.version
-    }
+	from(sourceSets.main.resources.srcDirs) {
+		include 'mcmod.info'
+		expand 'version':project.version, 'mcversion':project.minecraft.version
+	}
 
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
+	from(sourceSets.main.resources.srcDirs) {
+		exclude 'mcmod.info'
+	}
 }
 
 task deobfJar(type: Jar, dependsOn: 'classes') {
