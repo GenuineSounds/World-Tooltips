@@ -97,7 +97,7 @@ public class WorldTooltips {
 		} catch (NumberFormatException e) {
 			colorBackground = 0x100010;
 		}
-		overrideOutline = config.getBoolean("override_outline", "Appearance", enabled, "If enabled outline color will be override_outline_color instead of default behavior.");
+		overrideOutline = config.getBoolean("override_outline", "Appearance", false, "If enabled outline color will be override_outline_color instead of default behavior.");
 		try {
 			overrideOutlineColor = Integer.decode(config.get("Appearance", "override_outline_color", "0x5000FF", DESC, Type.COLOR).getString());
 		} catch (NumberFormatException e) {
