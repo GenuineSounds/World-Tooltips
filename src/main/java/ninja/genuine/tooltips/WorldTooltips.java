@@ -32,8 +32,8 @@ public class WorldTooltips {
 	public static int colorBackground, overrideOutlineColor;
 	public static float alpha;
 	public static boolean hideModName, overrideOutline;
-	public RenderEvent events;
 	private static boolean enabled = false;
+	public RenderEvent events;
 
 	public WorldTooltips() {
 		instance = this;
@@ -42,7 +42,7 @@ public class WorldTooltips {
 	@EventHandler
 	public void pre(FMLPreInitializationEvent event) {
 		config = new Configuration(event.getSuggestedConfigurationFile());
-		enabled = config.get("Appearance", "enabled", true).getBoolean();
+		enabled = config.get("Appearance", "enabled", true, "Enable rendering the tooltips.").getBoolean();
 		syncConfig();
 	}
 
@@ -77,7 +77,7 @@ public class WorldTooltips {
 		if (event.getModID().equals(MODID)) {
 			if (event.getConfigID().equals(GUIID)) {
 				boolean tmp = enabled;
-				enabled = config.get("Appearance", "enabled", true).getBoolean();
+				enabled = config.get("Appearance", "enabled", true, "Enable rendering the tooltips.").getBoolean();
 				if (tmp != enabled) {
 					if (enabled)
 						enable();
