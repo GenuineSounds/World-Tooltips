@@ -16,9 +16,9 @@ group = "ninja.genuine.world-tooltips"
 ext.revision = 'git rev-list --count HEAD'.execute().text.trim()
 version = "1.11-1.2.3-${revision}"
 
-sourceCompatibility = targetCompatibility = "1.6"
+sourceCompatibility = targetCompatibility = "1.8"
 compileJava {
-	sourceCompatibility = targetCompatibility = "1.6"
+	sourceCompatibility = targetCompatibility = "1.8"
 }
 
 minecraft {
