@@ -30,6 +30,7 @@ public class WorldTooltips {
 	public static final String GUIID = "worldtooltipsgui";
 	public static int colorPrimary, colorOutline;
 	public static float alpha;
+	public static boolean showModName;
 	public RenderEvent events;
 	private static boolean enabled = false;
 
@@ -40,7 +41,7 @@ public class WorldTooltips {
 	@EventHandler
 	public void pre(FMLPreInitializationEvent event) {
 		config = new Configuration(event.getSuggestedConfigurationFile());
-		config.get("Appearance", "enabled", true).getBoolean();
+		enabled = config.get("Appearance", "enabled", true).getBoolean();
 		syncConfig();
 	}
 
@@ -87,6 +88,7 @@ public class WorldTooltips {
 	}
 
 	private void syncConfig() {
+		showModName = config.getBoolean("show_mod_name", "Appearance", enabled, "Display the mod of the item. This setting is overriden by having NEI/Waila/HWYLA installed.");
 		try {
 			colorPrimary = Integer.decode(config.get("Appearance", "primary", "0x100010", DESC, Type.COLOR).getString());
 		} catch (NumberFormatException e) {

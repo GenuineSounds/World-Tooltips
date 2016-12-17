@@ -32,6 +32,7 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import ninja.genuine.tooltips.WorldTooltips;
 import ninja.genuine.tooltips.client.render.TooltipRenderer;
 
 public class RenderEvent {
@@ -80,7 +81,7 @@ public class RenderEvent {
 			} catch (final Exception e) {}
 		if (list == null)
 			list = item.getEntityItem().getTooltip(player, mc.gameSettings.advancedItemTooltips);
-		if (!modsAreLoaded())
+		if (!modsAreLoaded() && WorldTooltips.showModName)
 			list.add(ChatFormatting.BLUE.toString() + ChatFormatting.ITALIC.toString() + getModName(item.getEntityItem().getItem()) + ChatFormatting.RESET.toString());
 		if (item.getEntityItem().getCount() > 1)
 			list.set(0, item.getEntityItem().getCount() + " x " + list.get(0));
