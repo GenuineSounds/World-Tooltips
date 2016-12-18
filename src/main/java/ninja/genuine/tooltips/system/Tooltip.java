@@ -87,8 +87,8 @@ public class Tooltip {
 		text = item.getTooltip(player, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
 		if (!modsAreLoaded() && !WorldTooltips.hideModName)
 			text.add(ChatFormatting.BLUE.toString() + ChatFormatting.ITALIC.toString() + getModName(item.getItem()) + ChatFormatting.RESET.toString());
-		if (item.getCount() > 1)
-			text.set(0, item.getCount() + " x " + text.get(0));
+		if (item.stackSize > 1)
+			text.set(0, item.stackSize + " x " + text.get(0));
 		int maxwidth = 0;
 		for (int line = 0; line < text.size(); line++) {
 			final int swidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(getLine(line));

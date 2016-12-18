@@ -18,14 +18,14 @@ archivesBaseName = "World-Tooltips"
 
 group = "ninja.genuine.world-tooltips"
 ext.revision = 'git rev-list --count HEAD'.execute().text.trim()
-version = "1.11-1.2.3-${revision}"
+version = "1.9.4-1.2.3-${revision}"
 
 sourceCompatibility = targetCompatibility = "1.8"
 
 minecraft {
-	version = "1.11-13.19.1.2189"
+	version = "1.9.4-12.17.0.2051"
 	runDir = "run"
-	mappings = "snapshot_20161217"
+	mappings = "snapshot_20160518"
 }
 
 dependencies {
@@ -52,9 +52,9 @@ allprojects {
 }
 
 task makeChangelog(type: se.bjurr.gitchangelog.plugin.gradle.GitChangelogTask) {
-	filePath = "changelog.html"
+	filePath = "build/changelogs/changelog-${project.version}.html"
 	untaggedName = "Current release ${project.version}"
-	fromCommit = "a06ed210a99b62ad632379308c691ef7978a496a"
+	fromCommit = "511d5e02acf0e875ff1d8d9e4f9334fc36462870"
 	toRef =  "HEAD"
 	templateContent = """
 {{#tags}}

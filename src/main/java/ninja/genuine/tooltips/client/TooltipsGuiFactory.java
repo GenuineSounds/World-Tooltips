@@ -21,7 +21,6 @@ public class TooltipsGuiFactory implements IModGuiFactory {
 		return null;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public RuntimeOptionGuiHandler getHandlerFor(RuntimeOptionCategoryElement element) {
 		return null;
