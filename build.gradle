@@ -52,9 +52,9 @@ allprojects {
 }
 
 task makeChangelog(type: se.bjurr.gitchangelog.plugin.gradle.GitChangelogTask) {
-	filePath = "changelog.html"
+	filePath = "build/changelogs/changelog-${project.version}.html"
 	untaggedName = "Current release ${project.version}"
-	fromCommit = "a06ed210a99b62ad632379308c691ef7978a496a"
+	fromCommit = "511d5e02acf0e875ff1d8d9e4f9334fc36462870"
 	toRef =  "HEAD"
 	templateContent = """
 {{#tags}}
