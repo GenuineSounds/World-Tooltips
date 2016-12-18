@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import ninja.genuine.tooltips.system.Tooltip;
 
@@ -14,7 +14,7 @@ public class RenderHelper {
 	public static void renderTooltipText(Tooltip tooltip, int drawx, int drawy, int alpha) {
 		GlStateManager.pushMatrix();
 		GlStateManager.enableBlend();
-		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+		GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
 		for (int i = 0; i < tooltip.size(); i++) {
 			String s = tooltip.getLine(i);
 			if (i == 0)
@@ -47,7 +47,7 @@ public class RenderHelper {
 		GlStateManager.enableAlpha();
 		GlStateManager.alphaFunc(516, 0.1F);
 		GlStateManager.enableBlend();
-		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+		GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 
@@ -76,7 +76,7 @@ public class RenderHelper {
 		GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
 		GlStateManager.shadeModel(GL11.GL_SMOOTH);
 		Tessellator tessellator = Tessellator.getInstance();
-		VertexBuffer vertexBuffer = tessellator.getBuffer();
+		WorldRenderer vertexBuffer = tessellator.getWorldRenderer();
 		vertexBuffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
 		vertexBuffer.pos(w, y, 0.0D).color(r1, g1, b1, a1).endVertex();
 		vertexBuffer.pos(x, y, 0.0D).color(r1, g1, b1, a1).endVertex();
