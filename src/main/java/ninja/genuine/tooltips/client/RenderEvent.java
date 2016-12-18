@@ -6,9 +6,9 @@ import java.util.Objects;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -34,11 +34,11 @@ public class RenderEvent {
 
 	@SubscribeEvent
 	public void render(final RenderWorldLastEvent event) {
-		entity = getMouseOver(mc, event.getPartialTicks());
+		entity = getMouseOver(mc, event.partialTicks);
 		if (!Objects.isNull(entity)) {
 			if (Objects.isNull(cache) || cache.getEntity() != entity)
-				cache = new Tooltip(Minecraft.getMinecraft().player, entity);
-			cache.renderTooltip3D(mc, event.getPartialTicks());
+				cache = new Tooltip(Minecraft.getMinecraft().thePlayer, entity);
+			cache.renderTooltip3D(mc, event.partialTicks);
 		}
 	}
 
@@ -53,11 +53,11 @@ public class RenderEvent {
 		Entity viewer = mc.getRenderViewEntity();
 		mc.mcProfiler.startSection("world-tooltips");
 		double distanceLook = WorldTooltips.maxDistance;
-		Vec3d eyes = viewer.getPositionEyes(partialTicks);
-		Vec3d look = viewer.getLook(partialTicks);
-		Vec3d eyesLook = eyes.addVector(look.xCoord * distanceLook, look.yCoord * distanceLook, look.zCoord * distanceLook);
+		Vec3 eyes = viewer.getPositionEyes(partialTicks);
+		Vec3 look = viewer.getLook(partialTicks);
+		Vec3 eyesLook = eyes.addVector(look.xCoord * distanceLook, look.yCoord * distanceLook, look.zCoord * distanceLook);
 		float distanceMax = 1;
-		List<EntityItem> entityList = mc.world.getEntitiesWithinAABB(EntityItem.class,
+		List<EntityItem> entityList = mc.theWorld.getEntitiesWithinAABB(EntityItem.class,
 				viewer.getEntityBoundingBox().addCoord(look.xCoord * distanceLook, look.yCoord * distanceLook, look.zCoord * distanceLook).expand(distanceMax, distanceMax, distanceMax));
 		double difference = 0;
 		EntityItem target = null;
@@ -66,8 +66,8 @@ public class RenderEvent {
 			float boundSize = 0.15F;
 			AxisAlignedBB aabb1 = entity.getEntityBoundingBox();
 			AxisAlignedBB aabb2 = new AxisAlignedBB(aabb1.minX, aabb1.minY, aabb1.minZ, aabb1.maxX, aabb1.maxY, aabb1.maxZ);
-			AxisAlignedBB expandedAABB = aabb2.offset(0, 0.25, 0).expand(0.15, 0.1, 0.15).expandXyz(boundSize);
-			RayTraceResult objectInVector = expandedAABB.calculateIntercept(eyes, eyesLook);
+			AxisAlignedBB expandedAABB = aabb2.offset(0, 0.25, 0).expand(0.15, 0.1, 0.15).expand(boundSize, boundSize, boundSize);
+			MovingObjectPosition objectInVector = expandedAABB.calculateIntercept(eyes, eyesLook);
 			if (expandedAABB.isVecInside(eyes)) {
 				if (0.0D <= difference) {
 					target = entity;

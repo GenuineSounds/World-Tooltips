@@ -17,8 +17,8 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 import ninja.genuine.tooltips.WorldTooltips;
@@ -27,7 +27,7 @@ import ninja.genuine.tooltips.client.render.RenderHelper;
 public class Tooltip {
 
 	private static final Map<String, String> itemIdToModName = new HashMap<String, String>();
-	private static final Map<TextFormatting, Integer> formattingToColorCode = new HashMap<>();
+	private static final Map<EnumChatFormatting, Integer> formattingToColorCode = new HashMap<>();
 
 	public static void init() {
 		Map<String, ModContainer> modMap = Loader.instance().getIndexedModList();
@@ -36,7 +36,7 @@ public class Tooltip {
 			String modName = modEntry.getValue().getName();
 			itemIdToModName.put(lowercaseId, modName);
 		}
-		for (TextFormatting color : TextFormatting.values())
+		for (EnumChatFormatting color : EnumChatFormatting.values())
 			formattingToColorCode.put(color, Minecraft.getMinecraft().fontRendererObj.getColorCode(color.toString().replace("\u00a7", "").charAt(0)));
 	}
 
@@ -79,7 +79,7 @@ public class Tooltip {
 		return text.get(line);
 	}
 
-	public TextFormatting getRarityColor() {
+	public EnumChatFormatting getRarityColor() {
 		return entity.getEntityItem().getRarity().rarityColor;
 	}
 
@@ -87,8 +87,8 @@ public class Tooltip {
 		text = item.getTooltip(player, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
 		if (!modsAreLoaded() && !WorldTooltips.hideModName)
 			text.add(ChatFormatting.BLUE.toString() + ChatFormatting.ITALIC.toString() + getModName(item.getItem()) + ChatFormatting.RESET.toString());
-		if (item.getCount() > 1)
-			text.set(0, item.getCount() + " x " + text.get(0));
+		if (item.stackSize > 1)
+			text.set(0, item.stackSize + " x " + text.get(0));
 		int maxwidth = 0;
 		for (int line = 0; line < text.size(); line++) {
 			final int swidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(getLine(line));
@@ -106,7 +106,7 @@ public class Tooltip {
 	}
 
 	private String getModName(Item item) {
-		ResourceLocation itemResourceLocation = Item.REGISTRY.getNameForObject(item);
+		ResourceLocation itemResourceLocation = Item.itemRegistry.getNameForObject(item);
 		if (itemResourceLocation == null)
 			return null;
 		String modId = itemResourceLocation.getResourceDomain();
