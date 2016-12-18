@@ -74,8 +74,8 @@ public class WorldTooltips {
 
 	@SubscribeEvent
 	public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
-		if (event.getModID().equals(MODID)) {
-			if (event.getConfigID().equals(GUIID)) {
+		if (event.modID.equals(MODID)) {
+			if (event.configID.equals(GUIID)) {
 				boolean tmp = enabled;
 				enabled = config.get("Appearance", "enabled", true, "Enable rendering the tooltips.").getBoolean();
 				if (tmp != enabled) {
