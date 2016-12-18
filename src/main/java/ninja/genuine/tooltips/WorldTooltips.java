@@ -28,7 +28,7 @@ public class WorldTooltips {
 	public static final String VERSION = "1.2.3";
 	public static final String DESC = "Choose a color in hexidecimal (ie: 0xAB12cd or #AB12cd) \nYou can look up your favorite colors online.";
 	public static final String GUIID = "worldtooltipsgui";
-	public static int colorBackground, overrideOutlineColor;
+	public static int colorBackground, overrideOutlineColor, maxDistance;
 	public static float alpha;
 	public static boolean hideModName, overrideOutline;
 	private static boolean enabled = false;
@@ -40,8 +40,8 @@ public class WorldTooltips {
 
 	@EventHandler
 	public void pre(FMLPreInitializationEvent event) {
-		config = new Configuration(event.getSuggestedConfigurationFile());
-		enabled = config.get("Appearance", "enabled", true, "Enable rendering the tooltips.").getBoolean();
+		config = new Configuration(event.getSuggestedConfigurationFile(), VERSION);
+		enabled = config.get("Appearance", "Enable Mod", true, "Enable rendering the tooltips.").getBoolean();
 		syncConfig();
 	}
 
@@ -75,7 +75,7 @@ public class WorldTooltips {
 		if (event.modID.equals(MODID)) {
 			if (event.configID.equals(GUIID)) {
 				boolean tmp = enabled;
-				enabled = config.get("Appearance", "enabled", true, "Enable rendering the tooltips.").getBoolean();
+				enabled = config.get("Appearance", "Enable Mod", true, "Enable rendering the tooltips.").getBoolean();
 				if (tmp != enabled) {
 					if (enabled)
 						enable();
@@ -89,19 +89,20 @@ public class WorldTooltips {
 	}
 
 	private void syncConfig() {
-		hideModName = config.getBoolean("hide_mod_name", "Appearance", false, "Hide mod names on tooltips.");
+		hideModName = config.getBoolean("Hide Mod Name", "Appearance", false, "Hide mod names on tooltips.");
+		maxDistance = config.getInt("Maximum Draw Distance", "Appearance", 8, 2, 64, "Set the maximum distance that tooltips should be displayed from.");
+		overrideOutline = config.getBoolean("Override Outline", "Appearance", false, "If enabled outline color will be manually set instead of default behavior.");
+		alpha = config.getFloat("Transparency", "Appearance", 0.8F, 0.0F, 1.0F, "Set the opacity for the tooltips; 0 being completely invisible and 1 being completely opaque.");
 		try {
-			colorBackground = Integer.decode(config.get("Appearance", "background", "0x100010", DESC, Type.COLOR).getString());
+			colorBackground = Integer.decode(config.get("Appearance", "Background Color", "0x100010", DESC, Type.COLOR).getString());
 		} catch (NumberFormatException e) {
 			colorBackground = 0x100010;
 		}
-		overrideOutline = config.getBoolean("override_outline", "Appearance", false, "If enabled outline color will be override_outline_color instead of default behavior.");
 		try {
-			overrideOutlineColor = Integer.decode(config.get("Appearance", "override_outline_color", "0x5000FF", DESC, Type.COLOR).getString());
+			overrideOutlineColor = Integer.decode(config.get("Appearance", "Outline Color", "0x5000FF", DESC, Type.COLOR).getString());
 		} catch (NumberFormatException e) {
 			overrideOutlineColor = 0x5000FF;
 		}
-		alpha = config.getFloat("transparency", "Appearance", 0.85F, 0.0F, 1.0F, "Set the opacity for the tooltips; 0 being completely invisible and 1 being completely opaque.");
 		config.save();
 	}
 }
