@@ -2,9 +2,9 @@ package ninja.genuine.tooltips.client;
 
 import java.util.Set;
 
+import cpw.mods.fml.client.IModGuiFactory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraftforge.fml.client.IModGuiFactory;
 
 public class TooltipsGuiFactory implements IModGuiFactory {
 
@@ -21,7 +21,6 @@ public class TooltipsGuiFactory implements IModGuiFactory {
 		return null;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public RuntimeOptionGuiHandler getHandlerFor(RuntimeOptionCategoryElement element) {
 		return null;

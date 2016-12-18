@@ -28,7 +28,6 @@ $RECYCLE.BIN/
 # Icon must ends with two \r.
 Icon
 
-
 # Thumbnails
 ._*
 
@@ -45,5 +44,4 @@ bin
 eclipse
 build
 run
-*.launch
 *.html

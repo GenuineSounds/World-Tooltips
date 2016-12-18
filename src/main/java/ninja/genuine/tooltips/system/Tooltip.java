@@ -1,33 +1,39 @@
 package ninja.genuine.tooltips.system;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang3.text.WordUtils;
+import org.lwjgl.opengl.GL11;
 
 import com.mojang.realmsclient.gui.ChatFormatting;
 
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.ModContainer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.ModContainer;
+import net.minecraft.util.EnumChatFormatting;
 import ninja.genuine.tooltips.WorldTooltips;
 import ninja.genuine.tooltips.client.render.RenderHelper;
 
 public class Tooltip {
 
 	private static final Map<String, String> itemIdToModName = new HashMap<String, String>();
-	private static final Map<TextFormatting, Integer> formattingToColorCode = new HashMap<>();
+	private static final Map<EnumChatFormatting, Integer> formattingToColorCode = new HashMap<>();
+	private static Class<?> nei;
+	private static Method info;
+	private static boolean useNei = false;
 
 	public static void init() {
 		Map<String, ModContainer> modMap = Loader.instance().getIndexedModList();
@@ -36,8 +42,29 @@ public class Tooltip {
 			String modName = modEntry.getValue().getName();
 			itemIdToModName.put(lowercaseId, modName);
 		}
-		for (TextFormatting color : TextFormatting.values())
-			formattingToColorCode.put(color, Minecraft.getMinecraft().fontRendererObj.getColorCode(color.toString().replace("\u00a7", "").charAt(0)));
+		formattingToColorCode.put(EnumChatFormatting.BLACK, 0x000000);
+		formattingToColorCode.put(EnumChatFormatting.DARK_BLUE, 0x0000AA);
+		formattingToColorCode.put(EnumChatFormatting.DARK_GREEN, 0x00AA00);
+		formattingToColorCode.put(EnumChatFormatting.DARK_AQUA, 0x00AAAA);
+		formattingToColorCode.put(EnumChatFormatting.DARK_RED, 0xAA0000);
+		formattingToColorCode.put(EnumChatFormatting.DARK_PURPLE, 0xAA00AA);
+		formattingToColorCode.put(EnumChatFormatting.GOLD, 0xFFAA00);
+		formattingToColorCode.put(EnumChatFormatting.GRAY, 0xAAAAAA);
+		formattingToColorCode.put(EnumChatFormatting.DARK_GRAY, 0x555555);
+		formattingToColorCode.put(EnumChatFormatting.BLUE, 0x5555FF);
+		formattingToColorCode.put(EnumChatFormatting.GREEN, 0x55FF55);
+		formattingToColorCode.put(EnumChatFormatting.AQUA, 0x55FFFF);
+		formattingToColorCode.put(EnumChatFormatting.RED, 0xFF5555);
+		formattingToColorCode.put(EnumChatFormatting.LIGHT_PURPLE, 0xFF55FF);
+		formattingToColorCode.put(EnumChatFormatting.YELLOW, 0xFFFF55);
+		formattingToColorCode.put(EnumChatFormatting.WHITE, 0xFFFFFF);
+		try {
+			nei = Class.forName("codechicken.nei.guihook.GuiContainerManager");
+			if (nei != null) {
+				info = nei.getDeclaredMethod("itemDisplayNameMultiline", ItemStack.class, GuiContainer.class, boolean.class);
+				useNei = true;
+			}
+		} catch (final Exception e) {}
 	}
 
 	int colorBackground, overrideOutlineColor, alpha;
@@ -79,19 +106,25 @@ public class Tooltip {
 		return text.get(line);
 	}
 
-	public TextFormatting getRarityColor() {
+	public EnumChatFormatting getRarityColor() {
 		return entity.getEntityItem().getRarity().rarityColor;
 	}
 
+	@SuppressWarnings("unchecked")
 	private void generateTooltip(EntityPlayer player, ItemStack item) {
-		text = item.getTooltip(player, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
+		if (useNei)
+			try {
+				text = (List<String>) info.invoke(null, entity.getEntityItem(), null, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
+			} catch (final Exception e) {}
+		if (Objects.isNull(text) || text.isEmpty())
+			text = (List<String>) item.getTooltip(player, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
 		if (!modsAreLoaded() && !WorldTooltips.hideModName)
 			text.add(ChatFormatting.BLUE.toString() + ChatFormatting.ITALIC.toString() + getModName(item.getItem()) + ChatFormatting.RESET.toString());
-		if (item.getCount() > 1)
-			text.set(0, item.getCount() + " x " + text.get(0));
+		if (item.stackSize > 1)
+			text.set(0, item.stackSize + " x " + text.get(0));
 		int maxwidth = 0;
 		for (int line = 0; line < text.size(); line++) {
-			final int swidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(getLine(line));
+			final int swidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(getLine(line));
 			if (swidth > maxwidth)
 				maxwidth = swidth;
 		}
@@ -106,10 +139,8 @@ public class Tooltip {
 	}
 
 	private String getModName(Item item) {
-		ResourceLocation itemResourceLocation = Item.REGISTRY.getNameForObject(item);
-		if (itemResourceLocation == null)
-			return null;
-		String modId = itemResourceLocation.getResourceDomain();
+		String fullName = Item.itemRegistry.getNameForObject(item);
+		String modId = fullName.substring(0, fullName.indexOf(":"));
 		String lowercaseModId = modId.toLowerCase(Locale.ENGLISH);
 		String modName = itemIdToModName.get(lowercaseModId);
 		if (modName == null) {
@@ -120,51 +151,31 @@ public class Tooltip {
 	}
 
 	public void renderTooltip3D(Minecraft mc, double partialTicks) {
-		ScaledResolution sr = new ScaledResolution(mc);
+		ScaledResolution sr = new ScaledResolution(mc, mc.displayWidth, mc.displayHeight);
 		int outline1 = overrideOutline ? overrideOutlineColor : formattingToColorCode.getOrDefault(getRarityColor(), overrideOutlineColor);
 		outline1 = ((outline1 & 0xFEFEFE) >> 1) | alpha;
 		int outline2 = ((outline1 & 0xFEFEFE) >> 1) | alpha;
-		double interpX = mc.getRenderManager().viewerPosX - (getEntity().posX - (getEntity().prevPosX - getEntity().posX) * partialTicks);
-		double interpY = mc.getRenderManager().viewerPosY - (getEntity().posY - (getEntity().prevPosY - getEntity().posY) * partialTicks);
-		double interpZ = mc.getRenderManager().viewerPosZ - (getEntity().posZ - (getEntity().prevPosZ - getEntity().posZ) * partialTicks);
-		double interpDistance = Math.sqrt(interpX * interpX + interpY * interpY + interpZ * interpZ);
+		final double interpX = RenderManager.renderPosX - (entity.posX - (entity.prevPosX - entity.posX) * partialTicks);
+		final double interpY = RenderManager.renderPosY - (entity.posY - (entity.prevPosY - entity.posY) * partialTicks);
+		final double interpZ = RenderManager.renderPosZ - (entity.posZ - (entity.prevPosZ - entity.posZ) * partialTicks);
+		final double interpDistance = Math.sqrt(interpX * interpX + interpY * interpY + interpZ * interpZ);
+		RenderHelper.start();
+		GL11.glTranslated(-interpX, -(interpY - 0.55), -interpZ);
+		GL11.glRotatef(-RenderManager.instance.playerViewY + 180, 0, 1, 0);
+		GL11.glRotatef(-RenderManager.instance.playerViewX, 1, 0, 0);
 		double scale = interpDistance;
 		scale /= sr.getScaleFactor() * 160;
 		if (scale <= 0.01)
 			scale = 0.01;
-		RenderHelper.start();
-		GlStateManager.translate(-interpX, -(interpY - 0.65), -interpZ);
-		GlStateManager.rotate(-mc.getRenderManager().playerViewY + 180, 0, 1, 0);
-		GlStateManager.rotate(-mc.getRenderManager().playerViewX, 1, 0, 0);
-		GlStateManager.scale(scale, -scale, scale);
+		GL11.glScaled(scale, -scale, scale);
 		int x = -getWidth() / 2;
 		int y = -getHeight();
-		GlStateManager.disableDepth();
 		RenderHelper.renderTooltipTile(x, y, getWidth(), getHeight(), colorBackground | alpha, outline1 | alpha, outline2 | alpha);
 		RenderHelper.renderTooltipText(this, x, y, alpha);
-		GlStateManager.enableDepth();
-		GlStateManager.scale(1F / scale, 1F / -scale, 1F / scale);
-		GlStateManager.rotate(mc.getRenderManager().playerViewX, 1, 0, 0);
-		GlStateManager.rotate(mc.getRenderManager().playerViewY - 180, 0, 1, 0);
-		GlStateManager.translate(interpX, interpY - 0.65, interpZ);
+		GL11.glScaled(1F / scale, 1F / -scale, 1F / scale);
+		GL11.glRotatef(RenderManager.instance.playerViewX, 1, 0, 0);
+		GL11.glRotatef(RenderManager.instance.playerViewY - 180, 0, 1, 0);
+		GL11.glTranslated(interpX, interpY - entity.height - 0.5, interpZ);
 		RenderHelper.end();
-	}
-
-	public void renderTooltip2D(Minecraft mc, double partialTicks) {
-		ScaledResolution sr = new ScaledResolution(mc);
-		int outline1 = formattingToColorCode.getOrDefault(getRarityColor(), overrideOutlineColor);
-		outline1 = ((outline1 & 0xFEFEFE) >> 1) | alpha;
-		int outline2 = ((outline1 & 0xFEFEFE) >> 1) | alpha;
-		GlStateManager.pushMatrix();
-		GlStateManager.pushAttrib();
-		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-		GlStateManager.translate(50 * sr.getScaleFactor(), 0, 50 * sr.getScaleFactor());
-		int x = getWidth() / 2;
-		int y = getHeight();
-		RenderHelper.renderTooltipTile(x, y, getWidth(), getHeight(), colorBackground | alpha, outline1 | alpha, outline2 | alpha);
-		RenderHelper.renderTooltipText(this, x, y, alpha);
-		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-		GlStateManager.popAttrib();
-		GlStateManager.popMatrix();
 	}
 }
