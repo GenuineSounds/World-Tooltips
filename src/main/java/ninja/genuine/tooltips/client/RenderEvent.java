@@ -12,6 +12,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import ninja.genuine.tooltips.WorldTooltips;
 import ninja.genuine.tooltips.system.Tooltip;
 
 public class RenderEvent {
@@ -51,7 +52,7 @@ public class RenderEvent {
 	public static EntityItem getMouseOver(Minecraft mc, float partialTicks) {
 		Entity viewer = mc.getRenderViewEntity();
 		mc.mcProfiler.startSection("world-tooltips");
-		double distanceLook = 32;
+		double distanceLook = WorldTooltips.maxDistance;
 		Vec3d eyes = viewer.getPositionEyes(partialTicks);
 		Vec3d look = viewer.getLook(partialTicks);
 		Vec3d eyesLook = eyes.addVector(look.xCoord * distanceLook, look.yCoord * distanceLook, look.zCoord * distanceLook);
