@@ -56,9 +56,4 @@ task sourceJar(type: Jar, dependsOn: 'sourceMainJava') {
 	classifier = 'src'
 }
 
-task javadocJar(type: Jar, dependsOn: 'javadoc') {
-	from javadoc.destinationDir
-	classifier = 'javadoc'
-}
-
 tasks.build.dependsOn deobfJar, sourceJar
