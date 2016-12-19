@@ -68,14 +68,4 @@ task makeChangelog(type: se.bjurr.gitchangelog.plugin.gradle.GitChangelogTask) {
 """
 }
 
-task deobfJar(type: Jar, dependsOn: 'classes') {
-	from sourceSets.main.output
-	classifier = 'dev'
-}
-
-task javadocJar(type: Jar, dependsOn: 'javadoc') {
-	from javadoc.destinationDir
-	classifier = 'javadoc'
-}
-
-tasks.build.dependsOn makeChangelog, deobfJar, sourceJar
+tasks.build.dependsOn makeChangelog, sourceJar
