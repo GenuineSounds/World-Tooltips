@@ -43,14 +43,4 @@ processResources {
 	}
 }
 
-task deobfJar(type: Jar, dependsOn: 'classes') {
-	from sourceSets.main.output
-	classifier = 'dev'
-}
-
-task javadocJar(type: Jar, dependsOn: 'javadoc') {
-	from javadoc.destinationDir
-	classifier = 'javadoc'
-}
-
-tasks.build.dependsOn deobfJar, sourceJar
+tasks.build.dependsOn sourceJar
