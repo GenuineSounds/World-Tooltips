@@ -37,7 +37,7 @@ public class RenderEvent {
 		entity = getMouseOver(mc, event.getPartialTicks());
 		if (!Objects.isNull(entity)) {
 			if (Objects.isNull(cache) || cache.getEntity() != entity)
-				cache = new Tooltip(Minecraft.getMinecraft().player, entity);
+				cache = new Tooltip(Minecraft.getMinecraft().thePlayer, entity);
 			cache.renderTooltip3D(mc, event.getPartialTicks());
 		}
 	}
@@ -57,7 +57,7 @@ public class RenderEvent {
 		Vec3d look = viewer.getLook(partialTicks);
 		Vec3d eyesLook = eyes.addVector(look.xCoord * distanceLook, look.yCoord * distanceLook, look.zCoord * distanceLook);
 		float distanceMax = 1;
-		List<EntityItem> entityList = mc.world.getEntitiesWithinAABB(EntityItem.class,
+		List<EntityItem> entityList = mc.theWorld.getEntitiesWithinAABB(EntityItem.class,
 				viewer.getEntityBoundingBox().addCoord(look.xCoord * distanceLook, look.yCoord * distanceLook, look.zCoord * distanceLook).expand(distanceMax, distanceMax, distanceMax));
 		double difference = 0;
 		EntityItem target = null;
