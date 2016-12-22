@@ -23,9 +23,9 @@ version = "1.11-1.2.3-${revision}"
 sourceCompatibility = targetCompatibility = "1.8"
 
 minecraft {
-	version = "1.11-13.19.1.2189"
+	version = "1.11-13.19.1.2198"
 	runDir = "run"
-	mappings = "snapshot_20161217"
+	mappings = "snapshot_20161221"
 }
 
 dependencies {

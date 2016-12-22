@@ -27,9 +27,9 @@ public class RenderEvent {
 		mc = Minecraft.getMinecraft();
 	}
 
-	public void syncColors() {
+	public void sync() {
 		if (!Objects.isNull(cache))
-			cache.syncSettings();
+			cache.sync();
 	}
 
 	@SubscribeEvent
@@ -52,7 +52,7 @@ public class RenderEvent {
 	public static EntityItem getMouseOver(Minecraft mc, float partialTicks) {
 		Entity viewer = mc.getRenderViewEntity();
 		mc.mcProfiler.startSection("world-tooltips");
-		double distanceLook = WorldTooltips.maxDistance;
+		double distanceLook = WorldTooltips.instance.maxDistance;
 		Vec3d eyes = viewer.getPositionEyes(partialTicks);
 		Vec3d look = viewer.getLook(partialTicks);
 		Vec3d eyesLook = eyes.addVector(look.xCoord * distanceLook, look.yCoord * distanceLook, look.zCoord * distanceLook);

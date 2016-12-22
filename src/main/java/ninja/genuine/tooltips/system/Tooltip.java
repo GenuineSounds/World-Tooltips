@@ -48,15 +48,17 @@ public class Tooltip {
 
 	public Tooltip(EntityPlayer player, EntityItem entity) {
 		this.entity = entity;
-		syncSettings();
+		sync();
 		generateTooltip(player, entity.getEntityItem());
 	}
 
-	public void syncSettings() {
-		overrideOutline = WorldTooltips.overrideOutline;
-		alpha = ((int) (WorldTooltips.alpha * 255) & 0xFF) << 24;
-		colorBackground = WorldTooltips.colorBackground & 0xFFFFFF;
-		overrideOutlineColor = WorldTooltips.overrideOutlineColor & 0xFFFFFF;
+	public void sync() {
+		overrideOutline = WorldTooltips.instance.overrideOutline;
+		alpha = ((int) (WorldTooltips.instance.alpha * 255) & 0xFF) << 24;
+		colorBackground = Integer.decode(WorldTooltips.instance.colorBackground.getString());
+		colorBackground &= 0xFFFFFF;
+		overrideOutlineColor = Integer.decode(WorldTooltips.instance.overrideOutlineColor.getString());
+		overrideOutlineColor &= 0xFFFFFF;
 	}
 
 	public int getWidth() {
@@ -85,7 +87,7 @@ public class Tooltip {
 
 	private void generateTooltip(EntityPlayer player, ItemStack item) {
 		text = item.getTooltip(player, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
-		if (!modsAreLoaded() && !WorldTooltips.hideModName)
+		if (!modsAreLoaded() && !WorldTooltips.instance.hideModName)
 			text.add(ChatFormatting.BLUE.toString() + ChatFormatting.ITALIC.toString() + getModName(item.getItem()) + ChatFormatting.RESET.toString());
 		if (item.getCount() > 1)
 			text.set(0, item.getCount() + " x " + text.get(0));
@@ -122,7 +124,8 @@ public class Tooltip {
 	public void renderTooltip3D(Minecraft mc, double partialTicks) {
 		ScaledResolution sr = new ScaledResolution(mc);
 		int outline1 = overrideOutline ? overrideOutlineColor : formattingToColorCode.getOrDefault(getRarityColor(), overrideOutlineColor);
-		outline1 = ((outline1 & 0xFEFEFE) >> 1) | alpha;
+		if (!WorldTooltips.instance.overrideOutline)
+			outline1 = ((outline1 & 0xFEFEFE) >> 1) | alpha;
 		int outline2 = ((outline1 & 0xFEFEFE) >> 1) | alpha;
 		double interpX = mc.getRenderManager().viewerPosX - (getEntity().posX - (getEntity().prevPosX - getEntity().posX) * partialTicks);
 		double interpY = mc.getRenderManager().viewerPosY - (getEntity().posY - (getEntity().prevPosY - getEntity().posY) * partialTicks);
