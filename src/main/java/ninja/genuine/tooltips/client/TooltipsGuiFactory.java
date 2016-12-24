@@ -5,6 +5,7 @@ import java.util.Set;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.fml.client.IModGuiFactory;
+import ninja.genuine.tooltips.client.gui.GuiConfigTooltips;
 
 public class TooltipsGuiFactory implements IModGuiFactory {
 
@@ -13,7 +14,7 @@ public class TooltipsGuiFactory implements IModGuiFactory {
 
 	@Override
 	public Class<? extends GuiScreen> mainConfigGuiClass() {
-		return TooltipsConfigGUI.class;
+		return GuiConfigTooltips.class;
 	}
 
 	@Override

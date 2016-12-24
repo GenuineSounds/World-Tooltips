@@ -17,15 +17,17 @@ import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Property;
+import ninja.genuine.tooltips.Constants;
 import ninja.genuine.tooltips.WorldTooltips;
 
 public class ColorPicker extends GuiScreen {
 
-	static final ResourceLocation COLOR_STRIP = new ResourceLocation(WorldTooltips.MODID, "gui/color-strip.png");
-	final GuiScreen parent;
-	final Property prop;
-	IntBuffer colorBuffer = BufferUtils.createIntBuffer(4);
-	int selectedHue, selectedColor, pickerX = 20, pickerY = 50, hueWidth = 8, pickerWidth = 100, pickerHeight = 100;
+	private static final ResourceLocation COLOR_STRIP = new ResourceLocation(Constants.MODID, "gui/color-strip.png");
+	private GuiScreen parent;
+	private Property prop;
+	private IntBuffer colorBuffer = BufferUtils.createIntBuffer(4);
+	private int selectedHue, selectedColor;
+	private int pickerX = 20, pickerY = 50, hueWidth = 8, pickerWidth = 100, pickerHeight = 100;
 
 	public ColorPicker(GuiScreen parent, Property prop) {
 		this.parent = parent;
@@ -52,7 +54,6 @@ public class ColorPicker extends GuiScreen {
 		else if (button.id == 1) {
 			prop.set("0x" + Integer.toHexString(selectedColor).toUpperCase());
 			WorldTooltips.instance.sync();
-			WorldTooltips.instance.events.sync();
 			mc.displayGuiScreen(parent);
 		}
 	}
@@ -60,19 +61,20 @@ public class ColorPicker extends GuiScreen {
 	@Override
 	public void initGui() {
 		ScaledResolution sr = new ScaledResolution(mc);
-		addButton(new GuiButton(0, sr.getScaledWidth() / 2 - 104, sr.getScaledHeight() - 35, "Back"));
-		addButton(new GuiButton(1, sr.getScaledWidth() / 2 - 104, sr.getScaledHeight() - 60, "Done"));
+		addButton(new GuiButton(0, sr.getScaledWidth() / 2 - 100, sr.getScaledHeight() - 30, "Back"));
+		addButton(new GuiButton(1, sr.getScaledWidth() / 2 - 100, sr.getScaledHeight() - 55, "Done"));
+		pickerX = sr.getScaledWidth() / 2 - 110;
+		pickerY = sr.getScaledHeight() / 2 - 80;
 	}
 
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		drawDefaultBackground();
-		ScaledResolution sr = new ScaledResolution(mc);
-		pickerX = sr.getScaledWidth() / 2 - 110;
 		drawGradientRect(pickerX - 1, pickerY - 1, pickerX + pickerWidth * 2 + hueWidth + 3, pickerY + pickerHeight + 1, 0xFF404040, 0xFF404040);
 		drawHueBar(pickerX, pickerY, hueWidth, pickerHeight);
 		drawColorGradient(pickerX + hueWidth + 1, pickerY, pickerWidth, pickerHeight);
 		drawGradientRect(pickerX + pickerWidth + hueWidth + 2, pickerY, pickerX + pickerWidth * 2 + hueWidth + 2, pickerY + pickerHeight, selectedColor | 0xFF << 24, selectedColor | 0xFF << 24);
+		this.fontRendererObj.drawString("Pick a color", pickerX, pickerY - 20, 0xFFFFFFFF);
 		super.drawScreen(mouseX, mouseY, partialTicks);
 	}
 
@@ -91,7 +93,6 @@ public class ColorPicker extends GuiScreen {
 				selectedHue = tmp & 0xFFFFFF;
 			else if (mouseX >= pickerX + hueWidth + 1 && mouseY >= pickerY && mouseX < pickerX + pickerWidth + hueWidth && mouseY < pickerY + pickerHeight)
 				selectedColor = tmp & 0xFFFFFF;
-			System.out.println(Integer.toHexString(selectedHue));
 			colorBuffer.clear();
 		}
 	}

@@ -16,7 +16,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 
 archivesBaseName = "World-Tooltips"
 
-group = "ninja.genuine.world-tooltips"
+group = "ninja.genuine.tooltips"
 ext.revision = 'git rev-list --count HEAD'.execute().text.trim()
 version = "1.11-1.2.3-${revision}"
 

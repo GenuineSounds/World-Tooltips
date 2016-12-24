@@ -7,7 +7,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import ninja.genuine.tooltips.system.Tooltip;
+import ninja.genuine.tooltips.client.Tooltip;
 
 public class RenderHelper {
 
@@ -40,7 +40,7 @@ public class RenderHelper {
 		RenderHelper.drawGradientRect(x - 3, y + h + 2, w + 6, 1, colorSecondary, colorSecondary);
 	}
 
-	public static void start() {
+	public static void start3D() {
 		GlStateManager.pushMatrix();
 		GlStateManager.pushAttrib();
 		GlStateManager.enableRescaleNormal();
@@ -51,7 +51,7 @@ public class RenderHelper {
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 	}
 
-	public static void end() {
+	public static void end3D() {
 		GlStateManager.disableAlpha();
 		GlStateManager.disableRescaleNormal();
 		GlStateManager.disableLighting();
