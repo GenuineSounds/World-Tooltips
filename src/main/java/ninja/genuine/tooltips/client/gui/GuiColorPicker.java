@@ -10,34 +10,33 @@ import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.config.Property;
 import ninja.genuine.tooltips.Constants;
-import ninja.genuine.tooltips.WorldTooltips;
 
-public class ColorPicker extends GuiScreen {
+public class GuiColorPicker extends GuiScreen {
 
 	private static final ResourceLocation COLOR_STRIP = new ResourceLocation(Constants.MODID, "gui/color-strip.png");
 	private GuiScreen parent;
-	private Property prop;
+	private GuiTextField text;
 	private IntBuffer colorBuffer = BufferUtils.createIntBuffer(4);
 	private int selectedHue, selectedColor;
 	private int pickerX = 20, pickerY = 50, hueWidth = 8, pickerWidth = 100, pickerHeight = 100;
 
-	public ColorPicker(GuiScreen parent, Property prop) {
+	public GuiColorPicker(GuiScreen parent, GuiTextField text, String defaultText) {
 		this.parent = parent;
-		this.prop = prop;
+		this.text = text;
 		try {
-			selectedColor = Integer.decode(prop.getString());
-		} catch (NumberFormatException e1) {
+			selectedColor = Integer.decode(text.getText());
+		} catch (NumberFormatException e) {
 			try {
-				selectedColor = Integer.decode(prop.getDefault());
-			} catch (NumberFormatException e2) {
+				selectedColor = Integer.decode(defaultText);
+			} catch (NumberFormatException e1) {
 				selectedColor = 0x00FF00;
 			}
 		}
@@ -52,8 +51,7 @@ public class ColorPicker extends GuiScreen {
 		if (button.id == 0)
 			mc.displayGuiScreen(parent);
 		else if (button.id == 1) {
-			prop.set("0x" + Integer.toHexString(selectedColor).toUpperCase());
-			WorldTooltips.instance.sync();
+			text.setText("0x" + Integer.toHexString(selectedColor).toUpperCase());
 			mc.displayGuiScreen(parent);
 		}
 	}
@@ -65,6 +63,7 @@ public class ColorPicker extends GuiScreen {
 		addButton(new GuiButton(1, sr.getScaledWidth() / 2 - 100, sr.getScaledHeight() - 55, "Done"));
 		pickerX = sr.getScaledWidth() / 2 - 110;
 		pickerY = sr.getScaledHeight() / 2 - 80;
+		System.out.println(parent.getClass());
 	}
 
 	@Override
@@ -74,7 +73,7 @@ public class ColorPicker extends GuiScreen {
 		drawHueBar(pickerX, pickerY, hueWidth, pickerHeight);
 		drawColorGradient(pickerX + hueWidth + 1, pickerY, pickerWidth, pickerHeight);
 		drawGradientRect(pickerX + pickerWidth + hueWidth + 2, pickerY, pickerX + pickerWidth * 2 + hueWidth + 2, pickerY + pickerHeight, selectedColor | 0xFF << 24, selectedColor | 0xFF << 24);
-		this.fontRendererObj.drawString("Pick a color", pickerX, pickerY - 20, 0xFFFFFFFF);
+		fontRendererObj.drawString("Pick a color", pickerX, pickerY - 20, 0xFFFFFFFF);
 		super.drawScreen(mouseX, mouseY, partialTicks);
 	}
 

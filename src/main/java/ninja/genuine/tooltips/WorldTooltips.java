@@ -4,6 +4,8 @@ import java.util.Objects;
 
 import org.lwjgl.input.Keyboard;
 
+import com.mojang.realmsclient.dto.WorldDownload;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.common.MinecraftForge;
@@ -19,8 +21,9 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerChangedDimensionEvent;
 import ninja.genuine.tooltips.client.RenderEvent;
-import ninja.genuine.tooltips.client.gui.ColorConfigGui;
+import ninja.genuine.tooltips.client.gui.GuiColorConfig;
 import ninja.genuine.utils.ModUtils;
 
 @Mod(modid = Constants.MODID, name = Constants.NAME, version = Constants.VERSION, canBeDeactivated = true, clientSideOnly = true, updateJSON = Constants.URL
@@ -64,7 +67,14 @@ public class WorldTooltips {
 	@SubscribeEvent
 	public void keypress(KeyInputEvent event) {
 		if (configKey.isPressed())
-			Minecraft.getMinecraft().displayGuiScreen(new ColorConfigGui(Minecraft.getMinecraft().currentScreen));
+			Minecraft.getMinecraft().displayGuiScreen(new GuiColorConfig(Minecraft.getMinecraft().currentScreen));
+	}
+
+	@EventHandler
+	public void eventChange(PlayerChangedDimensionEvent event) {
+		System.out.println(event.fromDim);
+		System.out.println(event.toDim);
+		WorldDownload wd;
 	}
 
 	@SubscribeEvent

@@ -10,13 +10,14 @@ import net.minecraft.client.gui.ScaledResolution;
 import ninja.genuine.tooltips.Config;
 import ninja.genuine.tooltips.WorldTooltips;
 
-public class ColorConfigGui extends GuiScreen {
+public class GuiColorConfig extends GuiScreen {
 
 	private GuiScreen parent;
 	private GuiTextField textboxOutline, textboxBackground;
+	private GuiColorButton outlineButton, backgroundButton;
 	private String strOutlineOrig, strBackgroundOrig;
 
-	public ColorConfigGui(GuiScreen parent) {
+	public GuiColorConfig(GuiScreen parent) {
 		this.parent = parent;
 	}
 
@@ -35,8 +36,8 @@ public class ColorConfigGui extends GuiScreen {
 		textboxBackground.setValidator((input) -> Pattern.compile("(0[x#])?[0-9a-fA-F]{0,8}").asPredicate().test(input));
 		GuiButton back = new GuiButton(0, sr.getScaledWidth() / 2 - 100, sr.getScaledHeight() - 30, 200, 20, "Back");
 		GuiButton done = new GuiButton(1, sr.getScaledWidth() / 2 - 100, sr.getScaledHeight() - 55, 200, 20, "Done");
-		ColorButton outlineButton = new ColorButton(5, sr.getScaledWidth() / 2 + 130, sr.getScaledHeight() / 2 - 80, Config.getInstance().getOutline());
-		ColorButton backgroundButton = new ColorButton(6, sr.getScaledWidth() / 2 + 130, sr.getScaledHeight() / 2 - 50, Config.getInstance().getBackground());
+		outlineButton = new GuiColorButton(5, sr.getScaledWidth() / 2 + 130, sr.getScaledHeight() / 2 - 80, Config.getInstance().getOutline());
+		backgroundButton = new GuiColorButton(6, sr.getScaledWidth() / 2 + 130, sr.getScaledHeight() / 2 - 50, Config.getInstance().getBackground());
 		addButton(outlineButton);
 		addButton(backgroundButton);
 		addButton(done);
@@ -45,6 +46,9 @@ public class ColorConfigGui extends GuiScreen {
 
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		outlineButton.update(textboxOutline.getText());
+		backgroundButton.update(textboxBackground.getText());
+		sync();
 		drawDefaultBackground();
 		ScaledResolution sr = new ScaledResolution(mc);
 		fontRendererObj.drawString(Config.getInstance().getOutline().getName(), sr.getScaledWidth() / 2 - 140, sr.getScaledHeight() / 2 - 75, 0xFFFFFFFF);
@@ -56,17 +60,17 @@ public class ColorConfigGui extends GuiScreen {
 	}
 
 	@Override
+	public void updateScreen() {
+		super.updateScreen();
+		textboxOutline.updateCursorCounter();
+		textboxBackground.updateCursorCounter();
+	}
+
+	@Override
 	protected void keyTyped(char typedChar, int keyCode) throws IOException {
 		super.keyTyped(typedChar, keyCode);
 		textboxOutline.textboxKeyTyped(typedChar, keyCode);
 		textboxBackground.textboxKeyTyped(typedChar, keyCode);
-		try {
-			Config.getInstance().getOutline().set(textboxOutline.getText());
-		} catch (Exception e) {}
-		try {
-			Config.getInstance().getBackground().set(textboxBackground.getText());
-		} catch (Exception e) {}
-		WorldTooltips.instance.sync();
 	}
 
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
@@ -75,23 +79,35 @@ public class ColorConfigGui extends GuiScreen {
 		textboxBackground.mouseClicked(mouseX, mouseY, mouseButton);
 	}
 
+	private void sync() {
+		try {
+			Config.getInstance().getOutline().set(textboxOutline.getText());
+		} catch (Exception e) {}
+		try {
+			Config.getInstance().getBackground().set(textboxBackground.getText());
+		} catch (Exception e) {}
+		outlineButton.update(textboxOutline.getText());
+		backgroundButton.update(textboxBackground.getText());
+		WorldTooltips.instance.sync();
+	}
+
 	@Override
 	protected void actionPerformed(GuiButton button) throws IOException {
-		super.actionPerformed(button);
-		if (button.id <= 1) {
-			mc.displayGuiScreen(this.parent);
-			if (button.id == 0) {
-				try {
-					Config.getInstance().getOutline().set(strOutlineOrig);
-				} catch (Exception e) {}
-				try {
-					Config.getInstance().getBackground().set(strBackgroundOrig);
-				} catch (Exception e) {}
-			}
+		if (button.id == 0) {
+			try {
+				Config.getInstance().getOutline().set(strOutlineOrig);
+			} catch (Exception e) {}
+			try {
+				Config.getInstance().getBackground().set(strBackgroundOrig);
+			} catch (Exception e) {}
 			WorldTooltips.instance.sync();
+			mc.displayGuiScreen(this.parent);
+		} else if (button.id == 1) {
+			sync();
+			mc.displayGuiScreen(this.parent);
 		} else if (button.id == 5)
-			this.mc.displayGuiScreen(new ColorPicker(this, Config.getInstance().getOutline()));
+			mc.displayGuiScreen(new GuiColorPicker(this, textboxOutline, strOutlineOrig));
 		else if (button.id == 6)
-			this.mc.displayGuiScreen(new ColorPicker(this, Config.getInstance().getBackground()));
+			mc.displayGuiScreen(new GuiColorPicker(this, textboxBackground, strBackgroundOrig));
 	}
 }

@@ -20,8 +20,8 @@ import ninja.genuine.utils.ModUtils;
 
 public class Tooltip {
 
-	private int colorBG, colorOL, alpha;
 	private int width, height;
+	private int alpha;
 	private EntityItem entity;
 	private List<String> text = new ArrayList<>();
 
@@ -34,8 +34,6 @@ public class Tooltip {
 
 	public void sync() {
 		alpha = ((int) (Config.getInstance().getOpacity() * 255) & 0xFF) << 24;
-		colorBG = Config.getInstance().getBackgroundColor();
-		colorOL = Config.getInstance().getOutlineColor();
 	}
 
 	private void generateTooltip(EntityPlayer player, ItemStack item) {
@@ -82,7 +80,7 @@ public class Tooltip {
 		int x = -getWidth() / 2;
 		int y = -getHeight();
 		GlStateManager.disableDepth();
-		RenderHelper.renderTooltipTile(x, y, getWidth(), getHeight(), colorBG | alpha, outline.getFirst() | alpha, outline.getSecond() | alpha);
+		RenderHelper.renderTooltipTile(x, y, getWidth(), getHeight(), Config.getInstance().getBackgroundColor() | alpha, outline.getFirst() | alpha, outline.getSecond() | alpha);
 		RenderHelper.renderTooltipText(this, x, y, alpha);
 		GlStateManager.enableDepth();
 		GlStateManager.scale(1 / scale, 1 / -scale, 1 / scale);
@@ -94,14 +92,14 @@ public class Tooltip {
 
 	public void renderTooltip2D(Minecraft mc, double partialTicks) {
 		ScaledResolution sr = new ScaledResolution(mc);
+		Tuple<Integer, Integer> outline = setupColors();
 		int x = getWidth() / 2;
 		int y = getHeight();
-		Tuple<Integer, Integer> outline = setupColors();
 		GlStateManager.pushMatrix();
 		GlStateManager.pushAttrib();
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		GlStateManager.translate(50 * sr.getScaleFactor(), 0, 50 * sr.getScaleFactor());
-		RenderHelper.renderTooltipTile(x, y, getWidth(), getHeight(), colorBG | alpha, outline.getFirst() | alpha, outline.getSecond() | alpha);
+		RenderHelper.renderTooltipTile(x, y, getWidth(), getHeight(), Config.getInstance().getBackgroundColor() | alpha, outline.getFirst() | alpha, outline.getSecond() | alpha);
 		RenderHelper.renderTooltipText(this, x, y, alpha);
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		GlStateManager.popAttrib();
@@ -109,8 +107,8 @@ public class Tooltip {
 	}
 
 	private Tuple<Integer, Integer> setupColors() {
-		int o1 = Config.getInstance().isOverridingOutline() ? ModUtils.formatting_color.getOrDefault(getRarityColor(), colorOL) : (colorOL & 0xFEFEFE) >> 1;
-		return new Tuple<>(o1, (o1 & 0xFEFEFE) >> 1);
+		int i = Config.getInstance().isOverridingOutline() ? Config.getInstance().getOutlineColor() : (ModUtils.formatting_color.getOrDefault(getRarityColor(), Config.getInstance().getOutlineColor()) & 0xFEFEFE) >> 1;
+		return new Tuple<>(i, (i & 0xFEFEFE) >> 1);
 	}
 
 	public int getWidth() {
