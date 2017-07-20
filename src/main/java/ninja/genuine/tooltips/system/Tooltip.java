@@ -1,5 +1,8 @@
 package ninja.genuine.tooltips.system;
 
+import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.ADVANCED;
+import static net.minecraft.client.util.ITooltipFlag.TooltipFlags.NORMAL;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +40,7 @@ public class Tooltip {
 			itemIdToModName.put(lowercaseId, modName);
 		}
 		for (TextFormatting color : TextFormatting.values())
-			formattingToColorCode.put(color, Minecraft.getMinecraft().fontRendererObj.getColorCode(color.toString().replace("\u00a7", "").charAt(0)));
+			formattingToColorCode.put(color, Minecraft.getMinecraft().fontRenderer.getColorCode(color.toString().replace("\u00a7", "").charAt(0)));
 	}
 
 	int colorBackground, overrideOutlineColor, alpha;
@@ -49,7 +52,7 @@ public class Tooltip {
 	public Tooltip(EntityPlayer player, EntityItem entity) {
 		this.entity = entity;
 		syncSettings();
-		generateTooltip(player, entity.getEntityItem());
+		generateTooltip(player, entity.getItem());
 	}
 
 	public void syncSettings() {
@@ -80,18 +83,18 @@ public class Tooltip {
 	}
 
 	public TextFormatting getRarityColor() {
-		return entity.getEntityItem().getRarity().rarityColor;
+		return entity.getItem().getRarity().rarityColor;
 	}
 
 	private void generateTooltip(EntityPlayer player, ItemStack item) {
-		text = item.getTooltip(player, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
+		text = item.getTooltip(player, Minecraft.getMinecraft().gameSettings.advancedItemTooltips ? ADVANCED : NORMAL);
 		if (!modsAreLoaded() && !WorldTooltips.hideModName)
 			text.add(ChatFormatting.BLUE.toString() + ChatFormatting.ITALIC.toString() + getModName(item.getItem()) + ChatFormatting.RESET.toString());
-		if (item.stackSize > 1)
-			text.set(0, item.stackSize + " x " + text.get(0));
+		if (item.getCount() > 1)
+			text.set(0, item.getCount() + " x " + text.get(0));
 		int maxwidth = 0;
 		for (int line = 0; line < text.size(); line++) {
-			final int swidth = Minecraft.getMinecraft().fontRendererObj.getStringWidth(getLine(line));
+			final int swidth = Minecraft.getMinecraft().fontRenderer.getStringWidth(getLine(line));
 			if (swidth > maxwidth)
 				maxwidth = swidth;
 		}

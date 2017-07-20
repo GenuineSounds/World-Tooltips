@@ -12,18 +12,17 @@ public class TooltipsGuiFactory implements IModGuiFactory {
 	public void initialize(Minecraft minecraftInstance) {}
 
 	@Override
-	public Class<? extends GuiScreen> mainConfigGuiClass() {
-		return TooltipsConfigGUI.class;
-	}
-
-	@Override
 	public Set<RuntimeOptionCategoryElement> runtimeGuiCategories() {
 		return null;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
-	public RuntimeOptionGuiHandler getHandlerFor(RuntimeOptionCategoryElement element) {
-		return null;
+	public boolean hasConfigGui() {
+		return true;
+	}
+
+	@Override
+	public GuiScreen createConfigGui(GuiScreen parentScreen) {
+		return new TooltipsConfigGUI(parentScreen);
 	}
 }

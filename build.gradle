@@ -18,14 +18,17 @@ archivesBaseName = "World-Tooltips"
 
 group = "ninja.genuine.world-tooltips"
 ext.revision = 'git rev-list --count HEAD'.execute().text.trim()
-version = "1.10.2-1.2.3-${revision}"
+version = "1.12-1.2.3-${revision}"
 
 sourceCompatibility = targetCompatibility = "1.8"
+compileJava {
+    sourceCompatibility = targetCompatibility = '1.8'
+}
 
 minecraft {
-	version = "1.10.2-12.18.3.2185"
+	version = "1.12-14.21.1.2387"
 	runDir = "run"
-	mappings = "snapshot_20161111"
+	mappings = "snapshot_20170624"
 }
 
 dependencies {

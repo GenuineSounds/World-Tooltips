@@ -4,7 +4,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property.Type;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -16,8 +15,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import ninja.genuine.tooltips.client.RenderEvent;
 import ninja.genuine.tooltips.system.Tooltip;
 
-@Mod(modid = WorldTooltips.MODID, name = WorldTooltips.NAME, version = WorldTooltips.VERSION, canBeDeactivated = true, clientSideOnly = true, updateJSON = WorldTooltips.URL
-		+ "update.json", useMetadata = true, guiFactory = "ninja.genuine.tooltips.client.TooltipsGuiFactory")
+@Mod(modid = WorldTooltips.MODID, name = WorldTooltips.NAME, version = WorldTooltips.VERSION, canBeDeactivated = true, clientSideOnly = true, updateJSON = WorldTooltips.URL + "update.json", useMetadata = true, guiFactory = "ninja.genuine.tooltips.client.TooltipsGuiFactory")
 public class WorldTooltips {
 
 	@Instance(WorldTooltips.MODID)
@@ -46,14 +44,13 @@ public class WorldTooltips {
 		syncConfig();
 	}
 
-	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
 		events = new RenderEvent();
 		Tooltip.init();
 		if (enabled)
 			enable();
-		FMLCommonHandler.instance().bus().register(this);
+		MinecraftForge.EVENT_BUS.register(this);
 	}
 
 	@EventHandler
