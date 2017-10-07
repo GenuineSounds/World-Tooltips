@@ -34,11 +34,8 @@ public class Tooltip {
 
 	public static void init() {
 		Map<String, ModContainer> modMap = Loader.instance().getIndexedModList();
-		for (Map.Entry<String, ModContainer> modEntry : modMap.entrySet()) {
-			String lowercaseId = modEntry.getKey().toLowerCase(Locale.ENGLISH);
-			String modName = modEntry.getValue().getName();
-			itemIdToModName.put(lowercaseId, modName);
-		}
+		for (Map.Entry<String, ModContainer> modEntry : modMap.entrySet())
+			itemIdToModName.put(modEntry.getKey().toLowerCase(Locale.ENGLISH), modEntry.getValue().getName());
 		for (TextFormatting color : TextFormatting.values())
 			formattingToColorCode.put(color, Minecraft.getMinecraft().fontRenderer.getColorCode(color.toString().replace("\u00a7", "").charAt(0)));
 	}
