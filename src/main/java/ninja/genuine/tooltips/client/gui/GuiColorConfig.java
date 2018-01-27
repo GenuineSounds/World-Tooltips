@@ -25,12 +25,12 @@ public class GuiColorConfig extends GuiScreen {
 	public void initGui() {
 		ScaledResolution sr = new ScaledResolution(mc);
 		strOutlineOrig = Config.getInstance().getOutline().getString();
-		textboxOutline = new GuiTextField(10, mc.fontRendererObj, sr.getScaledWidth() / 2 + 50, sr.getScaledHeight() / 2 - 80, 100, 20);
+		textboxOutline = new GuiTextField(10, mc.fontRenderer, sr.getScaledWidth() / 2 + 50, sr.getScaledHeight() / 2 - 80, 100, 20);
 		textboxOutline.setText(Config.getInstance().getOutline().getString());
 		textboxOutline.setMaxStringLength(10);
 		textboxOutline.setValidator((input) -> Pattern.compile("(0[x#])?[0-9a-fA-F]{0,8}").asPredicate().test(input));
 		strBackgroundOrig = Config.getInstance().getBackground().getString();
-		textboxBackground = new GuiTextField(10, mc.fontRendererObj, sr.getScaledWidth() / 2 + 50, sr.getScaledHeight() / 2 - 50, 100, 20);
+		textboxBackground = new GuiTextField(10, mc.fontRenderer, sr.getScaledWidth() / 2 + 50, sr.getScaledHeight() / 2 - 50, 100, 20);
 		textboxBackground.setText(Config.getInstance().getBackground().getString());
 		textboxBackground.setMaxStringLength(10);
 		textboxBackground.setValidator((input) -> Pattern.compile("(0[x#])?[0-9a-fA-F]{0,8}").asPredicate().test(input));
@@ -51,9 +51,9 @@ public class GuiColorConfig extends GuiScreen {
 		sync();
 		drawDefaultBackground();
 		ScaledResolution sr = new ScaledResolution(mc);
-		fontRendererObj.drawString(Config.getInstance().getOutline().getName(), sr.getScaledWidth() / 2 - 140, sr.getScaledHeight() / 2 - 75, 0xFFFFFFFF);
-		fontRendererObj.drawString(Config.getInstance().getBackground().getName(), sr.getScaledWidth() / 2 - 140, sr.getScaledHeight() / 2 - 45, 0xFFFFFFFF);
-		fontRendererObj.drawSplitString("Remember, you must select 'Override Outline Color' to display this outline color instead of rarity color.", sr.getScaledWidth() / 2 - 140, sr.getScaledHeight() / 2 + 0, 300, 0xFF808080);
+		fontRenderer.drawString(Config.getInstance().getOutline().getName(), sr.getScaledWidth() / 2 - 140, sr.getScaledHeight() / 2 - 75, 0xFFFFFFFF);
+		fontRenderer.drawString(Config.getInstance().getBackground().getName(), sr.getScaledWidth() / 2 - 140, sr.getScaledHeight() / 2 - 45, 0xFFFFFFFF);
+		fontRenderer.drawSplitString("Remember, you must select 'Override Outline Color' to display this outline color instead of rarity color.", sr.getScaledWidth() / 2 - 140, sr.getScaledHeight() / 2 + 0, 300, 0xFF808080);
 		textboxOutline.drawTextBox();
 		textboxBackground.drawTextBox();
 		super.drawScreen(mouseX, mouseY, partialTicks);

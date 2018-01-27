@@ -3,9 +3,9 @@ package ninja.genuine.tooltips.client.render;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import ninja.genuine.tooltips.client.Tooltip;
 
@@ -19,7 +19,7 @@ public class RenderHelper {
 			String s = tooltip.getLine(i);
 			if (i == 0)
 				s = tooltip.getRarityColor() + s;
-			Minecraft.getMinecraft().fontRendererObj.drawString(s, drawx, drawy, 0xFFFFFF | alpha, true);
+			Minecraft.getMinecraft().fontRenderer.drawString(s, drawx, drawy, 0xFFFFFF | alpha, true);
 			if (i == 0)
 				drawy += 2;
 			drawy += 10;
@@ -76,7 +76,7 @@ public class RenderHelper {
 		GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
 		GlStateManager.shadeModel(GL11.GL_SMOOTH);
 		Tessellator tessellator = Tessellator.getInstance();
-		VertexBuffer vertexBuffer = tessellator.getBuffer();
+		BufferBuilder vertexBuffer = tessellator.getBuffer();
 		vertexBuffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
 		vertexBuffer.pos(w, y, 0.0D).color(r1, g1, b1, a1).endVertex();
 		vertexBuffer.pos(x, y, 0.0D).color(r1, g1, b1, a1).endVertex();

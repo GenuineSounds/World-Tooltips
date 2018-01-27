@@ -4,7 +4,7 @@ buildscript {
 		maven { url = "http://files.minecraftforge.net/maven" }
 	}
 	dependencies {
-		classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+		classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
 	}
 }
 
@@ -18,14 +18,17 @@ archivesBaseName = "World-Tooltips"
 
 group = "ninja.genuine.tooltips"
 ext.revision = 'git rev-list --count HEAD'.execute().text.trim()
-version = "1.11-1.2.4-${revision}"
+version = "1.12.2-1.2.4-${revision}"
 
 sourceCompatibility = targetCompatibility = "1.8"
+compileJava {
+	sourceCompatibility = targetCompatibility = '1.8'
+}
 
 minecraft {
-	version = "1.11-13.19.1.2198"
+	version = "1.12.2-14.23.1.2604"
 	runDir = "run"
-	mappings = "snapshot_20161221"
+	mappings = "snapshot_20171003"
 }
 
 dependencies {

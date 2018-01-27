@@ -8,6 +8,7 @@ import com.mojang.realmsclient.gui.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -28,7 +29,7 @@ public class Tooltip {
 	public Tooltip(EntityPlayer player, EntityItem entity) {
 		this.entity = entity;
 		sync();
-		generateTooltip(player, entity.getEntityItem());
+		generateTooltip(player, entity.getItem());
 		calcDim();
 	}
 
@@ -37,7 +38,7 @@ public class Tooltip {
 	}
 
 	private void generateTooltip(EntityPlayer player, ItemStack item) {
-		text = item.getTooltip(player, Minecraft.getMinecraft().gameSettings.advancedItemTooltips);
+		text = item.getTooltip(player, Minecraft.getMinecraft().gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
 		if (!modsAreLoaded() && !Config.getInstance().isHidingMod())
 			text.add(ChatFormatting.BLUE.toString() + ChatFormatting.ITALIC.toString() + ModUtils.getModName(item) + ChatFormatting.RESET.toString());
 		if (item.getCount() > 1)
@@ -47,7 +48,7 @@ public class Tooltip {
 	private void calcDim() {
 		int maxWidth = 0;
 		for (int line = 0; line < text.size(); line++) {
-			int tmp = Minecraft.getMinecraft().fontRendererObj.getStringWidth(getLine(line));
+			int tmp = Minecraft.getMinecraft().fontRenderer.getStringWidth(getLine(line));
 			if (tmp > maxWidth)
 				maxWidth = tmp;
 		}
@@ -132,6 +133,6 @@ public class Tooltip {
 	}
 
 	public TextFormatting getRarityColor() {
-		return entity.getEntityItem().getRarity().rarityColor;
+		return entity.getItem().getRarity().rarityColor;
 	}
 }
