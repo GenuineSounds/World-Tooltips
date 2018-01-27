@@ -12,9 +12,9 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import ninja.genuine.tooltips.Constants;
@@ -73,7 +73,7 @@ public class GuiColorPicker extends GuiScreen {
 		drawHueBar(pickerX, pickerY, hueWidth, pickerHeight);
 		drawColorGradient(pickerX + hueWidth + 1, pickerY, pickerWidth, pickerHeight);
 		drawGradientRect(pickerX + pickerWidth + hueWidth + 2, pickerY, pickerX + pickerWidth * 2 + hueWidth + 2, pickerY + pickerHeight, selectedColor | 0xFF << 24, selectedColor | 0xFF << 24);
-		fontRendererObj.drawString("Pick a color", pickerX, pickerY - 20, 0xFFFFFFFF);
+		fontRenderer.drawString("Pick a color", pickerX, pickerY - 20, 0xFFFFFFFF);
 		super.drawScreen(mouseX, mouseY, partialTicks);
 	}
 
@@ -100,12 +100,12 @@ public class GuiColorPicker extends GuiScreen {
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		mc.getTextureManager().bindTexture(COLOR_STRIP);
 		Tessellator tessellator = Tessellator.getInstance();
-		VertexBuffer vertexbuffer = tessellator.getBuffer();
-		vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-		vertexbuffer.pos(x + width, y + height, zLevel).tex(0, 1).endVertex();
-		vertexbuffer.pos(x + width, y, zLevel).tex(0, 0).endVertex();
-		vertexbuffer.pos(x, y, zLevel).tex(1, 0).endVertex();
-		vertexbuffer.pos(x, y + height, zLevel).tex(1, 1).endVertex();
+		BufferBuilder bb = tessellator.getBuffer();
+		bb.begin(7, DefaultVertexFormats.POSITION_TEX);
+		bb.pos(x + width, y + height, zLevel).tex(0, 1).endVertex();
+		bb.pos(x + width, y, zLevel).tex(0, 0).endVertex();
+		bb.pos(x, y, zLevel).tex(1, 0).endVertex();
+		bb.pos(x, y + height, zLevel).tex(1, 1).endVertex();
 		tessellator.draw();
 	}
 
@@ -122,27 +122,27 @@ public class GuiColorPicker extends GuiScreen {
 		GlStateManager.shadeModel(GL11.GL_SMOOTH);
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		Tessellator tessellator = Tessellator.getInstance();
-		VertexBuffer vertexbuffer = tessellator.getBuffer();
+		BufferBuilder bb = tessellator.getBuffer();
 		// Color Gradient
-		vertexbuffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-		vertexbuffer.pos(x, y, zLevel).color(red, green, blue, 1F).endVertex();
-		vertexbuffer.pos(x, y + height, zLevel).color(red, green, blue, 1F).endVertex();
-		vertexbuffer.pos(x + width, y + height, zLevel).color(red, green, blue, 1F).endVertex();
-		vertexbuffer.pos(x + width, y, zLevel).color(red, green, blue, 1F).endVertex();
+		bb.begin(7, DefaultVertexFormats.POSITION_COLOR);
+		bb.pos(x, y, zLevel).color(red, green, blue, 1F).endVertex();
+		bb.pos(x, y + height, zLevel).color(red, green, blue, 1F).endVertex();
+		bb.pos(x + width, y + height, zLevel).color(red, green, blue, 1F).endVertex();
+		bb.pos(x + width, y, zLevel).color(red, green, blue, 1F).endVertex();
 		tessellator.draw();
 		// White Gradient.
-		vertexbuffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-		vertexbuffer.pos(x, y, zLevel).color(1F, 1F, 1F, 1F).endVertex();
-		vertexbuffer.pos(x, y + height, zLevel).color(1F, 1F, 1F, 1F).endVertex();
-		vertexbuffer.pos(x + width, y + height, zLevel).color(red, green, blue, 0F).endVertex();
-		vertexbuffer.pos(x + width, y, zLevel).color(red, green, blue, 0F).endVertex();
+		bb.begin(7, DefaultVertexFormats.POSITION_COLOR);
+		bb.pos(x, y, zLevel).color(1F, 1F, 1F, 1F).endVertex();
+		bb.pos(x, y + height, zLevel).color(1F, 1F, 1F, 1F).endVertex();
+		bb.pos(x + width, y + height, zLevel).color(red, green, blue, 0F).endVertex();
+		bb.pos(x + width, y, zLevel).color(red, green, blue, 0F).endVertex();
 		tessellator.draw();
 		// Black Gradient
-		vertexbuffer.begin(7, DefaultVertexFormats.POSITION_COLOR);
-		vertexbuffer.pos(x, y, zLevel).color(red, green, blue, 0F).endVertex();
-		vertexbuffer.pos(x, y + height, zLevel).color(0F, 0F, 0F, 1F).endVertex();
-		vertexbuffer.pos(x + width, y + height, zLevel).color(0F, 0F, 0F, 1F).endVertex();
-		vertexbuffer.pos(x + width, y, zLevel).color(red, green, blue, 0F).endVertex();
+		bb.begin(7, DefaultVertexFormats.POSITION_COLOR);
+		bb.pos(x, y, zLevel).color(red, green, blue, 0F).endVertex();
+		bb.pos(x, y + height, zLevel).color(0F, 0F, 0F, 1F).endVertex();
+		bb.pos(x + width, y + height, zLevel).color(0F, 0F, 0F, 1F).endVertex();
+		bb.pos(x + width, y, zLevel).color(red, green, blue, 0F).endVertex();
 		tessellator.draw();
 		GlStateManager.shadeModel(GL11.GL_FLAT);
 		GlStateManager.disableBlend();

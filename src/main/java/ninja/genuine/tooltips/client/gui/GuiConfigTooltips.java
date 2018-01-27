@@ -36,33 +36,33 @@ public class GuiConfigTooltips extends GuiConfig {
 		}
 
 		@Override
-		public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected) {
+		public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected, float partial) {
 			boolean isChanged = isChanged();
 			if (drawLabel) {
 				String label = (!isValidValue ? TextFormatting.RED.toString() : (isChanged ? TextFormatting.WHITE.toString() : TextFormatting.GRAY.toString())) + (isChanged ? TextFormatting.ITALIC.toString() : "") + name;
-				mc.fontRendererObj.drawString(label, owningScreen.entryList.labelX, y + slotHeight / 2 - mc.fontRendererObj.FONT_HEIGHT / 2, 16777215);
+				mc.fontRenderer.drawString(label, owningScreen.entryList.labelX, y + slotHeight / 2 - mc.fontRenderer.FONT_HEIGHT / 2, 16777215);
 			}
-			btnUndoChanges.xPosition = owningEntryList.scrollBarX - 44;
-			btnUndoChanges.yPosition = y;
+			btnUndoChanges.x = owningEntryList.scrollBarX - 44;
+			btnUndoChanges.y = y;
 			btnUndoChanges.enabled = enabled() && isChanged;
-			btnUndoChanges.drawButton(mc, mouseX, mouseY);
-			btnDefault.xPosition = owningEntryList.scrollBarX - 22;
-			btnDefault.yPosition = y;
+			btnUndoChanges.drawButton(mc, mouseX, mouseY, partial);
+			btnDefault.x = owningEntryList.scrollBarX - 22;
+			btnDefault.y = y;
 			btnDefault.enabled = enabled() && !isDefault();
-			btnDefault.drawButton(mc, mouseX, mouseY);
+			btnDefault.drawButton(mc, mouseX, mouseY, partial);
 			if (tooltipHoverChecker == null)
 				tooltipHoverChecker = new HoverChecker(y, y + slotHeight, x, owningScreen.entryList.controlX - 8, 800);
 			else
 				tooltipHoverChecker.updateBounds(y, y + slotHeight, x, owningScreen.entryList.controlX - 8);
-			textFieldValue.xPosition = owningEntryList.controlX + 2;
-			textFieldValue.yPosition = y + 1;
+			textFieldValue.x = owningEntryList.controlX + 2;
+			textFieldValue.y = y + 1;
 			textFieldValue.width = owningEntryList.controlWidth - 24;
 			textFieldValue.setEnabled(enabled());
 			button.update(textFieldValue.getText());
-			button.xPosition = owningEntryList.controlX + textFieldValue.width + 4;
-			button.yPosition = y - 1;
+			button.x = owningEntryList.controlX + textFieldValue.width + 4;
+			button.y = y - 1;
 			textFieldValue.drawTextBox();
-			button.drawButton(mc, mouseX, mouseY);
+			button.drawButton(mc, mouseX, mouseY, partial);
 		}
 
 		@Override

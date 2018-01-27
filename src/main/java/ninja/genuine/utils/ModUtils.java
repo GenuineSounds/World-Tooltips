@@ -21,7 +21,7 @@ public class ModUtils {
 
 	public static void post() {
 		for (TextFormatting color : TextFormatting.values())
-			formatting_color.put(color, Minecraft.getMinecraft().fontRendererObj.getColorCode(color.toString().replace("\u00a7", "").charAt(0)));
+			formatting_color.put(color, Minecraft.getMinecraft().fontRenderer.getColorCode(color.toString().replace("\u00a7", "").charAt(0)));
 		Map<String, ModContainer> modMap = Loader.instance().getIndexedModList();
 		for (Map.Entry<String, ModContainer> modEntry : modMap.entrySet()) {
 			String lowercaseId = modEntry.getKey().toLowerCase(Locale.ENGLISH);

@@ -3,10 +3,20 @@ package ninja.genuine.tooltips.client;
 import java.util.List;
 import java.util.Objects;
 
+import javax.annotation.Nullable;
+
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityItemFrame;
+import net.minecraft.util.EntitySelectors;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -44,44 +54,38 @@ public class RenderEvent {
 
 	@SubscribeEvent
 	public void render(final RenderGameOverlayEvent.Post event) {
-		// TODO Let's make it a choice to do 2D or 3D tooltips.
-		//      Just need to make a nice anchoring gui first.
+		// TODO Let's make it a choice to do 2D or 3D tooltips. Just need to make a nice anchoring gui first.
 		// renderer.renderTooltip2D(mc, item, generateTooltip(mc, mc.player, item.getEntityItem()), event.getPartialTicks());
 	}
 
 	public static EntityItem getMouseOver(Minecraft mc, float partialTicks) {
 		mc.mcProfiler.startSection(Constants.MODID);
 		Entity viewer = mc.getRenderViewEntity();
-		int distanceLook = Config.getInstance().getMaxDistance();
+		int range = Config.getInstance().getMaxDistance();
 		Vec3d eyes = viewer.getPositionEyes(partialTicks);
 		Vec3d look = viewer.getLook(partialTicks);
-		Vec3d eyesLook = eyes.addVector(look.xCoord * distanceLook, look.yCoord * distanceLook, look.zCoord * distanceLook);
-		float distanceMax = 1;
-		List<EntityItem> entityList = mc.world.getEntitiesWithinAABB(EntityItem.class,
-				viewer.getEntityBoundingBox().addCoord(look.xCoord * distanceLook, look.yCoord * distanceLook, look.zCoord * distanceLook).expand(distanceMax, distanceMax, distanceMax));
-		double difference = 0;
-		EntityItem target = null;
-		for (int i = 0; i < entityList.size(); i++) {
-			EntityItem entity = entityList.get(i);
-			float boundSize = 0.15F;
-			AxisAlignedBB aabb1 = entity.getEntityBoundingBox();
-			AxisAlignedBB aabb2 = new AxisAlignedBB(aabb1.minX, aabb1.minY, aabb1.minZ, aabb1.maxX, aabb1.maxY, aabb1.maxZ);
-			AxisAlignedBB expandedAABB = aabb2.offset(0, 0.25, 0).expand(0.15, 0.1, 0.15).expandXyz(boundSize);
-			RayTraceResult objectInVector = expandedAABB.calculateIntercept(eyes, eyesLook);
-			if (expandedAABB.isVecInside(eyes)) {
-				if (0.0D <= difference) {
-					target = entity;
-					difference = 0;
+		Vec3d view = eyes.addVector(look.x * range, look.y * range, look.z * range);
+		double distance = 0;
+		EntityItem out = null;
+		List<EntityItem> list = mc.world.getEntitiesWithinAABB(EntityItem.class, viewer.getEntityBoundingBox().expand(look.x * range, look.y * range, look.z * range).grow(1F, 1F, 1F));
+		for (int i = 0; i < list.size(); i++) {
+			EntityItem entity = list.get(i);
+			AxisAlignedBB aabb = entity.getEntityBoundingBox().offset(0, 0.25, 0).grow(entity.getCollisionBorderSize() + 0.1);
+			RayTraceResult ray = aabb.calculateIntercept(eyes, view);
+			if (aabb.contains(eyes)) {
+				if (distance > 0) {
+					out = entity;
+					distance = 0;
 				}
-			} else if (objectInVector != null) {
-				final double distance = eyes.distanceTo(objectInVector.hitVec);
-				if (distance < difference || difference == 0.0D) {
-					target = entity;
-					difference = distance;
+			} else if (ray != null) {
+				double d = eyes.distanceTo(ray.hitVec);
+				if (d < distance || distance == 0.0D) {
+					out = entity;
+					distance = d;
 				}
 			}
 		}
 		mc.mcProfiler.endSection();
-		return target;
+		return out;
 	}
 }
