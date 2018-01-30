@@ -27,8 +27,6 @@ public class GuiColorButton extends GuiButton {
 	public void update(String value) {
 		this.value = value;
 	}
-	
-	
 
 	@Override
 	public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTick) {

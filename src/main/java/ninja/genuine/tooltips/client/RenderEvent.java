@@ -1,22 +1,11 @@
 package ninja.genuine.tooltips.client;
 
 import java.util.List;
-import java.util.Objects;
-
-import javax.annotation.Nullable;
-
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.item.EntityItemFrame;
-import net.minecraft.util.EntitySelectors;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -28,7 +17,7 @@ import ninja.genuine.tooltips.Constants;
 public class RenderEvent {
 
 	private Minecraft mc;
-	private Tooltip cache;
+	private Tooltip tooltip;
 	private EntityItem entity;
 
 	public RenderEvent() {}
@@ -38,18 +27,21 @@ public class RenderEvent {
 	}
 
 	public void sync() {
-		if (!Objects.isNull(cache))
-			cache.sync();
+		if (tooltip != null)
+			tooltip.sync();
 	}
 
 	@SubscribeEvent
 	public void render(final RenderWorldLastEvent event) {
-		entity = getMouseOver(mc, event.getPartialTicks());
-		if (!Objects.isNull(entity)) {
-			if (Objects.isNull(cache) || cache.getEntity() != entity)
-				cache = new Tooltip(Minecraft.getMinecraft().player, entity);
-			cache.renderTooltip3D(mc, event.getPartialTicks());
-		}
+		EntityItem tmp = getMouseOver(mc, event.getPartialTicks());
+		if (tmp == null)
+			return;
+		entity = tmp;
+		if (tooltip == null || tooltip.getEntity() != entity)
+			tooltip = new Tooltip(Minecraft.getMinecraft().player, entity);
+		if (tooltip == null)
+			return;
+		tooltip.renderTooltip3D(mc, event.getPartialTicks());
 	}
 
 	@SubscribeEvent
@@ -79,7 +71,7 @@ public class RenderEvent {
 				}
 			} else if (ray != null) {
 				double d = eyes.distanceTo(ray.hitVec);
-				if (d < distance || distance == 0.0D) {
+				if (d < distance || distance == 0) {
 					out = entity;
 					distance = d;
 				}
