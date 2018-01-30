@@ -16,6 +16,7 @@ public class GuiColorConfig extends GuiScreen {
 	private GuiTextField textboxOutline, textboxBackground;
 	private GuiColorButton outlineButton, backgroundButton;
 	private String strOutlineOrig, strBackgroundOrig;
+	int editing = 0;
 
 	public GuiColorConfig(GuiScreen parent) {
 		this.parent = parent;
@@ -101,13 +102,16 @@ public class GuiColorConfig extends GuiScreen {
 				Config.getInstance().getBackground().set(strBackgroundOrig);
 			} catch (Exception e) {}
 			WorldTooltips.instance.sync();
-			mc.displayGuiScreen(this.parent);
+			mc.displayGuiScreen(parent);
 		} else if (button.id == 1) {
 			sync();
-			mc.displayGuiScreen(this.parent);
-		} else if (button.id == 5)
+			mc.displayGuiScreen(parent);
+		} else if (button.id == 5) {
 			mc.displayGuiScreen(new GuiColorPicker(this, textboxOutline, strOutlineOrig));
-		else if (button.id == 6)
+			editing = 1;
+		} else if (button.id == 6) {
 			mc.displayGuiScreen(new GuiColorPicker(this, textboxBackground, strBackgroundOrig));
+			editing = 2;
+		}
 	}
 }

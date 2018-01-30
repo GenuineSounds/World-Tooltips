@@ -21,8 +21,7 @@ import ninja.genuine.utils.ModUtils;
 
 public class Tooltip {
 
-	private int width, height;
-	private int alpha;
+	private int width, height, alpha;
 	private EntityItem entity;
 	private List<String> text = new ArrayList<>();
 
@@ -71,7 +70,7 @@ public class Tooltip {
 		double interpDistance = Math.sqrt(interpX * interpX + interpY * interpY + interpZ * interpZ);
 		double scale = interpDistance;
 		scale /= sr.getScaleFactor() * 160;
-		if (scale <= 0.01)
+		if (scale < 0.01)
 			scale = 0.01;
 		RenderHelper.start3D();
 		GlStateManager.translate(-interpX, -(interpY - 0.65), -interpZ);

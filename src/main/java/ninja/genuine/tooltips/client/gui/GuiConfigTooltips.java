@@ -67,7 +67,6 @@ public class GuiConfigTooltips extends GuiConfig {
 
 		@Override
 		public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
-			System.out.println(button.mousePressed(mc, mouseX, mouseY));
 			if (button.mousePressed(mc, mouseX, mouseY))
 				mc.displayGuiScreen(new GuiColorPicker(owningScreen, textFieldValue, beforeValue));
 			super.mouseClicked(mouseX, mouseY, mouseButton);
