@@ -12,8 +12,9 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.ScaledResolution;
-import ninja.genuine.tooltips.Config;
+import net.minecraft.client.resources.I18n;
 import ninja.genuine.tooltips.WorldTooltips;
+import ninja.genuine.tooltips.client.config.Config;
 import ninja.genuine.tooltips.client.render.RenderHelper;
 
 public class GuiColorPicker extends GuiScreen {
@@ -47,8 +48,8 @@ public class GuiColorPicker extends GuiScreen {
 	@Override
 	public void initGui() {
 		ScaledResolution sr = new ScaledResolution(mc);
-		addButton(new GuiButton(0, sr.getScaledWidth() / 2 - 100, sr.getScaledHeight() - 30, "Back"));
-		addButton(new GuiButton(1, sr.getScaledWidth() / 2 - 100, sr.getScaledHeight() - 55, "Done"));
+		addButton(new GuiButton(0, sr.getScaledWidth() / 2 - 100, sr.getScaledHeight() - 30, I18n.format("gui.cancel")));
+		addButton(new GuiButton(1, sr.getScaledWidth() / 2 - 100, sr.getScaledHeight() - 55, I18n.format("gui.done")));
 		pickerX = sr.getScaledWidth() / 2 - 110;
 		pickerY = sr.getScaledHeight() / 2 - 80;
 	}

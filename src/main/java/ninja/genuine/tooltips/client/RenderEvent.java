@@ -11,8 +11,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import ninja.genuine.tooltips.Config;
 import ninja.genuine.tooltips.Constants;
+import ninja.genuine.tooltips.client.config.Config;
 
 public class RenderEvent {
 
