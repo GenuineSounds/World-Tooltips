@@ -15,12 +15,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.Loader;
-import ninja.genuine.tooltips.Config;
+import ninja.genuine.tooltips.client.config.Config;
 import ninja.genuine.tooltips.client.render.RenderHelper;
 import ninja.genuine.utils.ModUtils;
 
 public class Tooltip {
 
+	private Config config = Config.getInstance();
 	private int width, height, alpha;
 	private EntityItem entity;
 	private List<String> text = new ArrayList<>();
@@ -33,12 +34,12 @@ public class Tooltip {
 	}
 
 	public void sync() {
-		alpha = ((int) (Config.getInstance().getOpacity() * 255) & 0xFF) << 24;
+		alpha = ((int) (config.getOpacity() * 255) & 0xFF) << 24;
 	}
 
 	private void generateTooltip(EntityPlayer player, ItemStack item) {
 		text = item.getTooltip(player, Minecraft.getMinecraft().gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
-		if (!modsAreLoaded() && !Config.getInstance().isHidingMod())
+		if (!modsAreLoaded() && !config.isHidingMod())
 			text.add(ChatFormatting.BLUE.toString() + ChatFormatting.ITALIC.toString() + ModUtils.getModName(item) + ChatFormatting.RESET.toString());
 		if (item.getCount() > 1)
 			text.set(0, item.getCount() + " x " + text.get(0));
@@ -99,7 +100,7 @@ public class Tooltip {
 		GlStateManager.pushAttrib();
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		GlStateManager.translate(50 * sr.getScaleFactor(), 0, 50 * sr.getScaleFactor());
-		RenderHelper.renderTooltipTile(x, y, getWidth(), getHeight(), Config.getInstance().getBackgroundColor() | alpha, outline.getFirst() | alpha, outline.getSecond() | alpha);
+		RenderHelper.renderTooltipTile(x, y, getWidth(), getHeight(), config.getBackgroundColor() | alpha, outline.getFirst() | alpha, outline.getSecond() | alpha);
 		RenderHelper.renderTooltipText(this, x, y, alpha);
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		GlStateManager.popAttrib();
@@ -107,7 +108,7 @@ public class Tooltip {
 	}
 
 	private Tuple<Integer, Integer> setupColors() {
-		int i = Config.getInstance().isOverridingOutline() ? Config.getInstance().getOutlineColor() : (ModUtils.formatting_color.getOrDefault(getRarityColor(), Config.getInstance().getOutlineColor()) & 0xFEFEFE) >> 1;
+		int i = config.isOverridingOutline() ? config.getOutlineColor() : (ModUtils.getRarityColor(getRarityColor()) & 0xFEFEFE) >> 1;
 		return new Tuple<>(i, (i & 0xFEFEFE) >> 1);
 	}
 

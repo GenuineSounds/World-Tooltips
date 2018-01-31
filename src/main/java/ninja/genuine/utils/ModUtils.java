@@ -13,11 +13,12 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
+import ninja.genuine.tooltips.client.config.Config;
 
 public class ModUtils {
 
-	public static final Map<String, String> itemId_modName = new HashMap<>();
-	public static final Map<TextFormatting, Integer> formatting_color = new HashMap<>();
+	private static final Map<String, String> itemId_modName = new HashMap<>();
+	private static final Map<TextFormatting, Integer> formatting_color = new HashMap<>();
 
 	public static void post() {
 		for (TextFormatting color : TextFormatting.values())
@@ -28,6 +29,10 @@ public class ModUtils {
 			String modName = modEntry.getValue().getName();
 			itemId_modName.put(lowercaseId, modName);
 		}
+	}
+
+	public static int getRarityColor(TextFormatting format) {
+		return formatting_color.getOrDefault(format, Config.getInstance().getOutlineColor());
 	}
 
 	public static String getModName(ItemStack stack) {

@@ -7,8 +7,9 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.ScaledResolution;
-import ninja.genuine.tooltips.Config;
+import net.minecraft.client.resources.I18n;
 import ninja.genuine.tooltips.WorldTooltips;
+import ninja.genuine.tooltips.client.config.Config;
 
 public class GuiColorConfig extends GuiScreen {
 
@@ -24,21 +25,21 @@ public class GuiColorConfig extends GuiScreen {
 
 	@Override
 	public void initGui() {
-		ScaledResolution sr = new ScaledResolution(mc);
 		strOutlineOrig = Config.getInstance().getOutline().getString();
+		strBackgroundOrig = Config.getInstance().getBackground().getString();
+		ScaledResolution sr = new ScaledResolution(mc);
+		GuiButton back = new GuiButton(0, sr.getScaledWidth() / 2 - 100, sr.getScaledHeight() - 30, 200, 20, I18n.format("gui.cancel"));
+		GuiButton done = new GuiButton(1, sr.getScaledWidth() / 2 - 100, sr.getScaledHeight() - 55, 200, 20, I18n.format("gui.done"));
+		outlineButton = new GuiColorButton(5, sr.getScaledWidth() / 2 + 130, sr.getScaledHeight() / 2 - 80, Config.getInstance().getOutline());
+		backgroundButton = new GuiColorButton(6, sr.getScaledWidth() / 2 + 130, sr.getScaledHeight() / 2 - 50, Config.getInstance().getBackground());
 		textboxOutline = new GuiTextField(10, mc.fontRenderer, sr.getScaledWidth() / 2 + 50, sr.getScaledHeight() / 2 - 80, 100, 20);
+		textboxBackground = new GuiTextField(10, mc.fontRenderer, sr.getScaledWidth() / 2 + 50, sr.getScaledHeight() / 2 - 50, 100, 20);
 		textboxOutline.setText(Config.getInstance().getOutline().getString());
 		textboxOutline.setMaxStringLength(10);
 		textboxOutline.setValidator((input) -> Pattern.compile("(0[x#])?[0-9a-fA-F]{0,8}").asPredicate().test(input));
-		strBackgroundOrig = Config.getInstance().getBackground().getString();
-		textboxBackground = new GuiTextField(10, mc.fontRenderer, sr.getScaledWidth() / 2 + 50, sr.getScaledHeight() / 2 - 50, 100, 20);
 		textboxBackground.setText(Config.getInstance().getBackground().getString());
 		textboxBackground.setMaxStringLength(10);
 		textboxBackground.setValidator((input) -> Pattern.compile("(0[x#])?[0-9a-fA-F]{0,8}").asPredicate().test(input));
-		GuiButton back = new GuiButton(0, sr.getScaledWidth() / 2 - 100, sr.getScaledHeight() - 30, 200, 20, "Back");
-		GuiButton done = new GuiButton(1, sr.getScaledWidth() / 2 - 100, sr.getScaledHeight() - 55, 200, 20, "Done");
-		outlineButton = new GuiColorButton(5, sr.getScaledWidth() / 2 + 130, sr.getScaledHeight() / 2 - 80, Config.getInstance().getOutline());
-		backgroundButton = new GuiColorButton(6, sr.getScaledWidth() / 2 + 130, sr.getScaledHeight() / 2 - 50, Config.getInstance().getBackground());
 		addButton(outlineButton);
 		addButton(backgroundButton);
 		addButton(done);
@@ -47,6 +48,7 @@ public class GuiColorConfig extends GuiScreen {
 
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		super.drawScreen(mouseX, mouseY, partialTicks);
 		outlineButton.update(textboxOutline.getText());
 		backgroundButton.update(textboxBackground.getText());
 		sync();
@@ -54,10 +56,9 @@ public class GuiColorConfig extends GuiScreen {
 		ScaledResolution sr = new ScaledResolution(mc);
 		fontRenderer.drawString(Config.getInstance().getOutline().getName(), sr.getScaledWidth() / 2 - 140, sr.getScaledHeight() / 2 - 75, 0xFFFFFFFF);
 		fontRenderer.drawString(Config.getInstance().getBackground().getName(), sr.getScaledWidth() / 2 - 140, sr.getScaledHeight() / 2 - 45, 0xFFFFFFFF);
-		fontRenderer.drawSplitString("Remember, you must select 'Override Outline Color' to display this outline color instead of rarity color.", sr.getScaledWidth() / 2 - 140, sr.getScaledHeight() / 2 + 0, 300, 0xFF808080);
+		fontRenderer.drawSplitString("Remember, you must enable 'Override Outline Color' to display the custom outline color.", sr.getScaledWidth() / 2 - 140, sr.getScaledHeight() / 2 + 0, 300, 0xFF808080);
 		textboxOutline.drawTextBox();
 		textboxBackground.drawTextBox();
-		super.drawScreen(mouseX, mouseY, partialTicks);
 	}
 
 	@Override

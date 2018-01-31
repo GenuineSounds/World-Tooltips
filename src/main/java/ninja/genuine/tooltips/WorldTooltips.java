@@ -20,6 +20,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
 import ninja.genuine.tooltips.client.RenderEvent;
+import ninja.genuine.tooltips.client.config.Config;
 import ninja.genuine.tooltips.client.gui.GuiColorConfig;
 import ninja.genuine.utils.ModUtils;
 
@@ -29,7 +30,7 @@ public class WorldTooltips {
 	@Instance(Constants.MODID)
 	public static WorldTooltips instance;
 	private RenderEvent events = new RenderEvent();
-	private KeyBinding configKey = new KeyBinding("World-Tooltips Configuration", Keyboard.KEY_SUBTRACT, "World-Tooltips");
+	private KeyBinding configKey = new KeyBinding(Constants.NAME + " Configuration", Keyboard.KEY_SUBTRACT, Constants.NAME);
 
 	public WorldTooltips() {
 		instance = this;
