@@ -13,8 +13,6 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.resources.I18n;
-import ninja.genuine.tooltips.WorldTooltips;
-import ninja.genuine.tooltips.client.config.Config;
 import ninja.genuine.tooltips.client.render.RenderHelper;
 
 public class GuiColorPicker extends GuiScreen {
@@ -23,8 +21,8 @@ public class GuiColorPicker extends GuiScreen {
 	private GuiTextField text;
 	private int hue, color;
 	@SuppressWarnings("unused")
-	private int sliderY;
-	private int pickerX = 20, pickerY = 50, hueWidth = 8, pickerWidth = 100, pickerHeight = 100;
+	private int hueSliderPos;
+	private int pickerX, pickerY, hueWidth = 10, pickerWidth = 128, pickerHeight = 128;
 	private IntBuffer colorBuffer = BufferUtils.createIntBuffer(4);
 
 	public GuiColorPicker(GuiScreen parent, GuiTextField text, String defaultText) {
@@ -50,18 +48,19 @@ public class GuiColorPicker extends GuiScreen {
 		ScaledResolution sr = new ScaledResolution(mc);
 		addButton(new GuiButton(0, sr.getScaledWidth() / 2 - 100, sr.getScaledHeight() - 30, I18n.format("gui.cancel")));
 		addButton(new GuiButton(1, sr.getScaledWidth() / 2 - 100, sr.getScaledHeight() - 55, I18n.format("gui.done")));
-		pickerX = sr.getScaledWidth() / 2 - 110;
-		pickerY = sr.getScaledHeight() / 2 - 80;
+		pickerX = sr.getScaledWidth() / 2 - (pickerWidth + hueWidth);
+		pickerY = sr.getScaledHeight() / 2 - pickerHeight / 2 - 20;
 	}
 
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
+		ScaledResolution sr = new ScaledResolution(mc);
 		drawDefaultBackground();
-		drawGradientRect(pickerX - 1, pickerY - 1, pickerX + pickerWidth * 2 + hueWidth + 3, pickerY + pickerHeight + 1, 0xFF404040, 0xFF404040);
-		RenderHelper.drawHueBar(pickerX, pickerY, zLevel, hueWidth, pickerHeight);
-		RenderHelper.drawColorGradient(pickerX + hueWidth + 1, pickerY, zLevel, pickerWidth, pickerHeight, hue);
-		drawGradientRect(pickerX + pickerWidth + hueWidth + 2, pickerY, pickerX + pickerWidth * 2 + hueWidth + 2, pickerY + pickerHeight, color | 0xFF << 24, color | 0xFF << 24);
-		fontRenderer.drawString("Pick a color", pickerX, pickerY - 20, 0xFFFFFFFF);
+		drawGradientRect(pickerX - 2, pickerY - 1, pickerX + pickerWidth * 2 + hueWidth + 2, pickerY + pickerHeight + 1, 0xFF404040, 0xFF404040);
+		RenderHelper.drawHuePicker(pickerX, pickerY, zLevel, hueWidth, pickerHeight);
+		RenderHelper.drawColorPicker(pickerX + hueWidth, pickerY, zLevel, pickerWidth, pickerHeight, hue);
+		drawGradientRect(pickerX + pickerWidth + hueWidth + 1, pickerY, pickerX + pickerWidth * 2 + hueWidth + 1, pickerY + pickerHeight, color | 0xFF << 24, color | 0xFF << 24);
+		fontRenderer.drawString("Pick a color", sr.getScaledWidth() / 2 - fontRenderer.getStringWidth("Pick a color") / 2, pickerY - 26, 0xFFFFFFFF);
 		super.drawScreen(mouseX, mouseY, partialTicks);
 	}
 
@@ -89,7 +88,7 @@ public class GuiColorPicker extends GuiScreen {
 		int tmp = ((cl[2] / 128) & 0xFF << 0) | ((cl[1] / 128) & 0xFF << 8) | ((cl[0] / 128) & 0xFF << 16) | 0xFF000000;
 		if (mouseX >= pickerX && mouseY >= pickerY && mouseX < pickerX + hueWidth && mouseY < pickerY + pickerHeight) {
 			hue = tmp & 0xFFFFFF;
-			sliderY = mouseY;
+			hueSliderPos = mouseY;
 		} else if (mouseX >= pickerX + hueWidth + 1 && mouseY >= pickerY && mouseX < pickerX + pickerWidth + hueWidth && mouseY < pickerY + pickerHeight)
 			color = tmp & 0xFFFFFF;
 		colorBuffer.clear();
@@ -101,16 +100,6 @@ public class GuiColorPicker extends GuiScreen {
 			mc.displayGuiScreen(parent);
 		else if (button.id == 1) {
 			text.setText("0x" + Integer.toHexString(color).toUpperCase());
-			if (parent instanceof GuiColorConfig) {
-				GuiColorConfig config = (GuiColorConfig) parent;
-				try {
-					if (config.editing == 1)
-						Config.getInstance().getOutline().set(text.getText());
-					else if (config.editing == 2)
-						Config.getInstance().getBackground().set(text.getText());
-					WorldTooltips.instance.sync();
-				} catch (Exception e) {}
-			}
 			mc.displayGuiScreen(parent);
 		}
 	}

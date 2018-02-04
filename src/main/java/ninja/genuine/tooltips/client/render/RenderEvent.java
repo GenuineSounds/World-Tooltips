@@ -1,4 +1,4 @@
-package ninja.genuine.tooltips.client;
+package ninja.genuine.tooltips.client.render;
 
 import java.util.List;
 
@@ -8,10 +8,10 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import ninja.genuine.tooltips.Constants;
+import ninja.genuine.tooltips.client.Tooltip;
 import ninja.genuine.tooltips.client.config.Config;
 
 public class RenderEvent {
@@ -33,21 +33,15 @@ public class RenderEvent {
 
 	@SubscribeEvent
 	public void render(final RenderWorldLastEvent event) {
-		EntityItem tmp = getMouseOver(mc, event.getPartialTicks());
-		if (tmp == null)
+		entity = getMouseOver(mc, event.getPartialTicks());
+		if (entity == null || entity.isDead) {
+			tooltip = null;
 			return;
-		entity = tmp;
+		}
 		if (tooltip == null || tooltip.getEntity() != entity)
 			tooltip = new Tooltip(Minecraft.getMinecraft().player, entity);
-		if (tooltip == null)
-			return;
-		tooltip.renderTooltip3D(mc, event.getPartialTicks());
-	}
-
-	@SubscribeEvent
-	public void render(final RenderGameOverlayEvent.Post event) {
-		// TODO Let's make it a choice to do 2D or 3D tooltips. Just need to make a nice anchoring gui first.
-		// renderer.renderTooltip2D(mc, item, generateTooltip(mc, mc.player, item.getEntityItem()), event.getPartialTicks());
+		if (entity != null)
+			tooltip.render(mc, event.getPartialTicks());
 	}
 
 	public static EntityItem getMouseOver(Minecraft mc, float partialTicks) {
