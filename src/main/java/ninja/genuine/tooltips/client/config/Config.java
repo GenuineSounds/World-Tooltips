@@ -6,6 +6,7 @@ import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.common.config.Property.Type;
+import net.minecraftforge.fml.client.config.GuiConfigEntries.NumberSliderEntry;
 
 public class Config {
 
@@ -56,8 +57,8 @@ public class Config {
 		return base.getBoolean("Hide Mod Name", category_behavior, false, "Hide mod names on tooltips. Enable if you see two mod names.");
 	}
 
-	public float getOpacity() {
-		return base.getFloat("Tooltip Opacity", category_appearance, 0.75F, 0.0F, 1.0F, "Set the opacity for the tooltips; 0 being completely invisible and 1 being completely opaque.");
+	public Property getOpacity() {
+		return base.get(category_appearance, "Tooltip Opacity", 0.75, "Set the opacity for the tooltips; 0 being completely invisible and 1 being completely opaque.", 0.0, 1.0);
 	}
 
 	public Property getOutline() {
@@ -86,7 +87,7 @@ public class Config {
 
 	private void internalPopulation() {
 		getBackground();
-		getOpacity();
+		getOpacity().setConfigEntryClass(NumberSliderEntry.class);
 		getOutline();
 		getMaxDistance();
 		isEnabled();

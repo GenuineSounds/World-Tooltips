@@ -12,7 +12,6 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Tuple;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.Loader;
 import ninja.genuine.tooltips.client.config.Config;
@@ -34,7 +33,7 @@ public class Tooltip {
 	}
 
 	public void sync() {
-		alpha = ((int) (config.getOpacity() * 255) & 0xFF) << 24;
+		alpha = ((int) (config.getOpacity().getDouble() * 255) & 0xFF) << 24;
 	}
 
 	private void generateTooltip(EntityPlayer player, ItemStack item) {
@@ -62,54 +61,32 @@ public class Tooltip {
 		return Loader.isModLoaded("waila") | Loader.isModLoaded("nei") | Loader.isModLoaded("hwyla");
 	}
 
-	public void renderTooltip3D(Minecraft mc, double partialTicks) {
+	public void render(Minecraft mc, double partialTicks) {
 		ScaledResolution sr = new ScaledResolution(mc);
-		Tuple<Integer, Integer> outline = setupColors();
 		double interpX = mc.getRenderManager().viewerPosX - (getEntity().posX - (getEntity().prevPosX - getEntity().posX) * partialTicks);
-		double interpY = mc.getRenderManager().viewerPosY - (getEntity().posY - (getEntity().prevPosY - getEntity().posY) * partialTicks);
+		double interpY = mc.getRenderManager().viewerPosY - 0.65 - (getEntity().posY - (getEntity().prevPosY - getEntity().posY) * partialTicks);
 		double interpZ = mc.getRenderManager().viewerPosZ - (getEntity().posZ - (getEntity().prevPosZ - getEntity().posZ) * partialTicks);
 		double interpDistance = Math.sqrt(interpX * interpX + interpY * interpY + interpZ * interpZ);
-		double scale = interpDistance;
-		scale /= sr.getScaleFactor() * 160;
-		if (scale < 0.01)
+		double scale = interpDistance; // -(0.5 / interpDistance) * 0.02 + 0.02;
+		scale /= (6 - sr.getScaleFactor()) * 160;
+		if (scale <= 0.01)
 			scale = 0.01;
 		RenderHelper.start3D();
-		GlStateManager.translate(-interpX, -(interpY - 0.65), -interpZ);
-		GlStateManager.rotate(-mc.getRenderManager().playerViewY + 180, 0, 1, 0);
-		GlStateManager.rotate(-mc.getRenderManager().playerViewX, 1, 0, 0);
+		GlStateManager.translate(-interpX, -(interpY), -interpZ);
+		GlStateManager.rotate(mc.getRenderManager().playerViewY + 180, 0, -1, 0);
+		GlStateManager.rotate(mc.getRenderManager().playerViewX, -1, 0, 0);
 		GlStateManager.scale(scale, -scale, scale);
 		int x = -getWidth() / 2;
-		int y = -getHeight();
+		int y = -getHeight() / 2;
 		GlStateManager.disableDepth();
-		RenderHelper.renderTooltipTile(x, y, getWidth(), getHeight(), Config.getInstance().getBackgroundColor() | alpha, outline.getFirst() | alpha, outline.getSecond() | alpha);
+		RenderHelper.renderTooltipTile(entity, x, y, getWidth(), getHeight(), config.getBackgroundColor() | alpha, config.getOutlineColor() | alpha);
 		RenderHelper.renderTooltipText(this, x, y, alpha);
 		GlStateManager.enableDepth();
 		GlStateManager.scale(1 / scale, 1 / -scale, 1 / scale);
 		GlStateManager.rotate(mc.getRenderManager().playerViewX, 1, 0, 0);
 		GlStateManager.rotate(mc.getRenderManager().playerViewY - 180, 0, 1, 0);
-		GlStateManager.translate(interpX, interpY - 0.65, interpZ);
+		GlStateManager.translate(interpX, interpY, interpZ);
 		RenderHelper.end3D();
-	}
-
-	public void renderTooltip2D(Minecraft mc, double partialTicks) {
-		ScaledResolution sr = new ScaledResolution(mc);
-		Tuple<Integer, Integer> outline = setupColors();
-		int x = getWidth() / 2;
-		int y = getHeight();
-		GlStateManager.pushMatrix();
-		GlStateManager.pushAttrib();
-		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-		GlStateManager.translate(50 * sr.getScaleFactor(), 0, 50 * sr.getScaleFactor());
-		RenderHelper.renderTooltipTile(x, y, getWidth(), getHeight(), config.getBackgroundColor() | alpha, outline.getFirst() | alpha, outline.getSecond() | alpha);
-		RenderHelper.renderTooltipText(this, x, y, alpha);
-		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-		GlStateManager.popAttrib();
-		GlStateManager.popMatrix();
-	}
-
-	private Tuple<Integer, Integer> setupColors() {
-		int i = config.isOverridingOutline() ? config.getOutlineColor() : (ModUtils.getRarityColor(getRarityColor()) & 0xFEFEFE) >> 1;
-		return new Tuple<>(i, (i & 0xFEFEFE) >> 1);
 	}
 
 	public int getWidth() {
