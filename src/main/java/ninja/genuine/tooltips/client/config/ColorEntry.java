@@ -6,7 +6,6 @@ import net.minecraftforge.fml.client.config.GuiConfigEntries;
 import net.minecraftforge.fml.client.config.GuiConfigEntries.StringEntry;
 import net.minecraftforge.fml.client.config.HoverChecker;
 import net.minecraftforge.fml.client.config.IConfigElement;
-import ninja.genuine.tooltips.WorldTooltips;
 import ninja.genuine.tooltips.client.gui.GuiColorButton;
 import ninja.genuine.tooltips.client.gui.GuiColorPicker;
 
@@ -59,6 +58,6 @@ public class ColorEntry extends StringEntry {
 	@Override
 	public void keyTyped(char eventChar, int eventKey) {
 		super.keyTyped(eventChar, eventKey);
-		WorldTooltips.instance.sync();
+		Config.save();
 	}
 }

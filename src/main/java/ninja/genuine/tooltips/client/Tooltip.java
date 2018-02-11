@@ -6,8 +6,6 @@ import java.util.List;
 import com.mojang.realmsclient.gui.ChatFormatting;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -15,78 +13,58 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.Loader;
 import ninja.genuine.tooltips.client.config.Config;
-import ninja.genuine.tooltips.client.render.RenderHelper;
 import ninja.genuine.utils.ModUtils;
 
-public class Tooltip {
+public class Tooltip implements Comparable<Tooltip> {
 
-	private Config config = Config.getInstance();
-	private int width, height, alpha;
-	private EntityItem entity;
+	private EntityItem entityItem;
+	private TextFormatting textFormatting;
 	private List<String> text = new ArrayList<>();
+	private int width, height;
+	private double distanceToPlayer;
+	private int tickCount = 240;
 
 	public Tooltip(EntityPlayer player, EntityItem entity) {
-		this.entity = entity;
-		sync();
+		entityItem = entity;
+		textFormatting = entity.getItem().getRarity().rarityColor;
 		generateTooltip(player, entity.getItem());
-		calcDim();
+		calculateSize();
 	}
 
-	public void sync() {
-		alpha = ((int) (config.getOpacity().getDouble() * 255) & 0xFF) << 24;
-	}
-
-	private void generateTooltip(EntityPlayer player, ItemStack item) {
-		text = item.getTooltip(player, Minecraft.getMinecraft().gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
-		if (!modsAreLoaded() && !config.isHidingMod())
-			text.add(ChatFormatting.BLUE.toString() + ChatFormatting.ITALIC.toString() + ModUtils.getModName(item) + ChatFormatting.RESET.toString());
-		if (item.getCount() > 1)
-			text.set(0, item.getCount() + " x " + text.get(0));
-	}
-
-	private void calcDim() {
-		int maxWidth = 0;
-		for (int line = 0; line < text.size(); line++) {
-			int tmp = Minecraft.getMinecraft().fontRenderer.getStringWidth(getLine(line));
-			if (tmp > maxWidth)
-				maxWidth = tmp;
+	public void tick() {
+		if (entityItem == null || entityItem.isDead)
+			tickCount = 0;
+		if (entityItem.cannotPickup()) {
+			resetTick();
+			System.out.println("Poops");
 		}
-		width = maxWidth;
-		height = 8;
-		if (size() > 1)
-			height += 2 + (size() - 1) * 10;
+		Minecraft mc = Minecraft.getMinecraft();
+		tickCount--;
+		double interpX = mc.getRenderManager().viewerPosX - entityItem.posX;
+		double interpY = mc.getRenderManager().viewerPosY - 0.65 - entityItem.posY;
+		double interpZ = mc.getRenderManager().viewerPosZ - entityItem.posZ;
+		distanceToPlayer = Math.sqrt(interpX * interpX + interpY * interpY + interpZ * interpZ);
 	}
 
-	private boolean modsAreLoaded() {
-		return Loader.isModLoaded("waila") | Loader.isModLoaded("nei") | Loader.isModLoaded("hwyla");
+	public void resetTick() {
+		tickCount = 240;
 	}
 
-	public void render(Minecraft mc, double partialTicks) {
-		ScaledResolution sr = new ScaledResolution(mc);
-		double interpX = mc.getRenderManager().viewerPosX - (getEntity().posX - (getEntity().prevPosX - getEntity().posX) * partialTicks);
-		double interpY = mc.getRenderManager().viewerPosY - 0.65 - (getEntity().posY - (getEntity().prevPosY - getEntity().posY) * partialTicks);
-		double interpZ = mc.getRenderManager().viewerPosZ - (getEntity().posZ - (getEntity().prevPosZ - getEntity().posZ) * partialTicks);
-		double interpDistance = Math.sqrt(interpX * interpX + interpY * interpY + interpZ * interpZ);
-		double scale = interpDistance; // -(0.5 / interpDistance) * 0.02 + 0.02;
-		scale /= (6 - sr.getScaleFactor()) * 160;
-		if (scale <= 0.01)
-			scale = 0.01;
-		RenderHelper.start3D();
-		GlStateManager.translate(-interpX, -(interpY), -interpZ);
-		GlStateManager.rotate(mc.getRenderManager().playerViewY + 180, 0, -1, 0);
-		GlStateManager.rotate(mc.getRenderManager().playerViewX, -1, 0, 0);
-		GlStateManager.scale(scale, -scale, scale);
-		int x = -getWidth() / 2;
-		int y = -getHeight() / 2;
-		GlStateManager.disableDepth();
-		RenderHelper.renderTooltipTile(entity, x, y, getWidth(), getHeight(), config.getBackgroundColor() | alpha, config.getOutlineColor() | alpha);
-		RenderHelper.renderTooltipText(this, x, y, alpha);
-		GlStateManager.enableDepth();
-		GlStateManager.scale(1 / scale, 1 / -scale, 1 / scale);
-		GlStateManager.rotate(mc.getRenderManager().playerViewX, 1, 0, 0);
-		GlStateManager.rotate(mc.getRenderManager().playerViewY - 180, 0, 1, 0);
-		GlStateManager.translate(interpX, interpY, interpZ);
-		RenderHelper.end3D();
+	@Override
+	public int compareTo(Tooltip o) {
+		return (int) (o.distanceToPlayer * 1000 - distanceToPlayer * 1000);
+	}
+
+	public EntityItem getEntityItem() {
+		return entityItem;
+	}
+
+	public int getTickCount() {
+		return tickCount;
+	}
+
+	public boolean isDead() {
+		return tickCount <= 0;
 	}
 
 	public int getWidth() {
@@ -97,19 +75,40 @@ public class Tooltip {
 		return height;
 	}
 
-	public EntityItem getEntity() {
-		return entity;
-	}
-
 	public int size() {
 		return text.size();
 	}
 
-	public String getLine(int line) {
-		return text.get(line);
+	public List<String> getText() {
+		return text;
 	}
 
-	public TextFormatting getRarityColor() {
-		return entity.getItem().getRarity().rarityColor;
+	public TextFormatting formattingColor() {
+		return textFormatting;
+	}
+
+	private boolean modsAreLoaded() {
+		return Loader.isModLoaded("waila") | Loader.isModLoaded("nei") | Loader.isModLoaded("hwyla");
+	}
+
+	private void generateTooltip(EntityPlayer player, ItemStack item) {
+		text = item.getTooltip(player, Minecraft.getMinecraft().gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
+		if (!modsAreLoaded() && !Config.getInstance().isHidingModName())
+			text.add(ChatFormatting.BLUE.toString() + ChatFormatting.ITALIC.toString() + ModUtils.getModName(item) + ChatFormatting.RESET.toString());
+		if (item.getCount() > 1)
+			text.set(0, item.getCount() + " x " + text.get(0));
+	}
+
+	private void calculateSize() {
+		int maxWidth = 0;
+		for (int line = 0; line < text.size(); line++) {
+			int tmp = Minecraft.getMinecraft().fontRenderer.getStringWidth(text.get(line));
+			if (tmp > maxWidth)
+				maxWidth = tmp;
+		}
+		width = maxWidth;
+		height = 8;
+		if (size() > 1)
+			height += 2 + (size() - 1) * 10;
 	}
 }

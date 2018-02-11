@@ -3,6 +3,7 @@ package ninja.genuine.tooltips.client.render;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
@@ -14,33 +15,50 @@ import ninja.genuine.utils.ModUtils;
 
 public class RenderHelper {
 
-	public static void start3D() {
-		GlStateManager.pushMatrix();
-		GlStateManager.pushAttrib();
-		GlStateManager.enableRescaleNormal();
-		GlStateManager.enableAlpha();
-		GlStateManager.alphaFunc(516, 0.1F);
-		GlStateManager.enableBlend();
-		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+	public static void renderTooltip(Tooltip tooltip, double partialTicks) {
+		Minecraft mc = Minecraft.getMinecraft();
+		EntityItem entityItem = tooltip.getEntityItem();
+		ScaledResolution sr = new ScaledResolution(mc);
+		int x = -tooltip.getWidth() / 2;
+		int y = -tooltip.getHeight() / 2;
+		double interpX = mc.getRenderManager().viewerPosX - (entityItem.posX - (entityItem.prevPosX - entityItem.posX) * partialTicks);
+		double interpY = mc.getRenderManager().viewerPosY - 0.65 - (entityItem.posY - (entityItem.prevPosY - entityItem.posY) * partialTicks);
+		double interpZ = mc.getRenderManager().viewerPosZ - (entityItem.posZ - (entityItem.prevPosZ - entityItem.posZ) * partialTicks);
+		double interpDistance = Math.sqrt(interpX * interpX + interpY * interpY + interpZ * interpZ);
+		double scale = interpDistance / ((6 - sr.getScaleFactor()) * 160);
+		if (scale < 0.01)
+			scale = 0.01;
+		scale *= Config.getInstance().getScale().getDouble();
+		start3D();
+		GlStateManager.translate(-interpX, -interpY, -interpZ);
+		GlStateManager.rotate(mc.getRenderManager().playerViewY + 180, 0, -1, 0);
+		GlStateManager.rotate(mc.getRenderManager().playerViewX, -1, 0, 0);
+		GlStateManager.scale(scale, -scale, scale);
+		GlStateManager.disableDepth();
+		renderTooltipTile(tooltip, x, y, tooltip.getWidth(), tooltip.getHeight());
+		renderTooltipText(tooltip, x, y);
+		GlStateManager.enableDepth();
+		GlStateManager.scale(1 / scale, 1 / -scale, 1 / scale);
+		GlStateManager.rotate(mc.getRenderManager().playerViewX, 1, 0, 0);
+		GlStateManager.rotate(mc.getRenderManager().playerViewY - 180, 0, 1, 0);
+		GlStateManager.translate(interpX, interpY, interpZ);
+		end3D();
 	}
 
-	public static void end3D() {
-		GlStateManager.disableAlpha();
-		GlStateManager.disableRescaleNormal();
-		GlStateManager.disableLighting();
-		GlStateManager.popAttrib();
-		GlStateManager.popMatrix();
-	}
-
-	public static void renderTooltipText(Tooltip tooltip, int x, int y, int alpha) {
+	private static void renderTooltipText(Tooltip tooltip, int x, int y) {
+		double d = Math.abs(Math.pow(-1, 2) * (tooltip.getTickCount() / 60D));
+		if (d > Config.getInstance().getOpacity().getDouble())
+			d = Config.getInstance().getOpacity().getDouble();
+		int alpha = ((int) (d * 0xFF) & 0xFF) << 24;
+		if ((alpha & 0xFC000000) == 0)
+			return;
 		GlStateManager.pushMatrix();
 		GlStateManager.enableBlend();
 		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-		for (int i = 0; i < tooltip.size(); i++) {
-			String s = tooltip.getLine(i);
+		for (int i = 0; i < tooltip.getText().size(); i++) {
+			String s = tooltip.getText().get(i);
 			if (i == 0)
-				s = tooltip.getRarityColor() + s;
+				s = tooltip.formattingColor() + s;
 			Minecraft.getMinecraft().fontRenderer.drawString(s, x, y, 0xFFFFFF | alpha, true);
 			if (i == 0)
 				y += 2;
@@ -50,36 +68,38 @@ public class RenderHelper {
 		GlStateManager.popMatrix();
 	}
 
-	public static void renderTooltipTile(EntityItem item, int x, int y, int width, int height, int color1, int color2) {
-		final int alpha = color1 & 0xFF000000;
-		color2 = (Config.getInstance().isOverridingOutline() ? color2 : ModUtils.getRarityColor(item.getItem().getRarity().rarityColor)) | alpha;
-		color2 &= 0xFFE0E0E0;
-		int color3 = ((color2 & 0xFEFEFE) >> 1) | alpha;
-		drawGradientRect(x - 3        , y - 4         , 0, width + 6, 1         , color1, color1);
-		drawGradientRect(x - 3        , y + height + 3, 0, width + 6, 1         , color1, color1);
-		drawGradientRect(x - 3        , y - 3         , 0, width + 6, height + 6, color1, color1);
-		drawGradientRect(x - 4        , y - 3         , 0, 1        , height + 6, color1, color1);
-		drawGradientRect(x + width + 3, y - 3         , 0, 1        , height + 6, color1, color1);
-		drawGradientRect(x - 3        , y - 2         , 0, 1        , height + 4, color2, color3);
-		drawGradientRect(x + width + 2, y - 2         , 0, 1        , height + 4, color2, color3);
-		drawGradientRect(x - 3        , y - 3         , 0, width + 6, 1         , color2, color2);
-		drawGradientRect(x - 3        , y + height + 2, 0, width + 6, 1         , color3, color3);
+	private static void renderTooltipTile(Tooltip tooltip, int x, int y, int width, int height) {
+		double d = Math.abs(Math.pow(-1, 2) * (tooltip.getTickCount() / 60D));
+		if (d > Config.getInstance().getOpacity().getDouble())
+			d = Config.getInstance().getOpacity().getDouble();
+		int alpha = ((int) (d * 0xFF) & 0xFF) << 24;
+		final int colorBackground = Config.getInstance().getBackgroundColor() | alpha;
+		final int colorOutline = ((Config.getInstance().isOverridingOutline() ? Config.getInstance().getOutlineColor() : ModUtils.getRarityColor(tooltip.formattingColor())) | alpha) & 0xFFE0E0E0;
+		final int colorOutlineShade = ((colorOutline & 0xFEFEFE) >> 1) | alpha;
+		drawGradientRect(x - 3, y - 4, 0, width + 6, 1, colorBackground, colorBackground);
+		drawGradientRect(x - 3, y + height + 3, 0, width + 6, 1, colorBackground, colorBackground);
+		drawGradientRect(x - 3, y - 3, 0, width + 6, height + 6, colorBackground, colorBackground);
+		drawGradientRect(x - 4, y - 3, 0, 1, height + 6, colorBackground, colorBackground);
+		drawGradientRect(x + width + 3, y - 3, 0, 1, height + 6, colorBackground, colorBackground);
+		drawGradientRect(x - 3, y - 2, 0, 1, height + 4, colorOutline, colorOutlineShade);
+		drawGradientRect(x + width + 2, y - 2, 0, 1, height + 4, colorOutline, colorOutlineShade);
+		drawGradientRect(x - 3, y - 3, 0, width + 6, 1, colorOutline, colorOutline);
+		drawGradientRect(x - 3, y + height + 2, 0, width + 6, 1, colorOutlineShade, colorOutlineShade);
 	}
 
 	public static void drawHuePicker(double x, double y, double z, double width, double height) {
-		final double sHeight = height / 5F;
-		drawGradientRect(x - 1, y + 0 * sHeight, z, width, sHeight, 0xFFFF0000, 0xFFFFFF00);
-		drawGradientRect(x - 1, y + 1 * sHeight, z, width, sHeight, 0xFFFFFF00, 0xFF00FF00);
-		drawGradientRect(x - 1, y + 2 * sHeight, z, width, sHeight, 0xFF00FF00, 0xFF00FFFF);
-		drawGradientRect(x - 1, y + 3 * sHeight, z, width, sHeight, 0xFF00FFFF, 0xFF0000FF);
-		drawGradientRect(x - 1, y + 4 * sHeight, z, width, sHeight, 0xFF0000FF, 0xFFFF0000);
+		height /= 5F;
+		drawGradientRect(x - 1, y + 0 * height, z, width, height, 0xFFFF0000, 0xFFFFFF00);
+		drawGradientRect(x - 1, y + 1 * height, z, width, height, 0xFFFFFF00, 0xFF00FF00);
+		drawGradientRect(x - 1, y + 2 * height, z, width, height, 0xFF00FF00, 0xFF00FFFF);
+		drawGradientRect(x - 1, y + 3 * height, z, width, height, 0xFF00FFFF, 0xFF0000FF);
+		drawGradientRect(x - 1, y + 4 * height, z, width, height, 0xFF0000FF, 0xFFFF0000);
 	}
 
 	public static void drawColorPicker(double x, double y, double z, double width, double height, int hue) {
-		float red, green, blue;
-		red = (hue >> 16 & 0xFF) / 255F;
-		green = (hue >> 8 & 0xFF) / 255F;
-		blue = (hue & 0xFF) / 255F;
+		final float red = (hue >> 16 & 0xFF) / 255F;
+		final float green = (hue >> 8 & 0xFF) / 255F;
+		final float blue = (hue & 0xFF) / 255F;
 		GlStateManager.disableTexture2D();
 		GlStateManager.enableBlend();
 		GlStateManager.disableAlpha();
@@ -142,5 +162,24 @@ public class RenderHelper {
 		GlStateManager.disableBlend();
 		GlStateManager.enableAlpha();
 		GlStateManager.enableTexture2D();
+	}
+
+	public static void start3D() {
+		GlStateManager.pushMatrix();
+		GlStateManager.pushAttrib();
+		GlStateManager.enableRescaleNormal();
+		GlStateManager.enableAlpha();
+		GlStateManager.alphaFunc(516, 0.1F);
+		GlStateManager.enableBlend();
+		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+	}
+
+	public static void end3D() {
+		GlStateManager.disableAlpha();
+		GlStateManager.disableRescaleNormal();
+		GlStateManager.disableLighting();
+		GlStateManager.popAttrib();
+		GlStateManager.popMatrix();
 	}
 }

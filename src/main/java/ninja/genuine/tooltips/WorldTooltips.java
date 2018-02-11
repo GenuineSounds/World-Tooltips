@@ -1,7 +1,5 @@
 package ninja.genuine.tooltips;
 
-import java.util.Objects;
-
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.Minecraft;
@@ -53,7 +51,6 @@ public class WorldTooltips {
 	@EventHandler
 	public void post(FMLPostInitializationEvent event) {
 		ModUtils.post();
-		events.post();
 	}
 
 	@EventHandler
@@ -69,12 +66,6 @@ public class WorldTooltips {
 
 	@SubscribeEvent
 	public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
-		sync();
-	}
-
-	public void sync() {
 		Config.save();
-		if (!Objects.isNull(events))
-			events.sync();
 	}
 }
