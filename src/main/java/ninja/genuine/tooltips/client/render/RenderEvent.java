@@ -39,7 +39,7 @@ public class RenderEvent {
 				return;
 			boolean createTooltip = true;
 			for (Tooltip tooltip : tooltips) {
-				if (tooltip.getEntityItem() == entity) {
+				if (tooltip.getEntity() == entity) {
 					tooltip.resetTick();
 					createTooltip = false;
 				}

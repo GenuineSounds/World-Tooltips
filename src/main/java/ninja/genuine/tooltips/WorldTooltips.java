@@ -6,7 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -22,7 +22,8 @@ import ninja.genuine.tooltips.client.gui.GuiConfigTooltips;
 import ninja.genuine.tooltips.client.render.RenderEvent;
 import ninja.genuine.utils.ModUtils;
 
-@Mod(modid = Constants.MODID, name = Constants.NAME, version = Constants.VERSION, canBeDeactivated = true, clientSideOnly = true, updateJSON = Constants.URL + "update.json", useMetadata = true, guiFactory = "ninja.genuine.tooltips.client.TooltipsGuiFactory")
+@Mod(modid = Constants.MODID, name = Constants.NAME, version = Constants.VERSION, canBeDeactivated = true, clientSideOnly = true, updateJSON = Constants.URL
+		+ "update.json", useMetadata = true, guiFactory = "ninja.genuine.tooltips.client.TooltipsGuiFactory")
 public class WorldTooltips {
 
 	@Instance(Constants.MODID)
@@ -65,7 +66,7 @@ public class WorldTooltips {
 	}
 
 	@SubscribeEvent
-	public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
+	public void onConfigChanged(OnConfigChangedEvent event) {
 		Config.save();
 	}
 }
