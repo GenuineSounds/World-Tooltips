@@ -80,7 +80,7 @@ public class ModUtils {
 		if (mc.getRenderViewEntity() == null)
 			return null;
 		Entity viewer = mc.getRenderViewEntity();
-		int range = Config.getInstance().getMaxDistance();
+		int range = Config.getInstance().getRenderDistance();
 		Vec3d eyes = viewer.getPositionEyes(partialTicks);
 		Vec3d look = viewer.getLook(partialTicks);
 		Vec3d view = eyes.addVector(look.x * range, look.y * range, look.z * range);

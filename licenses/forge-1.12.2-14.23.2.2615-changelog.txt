@@ -1,5 +1,54 @@
 Changelog:
-Build 2604:
+Build 2615:
+	bs2609: Clean up some GUI code and change magic numbers to GL constants (#4734)
+
+Build 1.12.2-14.23.2.2614:
+	mezz: Minor cleanup for TestAnnotationParser
+
+Build 1.12.2-14.23.2.2613:
+	LexManos:
+		Remove Mercurius from release JSON, Sadly it's dead we may address it at
+		a later date.
+	LexManos:
+		Initial implementation of JSON based annotation scanning. Disabled by
+		default for now, until proven to be fully function. Enable using
+		-Dfml.enableJsonAnnotations=true
+
+Build 1.12.2-14.23.2.2612:
+	mezz: Update Github Stale bot message to better explain how to un-stale issues
+
+Build 1.12.2-14.23.2.2611:
+	LexManos: Bump version for RB.
+
+Build 1.12.2-14.23.1.2610:
+	bs2609: New hook in WorldProvider to control client lighting re-checks (#4645)
+	bjfccb: Fix inconsistency between vanilla and modded glass. Closes #4679 (#4680)
+	bs2609:
+		Change chunk gen command to only keep the target dimension loaded
+		(#4705)
+
+Build 1.12.2-14.23.1.2609:
+	CreativeMD:
+		New hook to delegate some liquid related physics to the blocks
+		themselves. (#4604)
+
+Build 1.12.2-14.23.1.2608:
+	bartek.bok: Remove texture loads from SimpleModelFontRenderer (#4721)
+
+Build 1.12.2-14.23.1.2607:
+	bs2609: Fix some shapeless recipes using damageable items not working (#4713)
+
+Build 1.12.2-14.23.1.2606:
+	bs2609:
+		Use relative time offset, rather than absolute value, for animations
+		(#4635)
+
+Build 1.12.2-14.23.1.2605:
+	malte0811:
+		Fixed UV contraction for the texture in the top-left corner of the
+		texture map (0, 0), see sp614x/optifine#1024 (#4703)
+
+Build 1.12.2-14.23.1.2604:
 	Leviathan143:
 		Fix some test mods preventing Forge server-Vanilla client connections
 		(#4616)

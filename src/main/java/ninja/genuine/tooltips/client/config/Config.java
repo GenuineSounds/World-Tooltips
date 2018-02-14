@@ -45,7 +45,7 @@ public class Config {
 		return base.getBoolean("Enable Mod", category_general, true, "Enable rendering the tooltips.");
 	}
 
-	public int getMaxDistance() {
+	public int getRenderDistance() {
 		return base.getInt("Maximum Drawing Distance", category_behavior, 8, 2, 64, "Set the maximum distance that tooltips should be displayed from.");
 	}
 
@@ -90,15 +90,13 @@ public class Config {
 	}
 
 	private void internalPopulation() {
-		getBackground();
+		isEnabled();
 		getOpacity().setConfigEntryClass(NumberSliderEntry.class);
 		getScale().setConfigEntryClass(NumberSliderEntry.class);
-		getOutline();
-		getMaxDistance();
-		isEnabled();
-		isHidingModName();
-		isOverridingOutline();
 		getOutline().setConfigEntryClass(ColorEntry.class);
 		getBackground().setConfigEntryClass(ColorEntry.class);
+		getRenderDistance();
+		isHidingModName();
+		isOverridingOutline();
 	}
 }
