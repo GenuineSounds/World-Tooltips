@@ -1,5 +1,6 @@
 package ninja.genuine.utils;
 
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -75,7 +76,7 @@ public class ModUtils {
 		return modName;
 	}
 
-	public static EntityItem getMouseOver(Minecraft mc, float partialTicks) {
+	public static EntityItem getMouseOver(Minecraft mc, float partialTicks) throws ConcurrentModificationException {
 		mc.mcProfiler.startSection(Constants.MODID);
 		if (mc.getRenderViewEntity() == null)
 			return null;

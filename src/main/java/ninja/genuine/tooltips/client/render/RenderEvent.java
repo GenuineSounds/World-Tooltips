@@ -2,6 +2,7 @@ package ninja.genuine.tooltips.client.render;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,13 +29,15 @@ public class RenderEvent {
 	public void tick(final WorldTickEvent event) {
 		if (Minecraft.getMinecraft().world == null)
 			return;
-		synchronized (Minecraft.getMinecraft().world) {
+		synchronized (tooltips) {
 			tooltips.removeIf(Objects::isNull);
 			tooltips.removeIf(Tooltip::isDead);
 			for (Tooltip tooltip : tooltips)
 				tooltip.tick();
 			Collections.sort(tooltips);
-			entity = ModUtils.getMouseOver(mc, 0);
+			try {
+				entity = ModUtils.getMouseOver(mc, 0);
+			} catch (ConcurrentModificationException e) {}
 			if (entity == null)
 				return;
 			boolean createTooltip = true;
@@ -53,7 +56,7 @@ public class RenderEvent {
 	public void render(final RenderWorldLastEvent event) {
 		if (!Config.getInstance().isEnabled() || Minecraft.getMinecraft().world == null)
 			return;
-		synchronized (Minecraft.getMinecraft().world) {
+		synchronized (tooltips) {
 			for (Tooltip tooltip : tooltips)
 				RenderHelper.renderTooltip(tooltip, event.getPartialTicks());
 		}
