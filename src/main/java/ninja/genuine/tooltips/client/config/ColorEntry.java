@@ -1,12 +1,15 @@
 package ninja.genuine.tooltips.client.config;
 
-import net.minecraft.util.text.TextFormatting;
+import static net.minecraft.util.text.TextFormatting.GRAY;
+import static net.minecraft.util.text.TextFormatting.ITALIC;
+import static net.minecraft.util.text.TextFormatting.RED;
+import static net.minecraft.util.text.TextFormatting.WHITE;
+
 import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraftforge.fml.client.config.GuiConfigEntries;
 import net.minecraftforge.fml.client.config.GuiConfigEntries.StringEntry;
 import net.minecraftforge.fml.client.config.HoverChecker;
 import net.minecraftforge.fml.client.config.IConfigElement;
-import ninja.genuine.tooltips.WorldTooltips;
 import ninja.genuine.tooltips.client.gui.GuiColorButton;
 import ninja.genuine.tooltips.client.gui.GuiColorPicker;
 
@@ -14,16 +17,16 @@ public class ColorEntry extends StringEntry {
 
 	private GuiColorButton button;
 
-	public ColorEntry(GuiConfig owningScreen, GuiConfigEntries owningEntryList, IConfigElement configElement) {
-		super(owningScreen, owningEntryList, configElement);
-		button = new GuiColorButton(11, owningEntryList.controlX + 2, owningEntryList.top - 1, configElement.get().toString(), configElement.getDefault().toString());
+	public ColorEntry(GuiConfig parent, GuiConfigEntries entries, IConfigElement element) {
+		super(parent, entries, element);
+		button = new GuiColorButton(11, entries.controlX + 2, entries.top - 1, element.get().toString(), element.getDefault().toString());
 	}
 
 	@Override
 	public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected, float partial) {
 		boolean isChanged = isChanged();
 		if (drawLabel) {
-			String label = (!isValidValue ? TextFormatting.RED.toString() : (isChanged ? TextFormatting.WHITE.toString() : TextFormatting.GRAY.toString())) + (isChanged ? TextFormatting.ITALIC.toString() : "") + name;
+			String label = (!isValidValue ? RED.toString() : (isChanged ? WHITE.toString() : GRAY.toString())) + (isChanged ? ITALIC.toString() : "") + name;
 			mc.fontRenderer.drawString(label, owningScreen.entryList.labelX, y + slotHeight / 2 - mc.fontRenderer.FONT_HEIGHT / 2, 16777215);
 		}
 		btnUndoChanges.x = owningEntryList.scrollBarX - 44;
@@ -59,6 +62,6 @@ public class ColorEntry extends StringEntry {
 	@Override
 	public void keyTyped(char eventChar, int eventKey) {
 		super.keyTyped(eventChar, eventKey);
-		WorldTooltips.instance.sync();
+		Config.save();
 	}
 }

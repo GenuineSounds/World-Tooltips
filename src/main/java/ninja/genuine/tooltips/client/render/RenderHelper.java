@@ -1,146 +1,239 @@
 package ninja.genuine.tooltips.client.render;
 
+import static net.minecraft.client.renderer.GlStateManager.alphaFunc;
+import static net.minecraft.client.renderer.GlStateManager.blendFunc;
+import static net.minecraft.client.renderer.GlStateManager.color;
+import static net.minecraft.client.renderer.GlStateManager.disableAlpha;
+import static net.minecraft.client.renderer.GlStateManager.disableBlend;
+import static net.minecraft.client.renderer.GlStateManager.disableDepth;
+import static net.minecraft.client.renderer.GlStateManager.disableLighting;
+import static net.minecraft.client.renderer.GlStateManager.disableRescaleNormal;
+import static net.minecraft.client.renderer.GlStateManager.disableTexture2D;
+import static net.minecraft.client.renderer.GlStateManager.enableAlpha;
+import static net.minecraft.client.renderer.GlStateManager.enableBlend;
+import static net.minecraft.client.renderer.GlStateManager.enableDepth;
+import static net.minecraft.client.renderer.GlStateManager.enableRescaleNormal;
+import static net.minecraft.client.renderer.GlStateManager.enableTexture2D;
+import static net.minecraft.client.renderer.GlStateManager.popAttrib;
+import static net.minecraft.client.renderer.GlStateManager.popMatrix;
+import static net.minecraft.client.renderer.GlStateManager.pushAttrib;
+import static net.minecraft.client.renderer.GlStateManager.pushMatrix;
+import static net.minecraft.client.renderer.GlStateManager.rotate;
+import static net.minecraft.client.renderer.GlStateManager.scale;
+import static net.minecraft.client.renderer.GlStateManager.shadeModel;
+import static net.minecraft.client.renderer.GlStateManager.translate;
+import static net.minecraft.client.renderer.GlStateManager.tryBlendFuncSeparate;
+
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.GlStateManager.DestFactor;
+import net.minecraft.client.renderer.GlStateManager.SourceFactor;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.item.EntityItem;
 import ninja.genuine.tooltips.client.Tooltip;
-import ninja.genuine.tooltips.client.config.Config;
-import ninja.genuine.utils.ModUtils;
 
+@SuppressWarnings("unused")
 public class RenderHelper {
 
-	public static void start3D() {
-		GlStateManager.pushMatrix();
-		GlStateManager.pushAttrib();
-		GlStateManager.enableRescaleNormal();
-		GlStateManager.enableAlpha();
-		GlStateManager.alphaFunc(516, 0.1F);
-		GlStateManager.enableBlend();
-		GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+	public static void renderTooltip(Tooltip tooltip, double partialTicks) {
+		final RenderManager rm = Minecraft.getMinecraft().getRenderManager();
+		final EntityItem e = tooltip.getEntity();
+		final double interpX = rm.viewerPosX - (e.posX - (e.prevPosX - e.posX) * partialTicks);
+		final double interpY = rm.viewerPosY - 0.65 - (e.posY - (e.prevPosY - e.posY) * partialTicks);
+		final double interpZ = rm.viewerPosZ - (e.posZ - (e.prevPosZ - e.posZ) * partialTicks);
+		pushMatrix();
+		pushAttrib();
+		enableRescaleNormal();
+		enableAlpha();
+		alphaFunc(516, 0.1F);
+		enableBlend();
+		disableDepth();
+		blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA);
+		color(1, 1, 1, 1);
+		translate(-interpX, -interpY, -interpZ);
+		rotate(rm.playerViewY + 180, 0, -1, 0);
+		rotate(rm.playerViewX, -1, 0, 0);
+		scale(tooltip.scale, -tooltip.scale, tooltip.scale);
+		renderTooltipTile(tooltip);
+		renderTooltipText(tooltip);
+		scale(1 / tooltip.scale, 1 / -tooltip.scale, 1 / tooltip.scale);
+		rotate(rm.playerViewX, 1, 0, 0);
+		rotate(rm.playerViewY - 180, 0, 1, 0);
+		translate(interpX, interpY, interpZ);
+		enableDepth();
+		disableAlpha();
+		disableRescaleNormal();
+		disableLighting();
+		popAttrib();
+		popMatrix();
 	}
 
-	public static void end3D() {
-		GlStateManager.disableAlpha();
-		GlStateManager.disableRescaleNormal();
-		GlStateManager.disableLighting();
-		GlStateManager.popAttrib();
-		GlStateManager.popMatrix();
+	private static void renderTooltipTile(Tooltip tooltip) {
+		final int x = -tooltip.getWidth() / 2;
+		final int y = -tooltip.getHeight() / 2;
+		final int w = tooltip.getWidth();
+		final int h = tooltip.getHeight();
+		final int c1 = tooltip.colorBackground;
+		final int c2 = tooltip.colorOutline;
+		final int c3 = tooltip.colorOutlineShade;
+		renderStyle1(x, y, w, h, c1, c2, c3);
 	}
 
-	public static void renderTooltipText(Tooltip tooltip, int x, int y, int alpha) {
-		GlStateManager.pushMatrix();
-		GlStateManager.enableBlend();
-		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-		for (int i = 0; i < tooltip.size(); i++) {
-			String s = tooltip.getLine(i);
+	private static void renderStyle1(int x, int y, int w, int h, int c1, int c2, int c3) {
+		// Background
+		drawRect(x - 3 + 0, y - 4 + 0, 0, w + 6, 1 + 0, c1);
+		drawRect(x + w + 3, y - 3 + 0, 0, 1 + 0, h + 6, c1);
+		drawRect(x - 3 + 0, y + h + 3, 0, w + 6, 1 + 0, c1);
+		drawRect(x - 4 + 0, y - 3 + 0, 0, 1 + 0, h + 6, c1);
+		drawRect(x - 2 + 0, y - 2 + 0, 0, w + 4, h + 4, c1);
+		// Outline
+		drawRect(x - 3 + 0, y - 3 + 0, 0, w + 6, 1 + 0, c2);
+		drawGradientRect(x + w + 2, y - 2 + 0, 0, 1 + 0, h + 4, c2, c3);
+		drawRect(x - 3 + 0, y + h + 2, 0, w + 6, 1 + 0, c3);
+		drawGradientRect(x - 3 + 0, y - 2 + 0, 0, 1 + 0, h + 4, c2, c3);
+	}
+
+	private static void renderStyle2(int x, int y, int w, int h, int c1, int c2, int c3) {
+		drawRect(x - 2 + 0, y - 2 + 0, 0, w + 4, h + 4, c1);
+		drawRect(x - 2 + 0, y - 3 + 0, 0, w + 4, 1 + 0, c2);
+		drawGradientRect(x + w + 2, y - 2 + 0, 0, 1 + 0, h + 4, c2, c3);
+		drawRect(x - 2 + 0, y + h + 2, 0, w + 4, 1 + 0, c3);
+		drawGradientRect(x - 3 + 0, y - 2 + 0, 0, 1 + 0, h + 4, c2, c3);
+	}
+
+	private static void renderStyle3(int x, int y, int w, int h, int c1, int c2, int c3) {
+		drawRect(x - 2 + 0, y - 2 + 0, 0, w + 4, h + 4, c1);
+		drawRect(x - 3 + 0, y - 3 + 0, 0, w + 6, 1 + 0, c2);
+		drawGradientRect(x + w + 2, y - 2 + 0, 0, 1 + 0, h + 4, c2, c3);
+		drawRect(x - 3 + 0, y + h + 2, 0, w + 6, 1 + 0, c3);
+		drawGradientRect(x - 3 + 0, y - 2 + 0, 0, 1 + 0, h + 4, c2, c3);
+	}
+
+	private static void renderStyle4(int x, int y, int w, int h, int c1, int c2, int c3) {
+		drawRect(x - 2 + 0, y - 2 + 0, 0, w + 4, h + 4, c1);
+	}
+
+	private static void renderTooltipText(Tooltip tooltip) {
+		if ((tooltip.alpha & 0xFC000000) == 0)
+			return;
+		int x = -tooltip.getWidth() / 2;
+		int y = -tooltip.getHeight() / 2;
+		pushMatrix();
+		enableBlend();
+		tryBlendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ONE, DestFactor.ZERO);
+		for (int i = 0; i < tooltip.getText().size(); i++) {
+			String s = tooltip.getText().get(i);
 			if (i == 0)
-				s = tooltip.getRarityColor() + s;
-			Minecraft.getMinecraft().fontRenderer.drawString(s, x, y, 0xFFFFFF | alpha, true);
+				s = tooltip.formattingColor() + s;
+			Minecraft.getMinecraft().fontRenderer.drawString(s, x, y, 0xFFFFFF | tooltip.alpha, true);
 			if (i == 0)
 				y += 2;
 			y += 10;
 		}
-		GlStateManager.disableBlend();
-		GlStateManager.popMatrix();
-	}
-
-	public static void renderTooltipTile(EntityItem item, int x, int y, int width, int height, int color1, int color2) {
-		final int alpha = color1 & 0xFF000000;
-		color2 = (Config.getInstance().isOverridingOutline() ? color2 : ModUtils.getRarityColor(item.getItem().getRarity().rarityColor)) | alpha;
-		color2 &= 0xFFE0E0E0;
-		int color3 = ((color2 & 0xFEFEFE) >> 1) | alpha;
-		drawGradientRect(x - 3        , y - 4         , 0, width + 6, 1         , color1, color1);
-		drawGradientRect(x - 3        , y + height + 3, 0, width + 6, 1         , color1, color1);
-		drawGradientRect(x - 3        , y - 3         , 0, width + 6, height + 6, color1, color1);
-		drawGradientRect(x - 4        , y - 3         , 0, 1        , height + 6, color1, color1);
-		drawGradientRect(x + width + 3, y - 3         , 0, 1        , height + 6, color1, color1);
-		drawGradientRect(x - 3        , y - 2         , 0, 1        , height + 4, color2, color3);
-		drawGradientRect(x + width + 2, y - 2         , 0, 1        , height + 4, color2, color3);
-		drawGradientRect(x - 3        , y - 3         , 0, width + 6, 1         , color2, color2);
-		drawGradientRect(x - 3        , y + height + 2, 0, width + 6, 1         , color3, color3);
+		disableBlend();
+		popMatrix();
 	}
 
 	public static void drawHuePicker(double x, double y, double z, double width, double height) {
-		final double sHeight = height / 5F;
-		drawGradientRect(x - 1, y + 0 * sHeight, z, width, sHeight, 0xFFFF0000, 0xFFFFFF00);
-		drawGradientRect(x - 1, y + 1 * sHeight, z, width, sHeight, 0xFFFFFF00, 0xFF00FF00);
-		drawGradientRect(x - 1, y + 2 * sHeight, z, width, sHeight, 0xFF00FF00, 0xFF00FFFF);
-		drawGradientRect(x - 1, y + 3 * sHeight, z, width, sHeight, 0xFF00FFFF, 0xFF0000FF);
-		drawGradientRect(x - 1, y + 4 * sHeight, z, width, sHeight, 0xFF0000FF, 0xFFFF0000);
+		height /= 5F;
+		drawGradientRect(x - 1, y + 0 * height, z, width, height, 0xFFFF0000, 0xFFFFFF00);
+		drawGradientRect(x - 1, y + 1 * height, z, width, height, 0xFFFFFF00, 0xFF00FF00);
+		drawGradientRect(x - 1, y + 2 * height, z, width, height, 0xFF00FF00, 0xFF00FFFF);
+		drawGradientRect(x - 1, y + 3 * height, z, width, height, 0xFF00FFFF, 0xFF0000FF);
+		drawGradientRect(x - 1, y + 4 * height, z, width, height, 0xFF0000FF, 0xFFFF0000);
 	}
 
-	public static void drawColorPicker(double x, double y, double z, double width, double height, int hue) {
-		float red, green, blue;
-		red = (hue >> 16 & 0xFF) / 255F;
-		green = (hue >> 8 & 0xFF) / 255F;
-		blue = (hue & 0xFF) / 255F;
-		GlStateManager.disableTexture2D();
-		GlStateManager.enableBlend();
-		GlStateManager.disableAlpha();
-		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-		GlStateManager.shadeModel(GL11.GL_SMOOTH);
-		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+	public static void drawColorPicker(double x, double y, double z, double w, double h, int hue) {
+		final int r = hue >> 16 & 0xFF;
+		final int g = hue >> 8 & 0xFF;
+		final int b = hue >> 0 & 0xFF;
+		disableTexture2D();
+		enableBlend();
+		disableAlpha();
+		tryBlendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ONE, DestFactor.ZERO);
+		shadeModel(GL11.GL_SMOOTH);
+		color(1, 1, 1, 1);
 		Tessellator tess = Tessellator.getInstance();
 		BufferBuilder bb = tess.getBuffer();
 		// Color Gradient
-		bb.begin(7, DefaultVertexFormats.POSITION_COLOR);
-		bb.pos(x, y, z).color(red, green, blue, 1F).endVertex();
-		bb.pos(x, y + height, z).color(red, green, blue, 1F).endVertex();
-		bb.pos(x + width, y + height, z).color(red, green, blue, 1F).endVertex();
-		bb.pos(x + width, y, z).color(red, green, blue, 1F).endVertex();
+		bb.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+		bb.pos(x + 0, y + 0, z).color(r, g, b, 0xFF).endVertex();
+		bb.pos(x + 0, y + h, z).color(r, g, b, 0xFF).endVertex();
+		bb.pos(x + w, y + h, z).color(r, g, b, 0xFF).endVertex();
+		bb.pos(x + w, y + 0, z).color(r, g, b, 0xFF).endVertex();
 		tess.draw();
 		// White Gradient.
-		bb.begin(7, DefaultVertexFormats.POSITION_COLOR);
-		bb.pos(x, y, z).color(1F, 1F, 1F, 1F).endVertex();
-		bb.pos(x, y + height, z).color(1F, 1F, 1F, 1F).endVertex();
-		bb.pos(x + width, y + height, z).color(1, 1, 1, 0F).endVertex();
-		bb.pos(x + width, y, z).color(1, 1, 1, 0F).endVertex();
+		bb.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+		bb.pos(x + 0, y + 0, z).color(0xFF, 0xFF, 0xFF, 0xFF).endVertex();
+		bb.pos(x + 0, y + h, z).color(0xFF, 0xFF, 0xFF, 0xFF).endVertex();
+		bb.pos(x + w, y + h, z).color(0xFF, 0xFF, 0xFF, 0).endVertex();
+		bb.pos(x + w, y + 0, z).color(0xFF, 0xFF, 0xFF, 0).endVertex();
 		tess.draw();
 		// Black Gradient
-		bb.begin(7, DefaultVertexFormats.POSITION_COLOR);
-		bb.pos(x, y, z).color(0, 0, 0, 0F).endVertex();
-		bb.pos(x, y + height, z).color(0F, 0F, 0F, 1F).endVertex();
-		bb.pos(x + width, y + height, z).color(0F, 0F, 0F, 1F).endVertex();
-		bb.pos(x + width, y, z).color(0, 0, 0, 0F).endVertex();
+		bb.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+		bb.pos(x + 0, y + 0, z).color(0, 0, 0, 0).endVertex();
+		bb.pos(x + 0, y + h, z).color(0, 0, 0, 0xFF).endVertex();
+		bb.pos(x + w, y + h, z).color(0, 0, 0, 0xFF).endVertex();
+		bb.pos(x + w, y + 0, z).color(0, 0, 0, 0).endVertex();
 		tess.draw();
-		GlStateManager.shadeModel(GL11.GL_FLAT);
-		GlStateManager.disableBlend();
-		GlStateManager.enableAlpha();
-		GlStateManager.enableTexture2D();
+		shadeModel(GL11.GL_FLAT);
+		disableBlend();
+		enableAlpha();
+		enableTexture2D();
 	}
 
-	private static void drawGradientRect(double x, double y, double z, double width, double height, int color1, int color2) {
-		final int alpha1 = (color1 >> 24) & 0xFF;
-		final int red1 = (color1 >> 16) & 0xFF;
-		final int green1 = (color1 >> 8) & 0xFF;
-		final int blue1 = (color1 >> 0) & 0xFF;
-		final int alpha2 = (color2 >> 24) & 0xFF;
-		final int red2 = (color2 >> 16) & 0xFF;
-		final int green2 = (color2 >> 8) & 0xFF;
-		final int blue2 = (color2 >> 0) & 0xFF;
-		GlStateManager.disableTexture2D();
-		GlStateManager.enableBlend();
-		GlStateManager.disableAlpha();
-		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-		GlStateManager.shadeModel(GL11.GL_SMOOTH);
-		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+	public static void drawRect(double x, double y, double z, double w, double h, int c1) {
+		drawGradientRect(x, y, z, w, h, c1, c1, c1, c1);
+	}
+
+	public static void drawGradientRect(double x, double y, double z, double w, double h, int c1) {
+		int alpha = c1 >> 24 & 0xFF;
+		int c2 = ((c1 & 0xFEFEFE) >> 1) | alpha;
+		drawGradientRect(x, y, z, w, h, c1, c2, c2, c1);
+	}
+
+	public static void drawGradientRect(double x, double y, double z, double w, double h, int c1, int c2) {
+		drawGradientRect(x, y, z, w, h, c1, c2, c2, c1);
+	}
+
+	public static void drawGradientRect(double x, double y, double z, double w, double h, int c1, int c2, int c3, int c4) {
+		final int a1 = c1 >> 24 & 0xFF;
+		final int r1 = c1 >> 16 & 0xFF;
+		final int g1 = c1 >> 8 & 0xFF;
+		final int b1 = c1 >> 0 & 0xFF;
+		final int a2 = c2 >> 24 & 0xFF;
+		final int r2 = c2 >> 16 & 0xFF;
+		final int g2 = c2 >> 8 & 0xFF;
+		final int b2 = c2 >> 0 & 0xFF;
+		final int a3 = c3 >> 24 & 0xFF;
+		final int r3 = c3 >> 16 & 0xFF;
+		final int g3 = c3 >> 8 & 0xFF;
+		final int b3 = c3 >> 0 & 0xFF;
+		final int a4 = c4 >> 24 & 0xFF;
+		final int r4 = c4 >> 16 & 0xFF;
+		final int g4 = c4 >> 8 & 0xFF;
+		final int b4 = c4 >> 0 & 0xFF;
+		disableTexture2D();
+		enableBlend();
+		disableAlpha();
+		tryBlendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ONE, DestFactor.ZERO);
+		shadeModel(GL11.GL_SMOOTH);
+		color(1, 1, 1, 1);
 		Tessellator tess = Tessellator.getInstance();
 		BufferBuilder bb = tess.getBuffer();
-		bb.begin(7, DefaultVertexFormats.POSITION_COLOR);
-		bb.pos(x, y, z).color(red1, green1, blue1, alpha1).endVertex();
-		bb.pos(x, y + height, z).color(red2, green2, blue2, alpha2).endVertex();
-		bb.pos(x + width, y + height, z).color(red2, green2, blue2, alpha2).endVertex();
-		bb.pos(x + width, y, z).color(red1, green1, blue1, alpha1).endVertex();
+		bb.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+		bb.pos(x + 0, y + 0, z).color(r1, g1, b1, a1).endVertex();
+		bb.pos(x + 0, y + h, z).color(r2, g2, b2, a2).endVertex();
+		bb.pos(x + w, y + h, z).color(r3, g3, b3, a3).endVertex();
+		bb.pos(x + w, y + 0, z).color(r4, g4, b4, a4).endVertex();
 		tess.draw();
-		GlStateManager.shadeModel(GL11.GL_FLAT);
-		GlStateManager.disableBlend();
-		GlStateManager.enableAlpha();
-		GlStateManager.enableTexture2D();
+		shadeModel(GL11.GL_FLAT);
+		disableBlend();
+		enableAlpha();
+		enableTexture2D();
 	}
 }

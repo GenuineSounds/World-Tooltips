@@ -15,14 +15,15 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.resources.I18n;
 import ninja.genuine.tooltips.client.render.RenderHelper;
 
+@SuppressWarnings("unused")
 public class GuiColorPicker extends GuiScreen {
 
+	private static final String display = "Pick a color";
 	private GuiScreen parent;
 	private GuiTextField text;
 	private int hue, color;
-	@SuppressWarnings("unused")
-	private int hueSliderPos;
-	private int pickerX, pickerY, hueWidth = 10, pickerWidth = 128, pickerHeight = 128;
+	private int sliderPos;
+	private int x, y, hueWidth = 10, width = 128, height = 128;
 	private IntBuffer colorBuffer = BufferUtils.createIntBuffer(4);
 
 	public GuiColorPicker(GuiScreen parent, GuiTextField text, String defaultText) {
@@ -48,19 +49,19 @@ public class GuiColorPicker extends GuiScreen {
 		ScaledResolution sr = new ScaledResolution(mc);
 		addButton(new GuiButton(0, sr.getScaledWidth() / 2 - 100, sr.getScaledHeight() - 30, I18n.format("gui.cancel")));
 		addButton(new GuiButton(1, sr.getScaledWidth() / 2 - 100, sr.getScaledHeight() - 55, I18n.format("gui.done")));
-		pickerX = sr.getScaledWidth() / 2 - (pickerWidth + hueWidth);
-		pickerY = sr.getScaledHeight() / 2 - pickerHeight / 2 - 20;
+		x = sr.getScaledWidth() / 2 - (width + hueWidth);
+		y = sr.getScaledHeight() / 2 - height / 2 - 20;
 	}
 
 	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		ScaledResolution sr = new ScaledResolution(mc);
 		drawDefaultBackground();
-		drawGradientRect(pickerX - 2, pickerY - 1, pickerX + pickerWidth * 2 + hueWidth + 2, pickerY + pickerHeight + 1, 0xFF404040, 0xFF404040);
-		RenderHelper.drawHuePicker(pickerX, pickerY, zLevel, hueWidth, pickerHeight);
-		RenderHelper.drawColorPicker(pickerX + hueWidth, pickerY, zLevel, pickerWidth, pickerHeight, hue);
-		drawGradientRect(pickerX + pickerWidth + hueWidth + 1, pickerY, pickerX + pickerWidth * 2 + hueWidth + 1, pickerY + pickerHeight, color | 0xFF << 24, color | 0xFF << 24);
-		fontRenderer.drawString("Pick a color", sr.getScaledWidth() / 2 - fontRenderer.getStringWidth("Pick a color") / 2, pickerY - 26, 0xFFFFFFFF);
+		drawGradientRect(x - 2, y - 1, x + width * 2 + hueWidth + 2, y + height + 1, 0xFF404040, 0xFF404040);
+		RenderHelper.drawHuePicker(x, y, zLevel, hueWidth, height);
+		RenderHelper.drawColorPicker(x + hueWidth, y, zLevel, width, height, hue);
+		drawGradientRect(x + width + hueWidth + 1, y, x + width * 2 + hueWidth + 1, y + height, color | 0xFF << 24, color | 0xFF << 24);
+		fontRenderer.drawString(display, sr.getScaledWidth() / 2 - fontRenderer.getStringWidth(display) / 2, y - 26, 0xFFFFFFFF);
 		super.drawScreen(mouseX, mouseY, partialTicks);
 	}
 
@@ -86,10 +87,10 @@ public class GuiColorPicker extends GuiScreen {
 		int[] cl = new int[4];
 		colorBuffer.get(cl);
 		int tmp = ((cl[2] / 128) & 0xFF << 0) | ((cl[1] / 128) & 0xFF << 8) | ((cl[0] / 128) & 0xFF << 16) | 0xFF000000;
-		if (mouseX >= pickerX && mouseY >= pickerY && mouseX < pickerX + hueWidth && mouseY < pickerY + pickerHeight) {
+		if (mouseX >= x && mouseY >= y && mouseX < x + hueWidth && mouseY < y + height) {
 			hue = tmp & 0xFFFFFF;
-			hueSliderPos = mouseY;
-		} else if (mouseX >= pickerX + hueWidth + 1 && mouseY >= pickerY && mouseX < pickerX + pickerWidth + hueWidth && mouseY < pickerY + pickerHeight)
+			sliderPos = mouseY;
+		} else if (mouseX >= x + hueWidth + 1 && mouseY >= y && mouseX < x + width + hueWidth && mouseY < y + height)
 			color = tmp & 0xFFFFFF;
 		colorBuffer.clear();
 	}

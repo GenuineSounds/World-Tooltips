@@ -1,92 +1,118 @@
 package ninja.genuine.tooltips.client;
 
+import static com.mojang.realmsclient.gui.ChatFormatting.BLUE;
+import static com.mojang.realmsclient.gui.ChatFormatting.ITALIC;
+import static com.mojang.realmsclient.gui.ChatFormatting.RESET;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import com.mojang.realmsclient.gui.ChatFormatting;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.client.util.ITooltipFlag.TooltipFlags;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.Loader;
 import ninja.genuine.tooltips.client.config.Config;
-import ninja.genuine.tooltips.client.render.RenderHelper;
 import ninja.genuine.utils.ModUtils;
 
-public class Tooltip {
+public class Tooltip implements Comparable<Tooltip> {
 
-	private Config config = Config.getInstance();
-	private int width, height, alpha;
+	private static final Minecraft mc = Minecraft.getMinecraft();
+	private static final Config cfg = Config.getInstance();
+	private ScaledResolution sr = new ScaledResolution(mc);
 	private EntityItem entity;
+	private EntityPlayer player;
+	private TextFormatting textFormatting;
 	private List<String> text = new ArrayList<>();
+	private int width, height;
+	private int tickCount = 240;
+	public double distanceToPlayer;
+	public double scale;
+	public int alpha;
+	public int colorBackground;
+	public int colorOutline;
+	public int colorOutlineShade;
 
 	public Tooltip(EntityPlayer player, EntityItem entity) {
+		this.player = player;
 		this.entity = entity;
-		sync();
-		generateTooltip(player, entity.getItem());
-		calcDim();
+		textFormatting = entity.getItem().getRarity().rarityColor;
+		generateTooltip(player);
+		calculateSize();
 	}
 
-	public void sync() {
-		alpha = ((int) (config.getOpacity().getDouble() * 255) & 0xFF) << 24;
+	private void generateTooltip(EntityPlayer player) {
+		boolean advanced = mc.gameSettings.advancedItemTooltips;
+		text = entity.getItem().getTooltip(player, advanced ? TooltipFlags.ADVANCED : TooltipFlags.NORMAL);
+		if (!modsAreLoaded() && !cfg.isHidingModName())
+			text.add(BLUE.toString() + ITALIC.toString() + ModUtils.getModName(entity) + RESET.toString());
+		if (entity.getItem().getCount() > 1)
+			text.set(0, entity.getItem().getCount() + " x " + text.get(0));
 	}
 
-	private void generateTooltip(EntityPlayer player, ItemStack item) {
-		text = item.getTooltip(player, Minecraft.getMinecraft().gameSettings.advancedItemTooltips ? ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL);
-		if (!modsAreLoaded() && !config.isHidingMod())
-			text.add(ChatFormatting.BLUE.toString() + ChatFormatting.ITALIC.toString() + ModUtils.getModName(item) + ChatFormatting.RESET.toString());
-		if (item.getCount() > 1)
-			text.set(0, item.getCount() + " x " + text.get(0));
-	}
-
-	private void calcDim() {
-		int maxWidth = 0;
+	private void calculateSize() {
+		int max = 0;
 		for (int line = 0; line < text.size(); line++) {
-			int tmp = Minecraft.getMinecraft().fontRenderer.getStringWidth(getLine(line));
-			if (tmp > maxWidth)
-				maxWidth = tmp;
+			int tmp = mc.fontRenderer.getStringWidth(text.get(line));
+			if (tmp > max)
+				max = tmp;
 		}
-		width = maxWidth;
+		width = max;
 		height = 8;
 		if (size() > 1)
 			height += 2 + (size() - 1) * 10;
+	}
+
+	public void tick() {
+		sr = new ScaledResolution(mc);
+		if (entity == null || entity.isDead)
+			tickCount = 0;
+		tickCount--;
+		generateTooltip(player);
+		calculateSize();
+		distanceToPlayer = entity.getDistance(player);
+		scale = distanceToPlayer / ((6 - sr.getScaleFactor()) * 160);
+		if (scale < 0.01)
+			scale = 0.01;
+		scale *= cfg.getScale().getDouble();
+		if (getFade() > cfg.getOpacity().getDouble())
+			alpha = ((int) (cfg.getOpacity().getDouble() * 0xFF) & 0xFF) << 24;
+		else
+			alpha = ((int) (getFade() * 0xFF) & 0xFF) << 24;
+		colorBackground = cfg.getBackgroundColor() | alpha;
+		colorOutline = ((cfg.isOverridingOutline() ? cfg.getOutlineColor() : ModUtils.getRarityColor(this)) | alpha) & 0xFFE0E0E0;
+		colorOutlineShade = ((colorOutline & 0xFEFEFE) >> 1) | alpha;
+	}
+
+	public double getFade() {
+		return Math.abs(Math.pow(-1, 2) * (tickCount / 60D));
 	}
 
 	private boolean modsAreLoaded() {
 		return Loader.isModLoaded("waila") | Loader.isModLoaded("nei") | Loader.isModLoaded("hwyla");
 	}
 
-	public void render(Minecraft mc, double partialTicks) {
-		ScaledResolution sr = new ScaledResolution(mc);
-		double interpX = mc.getRenderManager().viewerPosX - (getEntity().posX - (getEntity().prevPosX - getEntity().posX) * partialTicks);
-		double interpY = mc.getRenderManager().viewerPosY - 0.65 - (getEntity().posY - (getEntity().prevPosY - getEntity().posY) * partialTicks);
-		double interpZ = mc.getRenderManager().viewerPosZ - (getEntity().posZ - (getEntity().prevPosZ - getEntity().posZ) * partialTicks);
-		double interpDistance = Math.sqrt(interpX * interpX + interpY * interpY + interpZ * interpZ);
-		double scale = interpDistance; // -(0.5 / interpDistance) * 0.02 + 0.02;
-		scale /= (6 - sr.getScaleFactor()) * 160;
-		if (scale <= 0.01)
-			scale = 0.01;
-		RenderHelper.start3D();
-		GlStateManager.translate(-interpX, -(interpY), -interpZ);
-		GlStateManager.rotate(mc.getRenderManager().playerViewY + 180, 0, -1, 0);
-		GlStateManager.rotate(mc.getRenderManager().playerViewX, -1, 0, 0);
-		GlStateManager.scale(scale, -scale, scale);
-		int x = -getWidth() / 2;
-		int y = -getHeight() / 2;
-		GlStateManager.disableDepth();
-		RenderHelper.renderTooltipTile(entity, x, y, getWidth(), getHeight(), config.getBackgroundColor() | alpha, config.getOutlineColor() | alpha);
-		RenderHelper.renderTooltipText(this, x, y, alpha);
-		GlStateManager.enableDepth();
-		GlStateManager.scale(1 / scale, 1 / -scale, 1 / scale);
-		GlStateManager.rotate(mc.getRenderManager().playerViewX, 1, 0, 0);
-		GlStateManager.rotate(mc.getRenderManager().playerViewY - 180, 0, 1, 0);
-		GlStateManager.translate(interpX, interpY, interpZ);
-		RenderHelper.end3D();
+	@Override
+	public int compareTo(Tooltip o) {
+		return (int) (o.distanceToPlayer * 10000 - distanceToPlayer * 10000);
+	}
+
+	public void reset() {
+		tickCount = 240;
+	}
+
+	public EntityItem getEntity() {
+		return entity;
+	}
+
+	public int getTickCount() {
+		return tickCount;
+	}
+
+	public boolean isDead() {
+		return tickCount <= 0;
 	}
 
 	public int getWidth() {
@@ -97,19 +123,15 @@ public class Tooltip {
 		return height;
 	}
 
-	public EntityItem getEntity() {
-		return entity;
-	}
-
 	public int size() {
 		return text.size();
 	}
 
-	public String getLine(int line) {
-		return text.get(line);
+	public List<String> getText() {
+		return text;
 	}
 
-	public TextFormatting getRarityColor() {
-		return entity.getItem().getRarity().rarityColor;
+	public TextFormatting formattingColor() {
+		return textFormatting;
 	}
 }
