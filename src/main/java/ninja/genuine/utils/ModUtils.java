@@ -77,7 +77,6 @@ public class ModUtils {
 	}
 
 	public static EntityItem getMouseOver(Minecraft mc, float partialTicks) throws ConcurrentModificationException {
-		mc.mcProfiler.startSection(Constants.MODID);
 		if (mc.getRenderViewEntity() == null)
 			return null;
 		Entity viewer = mc.getRenderViewEntity();
@@ -106,7 +105,6 @@ public class ModUtils {
 				}
 			}
 		}
-		mc.mcProfiler.endSection();
 		return out;
 	}
 }
