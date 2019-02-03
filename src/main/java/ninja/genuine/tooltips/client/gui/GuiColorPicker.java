@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.io.IOException;
 import java.nio.IntBuffer;
 
+import ninja.genuine.tooltips.client.render.RenderHelper;
+
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
@@ -13,7 +15,6 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.resources.I18n;
-import ninja.genuine.tooltips.client.render.RenderHelper;
 
 @SuppressWarnings("unused")
 public class GuiColorPicker extends GuiScreen {

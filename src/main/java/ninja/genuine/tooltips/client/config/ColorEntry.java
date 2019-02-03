@@ -5,13 +5,14 @@ import static net.minecraft.util.text.TextFormatting.ITALIC;
 import static net.minecraft.util.text.TextFormatting.RED;
 import static net.minecraft.util.text.TextFormatting.WHITE;
 
+import ninja.genuine.tooltips.client.gui.GuiColorButton;
+import ninja.genuine.tooltips.client.gui.GuiColorPicker;
+
 import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraftforge.fml.client.config.GuiConfigEntries;
 import net.minecraftforge.fml.client.config.GuiConfigEntries.StringEntry;
 import net.minecraftforge.fml.client.config.HoverChecker;
 import net.minecraftforge.fml.client.config.IConfigElement;
-import ninja.genuine.tooltips.client.gui.GuiColorButton;
-import ninja.genuine.tooltips.client.gui.GuiColorPicker;
 
 public class ColorEntry extends StringEntry {
 

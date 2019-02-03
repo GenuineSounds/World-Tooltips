@@ -2,11 +2,12 @@ package ninja.genuine.tooltips.client.gui;
 
 import java.util.ArrayList;
 
+import ninja.genuine.tooltips.Constants;
+import ninja.genuine.tooltips.client.config.Config;
+
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.fml.client.config.GuiConfig;
-import ninja.genuine.tooltips.Constants;
-import ninja.genuine.tooltips.client.config.Config;
 
 public class GuiConfigTooltips extends GuiConfig {
 
