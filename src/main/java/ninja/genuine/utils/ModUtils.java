@@ -23,6 +23,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 
@@ -77,17 +78,17 @@ public class ModUtils {
 		return modName;
 	}
 
-	public static Optional<EntityItem> getMouseOver(Minecraft mc, float partialTicks) throws ConcurrentModificationException {
-		if (mc.getRenderViewEntity() == null)
+	public static Optional<EntityItem> getMouseOver(World world, Entity player, float partialTicks) throws ConcurrentModificationException {
+		if (world == null || player == null)
 			return Optional.empty();
-		final Entity viewer = mc.getRenderViewEntity();
+		final Entity viewer = player;
 		final int range = Config.getInstance().getRenderDistance();
 		final Vec3d eyes = viewer.getPositionEyes(partialTicks);
 		final Vec3d look = viewer.getLook(partialTicks);
 		final Vec3d view = eyes.addVector(look.x * range, look.y * range, look.z * range);
 		double distance = 0;
 		EntityItem out = null;
-		List<EntityItem> list = mc.world.getEntitiesWithinAABB(EntityItem.class,
+		List<EntityItem> list = world.getEntitiesWithinAABB(EntityItem.class,
 				viewer.getEntityBoundingBox().expand(look.x * range, look.y * range, look.z * range).grow(1F, 1F, 1F));
 		for (int i = 0; i < list.size(); i++) {
 			EntityItem entity = list.get(i);

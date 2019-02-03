@@ -11,26 +11,22 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
-import net.minecraftforge.fml.common.gameevent.TickEvent.WorldTickEvent;
 
 public class TooltipEvent {
 
-	private Minecraft mc;
 	private LinkedList<Tooltip> tooltips = new LinkedList<>();
 
-	public TooltipEvent() {
-		mc = Minecraft.getMinecraft();
-	}
+	public TooltipEvent() {}
 
 	@SubscribeEvent
-	public void tick(WorldTickEvent event) {
-		if (event.world == null || event.phase != Phase.START)
+	public void tick(ClientTickEvent event) {
+		if (event.phase != Phase.START)
 			return;
-//		System.out.println(event.side + ", " + event.type + ", " + event.phase);
 		EntityItem entity = null;
 		try {
-			entity = ModUtils.getMouseOver(mc, 0).get();
+			entity = ModUtils.getMouseOver(Minecraft.getMinecraft().world, Minecraft.getMinecraft().player, 0).get();
 		} catch (Exception e) {}
 		synchronized (tooltips) {
 			tooltips.removeIf(Objects::isNull);
