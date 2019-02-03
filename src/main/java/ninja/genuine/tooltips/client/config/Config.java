@@ -46,23 +46,35 @@ public class Config {
 	}
 
 	public int getRenderDistance() {
-		return base.getInt("Maximum Drawing Distance", category_behavior, 8, 2, 64, "Set the maximum distance that tooltips should be displayed from.");
+		return base.getInt("Maximum Drawing Distance", category_behavior, 12, 2, 64, "Sets the maximum distance that tooltips will be displayed.");
+	}
+
+	public int getMaxTooltips() {
+		return base.getInt("Max Tooltips", category_behavior, 4, 0, 999, "Sets the maximum number of tooltips shown on screenat once.");
+	}
+
+	public int getShowTime() {
+		return base.getInt("Ticks to Show", category_behavior, 40, 0, 1000, "Sets the number of ticks to show the tooltips before they fade.");
+	}
+
+	public int getFadeTime() {
+		return base.getInt("Fade Duration", category_behavior, 10, 0, 1000, "Sets the duration in ticks for the fading process.");
 	}
 
 	public boolean isOverridingOutline() {
-		return base.getBoolean("Override Outline Color", category_behavior, false, "If enabled outline color will be manually set instead of default behavior.");
+		return base.getBoolean("Override Outline Color", category_behavior, false, "Use the custom outline color instead.");
 	}
 
 	public boolean isHidingModName() {
-		return base.getBoolean("Hide Mod Name", category_behavior, false, "Hide mod names on tooltips. Enable if you see two mod names.");
+		return base.getBoolean("Hide Mod Name", category_behavior, false, "Hide mod names on tooltips. Enable this if you see two mod names.");
 	}
 
 	public Property getOpacity() {
-		return base.get(category_appearance, "Tooltip Opacity", 0.75, "Set the opacity for the tooltips; 0 being completely invisible and 1 being completely opaque.", 0.0, 1.0);
+		return base.get(category_appearance, "Tooltip Opacity", 0.75, "Sets the opacity for the tooltips; 0 being completely invisible and 1 being completely opaque.", 0.0, 1.0);
 	}
 
 	public Property getScale() {
-		return base.get(category_appearance, "Tooltip Scale", 1.0, "Set the scale for the tooltips; 0.1 being one thenth the size and 4 being four times the size.", 0.1, 4.0);
+		return base.get(category_appearance, "Tooltip Scale", 1.0, "Sets the scale for the tooltips; 0.1 being one thenth the size and 4 being four times the size.", 0.1, 4.0);
 	}
 
 	public Property getOutline() {
@@ -81,14 +93,6 @@ public class Config {
 		return decodeProperty(getOutline()) & 0xFFFFFF;
 	}
 
-	private int decodeProperty(Property property) {
-		try {
-			return Integer.decode(property.getString());
-		} catch (NumberFormatException e) {
-			return Integer.decode(property.getDefault());
-		}
-	}
-
 	private void internalPopulation() {
 		isEnabled();
 		getOpacity().setConfigEntryClass(NumberSliderEntry.class);
@@ -96,7 +100,18 @@ public class Config {
 		getOutline().setConfigEntryClass(ColorEntry.class);
 		getBackground().setConfigEntryClass(ColorEntry.class);
 		getRenderDistance();
+		getMaxTooltips();
+		getShowTime();
+		getFadeTime();
 		isHidingModName();
 		isOverridingOutline();
+	}
+
+	private int decodeProperty(Property property) {
+		try {
+			return Integer.decode(property.getString());
+		} catch (NumberFormatException e) {
+			return Integer.decode(property.getDefault());
+		}
 	}
 }

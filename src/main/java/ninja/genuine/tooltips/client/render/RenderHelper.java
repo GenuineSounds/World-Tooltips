@@ -1,28 +1,8 @@
 package ninja.genuine.tooltips.client.render;
 
-import static net.minecraft.client.renderer.GlStateManager.alphaFunc;
-import static net.minecraft.client.renderer.GlStateManager.blendFunc;
-import static net.minecraft.client.renderer.GlStateManager.color;
-import static net.minecraft.client.renderer.GlStateManager.disableAlpha;
-import static net.minecraft.client.renderer.GlStateManager.disableBlend;
-import static net.minecraft.client.renderer.GlStateManager.disableDepth;
-import static net.minecraft.client.renderer.GlStateManager.disableLighting;
-import static net.minecraft.client.renderer.GlStateManager.disableRescaleNormal;
-import static net.minecraft.client.renderer.GlStateManager.disableTexture2D;
-import static net.minecraft.client.renderer.GlStateManager.enableAlpha;
-import static net.minecraft.client.renderer.GlStateManager.enableBlend;
-import static net.minecraft.client.renderer.GlStateManager.enableDepth;
-import static net.minecraft.client.renderer.GlStateManager.enableRescaleNormal;
-import static net.minecraft.client.renderer.GlStateManager.enableTexture2D;
-import static net.minecraft.client.renderer.GlStateManager.popAttrib;
-import static net.minecraft.client.renderer.GlStateManager.popMatrix;
-import static net.minecraft.client.renderer.GlStateManager.pushAttrib;
-import static net.minecraft.client.renderer.GlStateManager.pushMatrix;
-import static net.minecraft.client.renderer.GlStateManager.rotate;
-import static net.minecraft.client.renderer.GlStateManager.scale;
-import static net.minecraft.client.renderer.GlStateManager.shadeModel;
-import static net.minecraft.client.renderer.GlStateManager.translate;
-import static net.minecraft.client.renderer.GlStateManager.tryBlendFuncSeparate;
+import static net.minecraft.client.renderer.GlStateManager.*;
+
+import ninja.genuine.tooltips.client.Tooltip;
 
 import org.lwjgl.opengl.GL11;
 
@@ -34,17 +14,16 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.item.EntityItem;
-import ninja.genuine.tooltips.client.Tooltip;
 
 @SuppressWarnings("unused")
 public class RenderHelper {
 
 	public static void renderTooltip(Tooltip tooltip, double partialTicks) {
-		final RenderManager rm = Minecraft.getMinecraft().getRenderManager();
-		final EntityItem e = tooltip.getEntity();
-		final double interpX = rm.viewerPosX - (e.posX - (e.prevPosX - e.posX) * partialTicks);
-		final double interpY = rm.viewerPosY - 0.65 - (e.posY - (e.prevPosY - e.posY) * partialTicks);
-		final double interpZ = rm.viewerPosZ - (e.posZ - (e.prevPosZ - e.posZ) * partialTicks);
+		RenderManager rm = Minecraft.getMinecraft().getRenderManager();
+		EntityItem e = tooltip.getEntity();
+		double interpX = rm.viewerPosX - (e.posX - (e.prevPosX - e.posX) * partialTicks);
+		double interpY = rm.viewerPosY - 0.65 - (e.posY - (e.prevPosY - e.posY) * partialTicks);
+		double interpZ = rm.viewerPosZ - (e.posZ - (e.prevPosZ - e.posZ) * partialTicks);
 		pushMatrix();
 		pushAttrib();
 		enableRescaleNormal();
@@ -73,13 +52,13 @@ public class RenderHelper {
 	}
 
 	private static void renderTooltipTile(Tooltip tooltip) {
-		final int x = -tooltip.getWidth() / 2;
-		final int y = -tooltip.getHeight() / 2;
-		final int w = tooltip.getWidth();
-		final int h = tooltip.getHeight();
-		final int c1 = tooltip.colorBackground;
-		final int c2 = tooltip.colorOutline;
-		final int c3 = tooltip.colorOutlineShade;
+		int x = -tooltip.getWidth() / 2;
+		int y = -tooltip.getHeight() / 2;
+		int w = tooltip.getWidth();
+		int h = tooltip.getHeight();
+		int c1 = tooltip.colorBackground;
+		int c2 = tooltip.colorOutline;
+		int c3 = tooltip.colorOutlineShade;
 		renderStyle1(x, y, w, h, c1, c2, c3);
 	}
 
@@ -148,9 +127,9 @@ public class RenderHelper {
 	}
 
 	public static void drawColorPicker(double x, double y, double z, double w, double h, int hue) {
-		final int r = hue >> 16 & 0xFF;
-		final int g = hue >> 8 & 0xFF;
-		final int b = hue >> 0 & 0xFF;
+		int r = hue >> 16 & 0xFF;
+		int g = hue >> 8 & 0xFF;
+		int b = hue >> 0 & 0xFF;
 		disableTexture2D();
 		enableBlend();
 		disableAlpha();
@@ -201,22 +180,22 @@ public class RenderHelper {
 	}
 
 	public static void drawGradientRect(double x, double y, double z, double w, double h, int c1, int c2, int c3, int c4) {
-		final int a1 = c1 >> 24 & 0xFF;
-		final int r1 = c1 >> 16 & 0xFF;
-		final int g1 = c1 >> 8 & 0xFF;
-		final int b1 = c1 >> 0 & 0xFF;
-		final int a2 = c2 >> 24 & 0xFF;
-		final int r2 = c2 >> 16 & 0xFF;
-		final int g2 = c2 >> 8 & 0xFF;
-		final int b2 = c2 >> 0 & 0xFF;
-		final int a3 = c3 >> 24 & 0xFF;
-		final int r3 = c3 >> 16 & 0xFF;
-		final int g3 = c3 >> 8 & 0xFF;
-		final int b3 = c3 >> 0 & 0xFF;
-		final int a4 = c4 >> 24 & 0xFF;
-		final int r4 = c4 >> 16 & 0xFF;
-		final int g4 = c4 >> 8 & 0xFF;
-		final int b4 = c4 >> 0 & 0xFF;
+		int a1 = c1 >> 24 & 0xFF;
+		int r1 = c1 >> 16 & 0xFF;
+		int g1 = c1 >> 8 & 0xFF;
+		int b1 = c1 >> 0 & 0xFF;
+		int a2 = c2 >> 24 & 0xFF;
+		int r2 = c2 >> 16 & 0xFF;
+		int g2 = c2 >> 8 & 0xFF;
+		int b2 = c2 >> 0 & 0xFF;
+		int a3 = c3 >> 24 & 0xFF;
+		int r3 = c3 >> 16 & 0xFF;
+		int g3 = c3 >> 8 & 0xFF;
+		int b3 = c3 >> 0 & 0xFF;
+		int a4 = c4 >> 24 & 0xFF;
+		int r4 = c4 >> 16 & 0xFF;
+		int g4 = c4 >> 8 & 0xFF;
+		int b4 = c4 >> 0 & 0xFF;
 		disableTexture2D();
 		enableBlend();
 		disableAlpha();

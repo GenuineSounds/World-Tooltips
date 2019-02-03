@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
+
+import ninja.genuine.tooltips.client.Tooltip;
+import ninja.genuine.tooltips.client.config.Config;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -21,9 +25,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
-import ninja.genuine.tooltips.Constants;
-import ninja.genuine.tooltips.client.Tooltip;
-import ninja.genuine.tooltips.client.config.Config;
 
 public class ModUtils {
 
@@ -76,14 +77,14 @@ public class ModUtils {
 		return modName;
 	}
 
-	public static EntityItem getMouseOver(Minecraft mc, float partialTicks) throws ConcurrentModificationException {
+	public static Optional<EntityItem> getMouseOver(Minecraft mc, float partialTicks) throws ConcurrentModificationException {
 		if (mc.getRenderViewEntity() == null)
-			return null;
-		Entity viewer = mc.getRenderViewEntity();
-		int range = Config.getInstance().getRenderDistance();
-		Vec3d eyes = viewer.getPositionEyes(partialTicks);
-		Vec3d look = viewer.getLook(partialTicks);
-		Vec3d view = eyes.addVector(look.x * range, look.y * range, look.z * range);
+			return Optional.empty();
+		final Entity viewer = mc.getRenderViewEntity();
+		final int range = Config.getInstance().getRenderDistance();
+		final Vec3d eyes = viewer.getPositionEyes(partialTicks);
+		final Vec3d look = viewer.getLook(partialTicks);
+		final Vec3d view = eyes.addVector(look.x * range, look.y * range, look.z * range);
 		double distance = 0;
 		EntityItem out = null;
 		List<EntityItem> list = mc.world.getEntitiesWithinAABB(EntityItem.class,
@@ -105,6 +106,6 @@ public class ModUtils {
 				}
 			}
 		}
-		return out;
+		return out == null ? Optional.empty() : Optional.of(out);
 	}
 }

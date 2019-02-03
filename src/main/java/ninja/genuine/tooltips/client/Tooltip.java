@@ -7,6 +7,9 @@ import static com.mojang.realmsclient.gui.ChatFormatting.RESET;
 import java.util.ArrayList;
 import java.util.List;
 
+import ninja.genuine.tooltips.client.config.Config;
+import ninja.genuine.utils.ModUtils;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.util.ITooltipFlag.TooltipFlags;
@@ -14,8 +17,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.Loader;
-import ninja.genuine.tooltips.client.config.Config;
-import ninja.genuine.utils.ModUtils;
 
 public class Tooltip implements Comparable<Tooltip> {
 
@@ -27,13 +28,16 @@ public class Tooltip implements Comparable<Tooltip> {
 	private TextFormatting textFormatting;
 	private List<String> text = new ArrayList<>();
 	private int width, height;
-	private int tickCount = 240;
+	private int tickCount;
+	private int fadeCount;
 	public double distanceToPlayer;
 	public double scale;
 	public int alpha;
 	public int colorBackground;
 	public int colorOutline;
 	public int colorOutlineShade;
+	private boolean forceFade;
+	private boolean countDown = true;
 
 	public Tooltip(EntityPlayer player, EntityItem entity) {
 		this.player = player;
@@ -41,6 +45,8 @@ public class Tooltip implements Comparable<Tooltip> {
 		textFormatting = entity.getItem().getRarity().rarityColor;
 		generateTooltip(player);
 		calculateSize();
+		fadeCount = cfg.getFadeTime();
+		tickCount = cfg.getShowTime() + fadeCount;
 	}
 
 	private void generateTooltip(EntityPlayer player) {
@@ -69,7 +75,14 @@ public class Tooltip implements Comparable<Tooltip> {
 		sr = new ScaledResolution(mc);
 		if (entity == null || entity.isDead)
 			tickCount = 0;
-		tickCount--;
+		if (countDown)
+			tickCount--;
+		else
+			tickCount += cfg.getFadeTime() / 4;
+		if (tickCount < 0)
+			tickCount = 0;
+		if (tickCount > cfg.getShowTime() + fadeCount)
+			tickCount = cfg.getShowTime() + fadeCount;
 		generateTooltip(player);
 		calculateSize();
 		distanceToPlayer = entity.getDistance(player);
@@ -84,10 +97,21 @@ public class Tooltip implements Comparable<Tooltip> {
 		colorBackground = cfg.getBackgroundColor() | alpha;
 		colorOutline = ((cfg.isOverridingOutline() ? cfg.getOutlineColor() : ModUtils.getRarityColor(this)) | alpha) & 0xFFE0E0E0;
 		colorOutlineShade = ((colorOutline & 0xFEFEFE) >> 1) | alpha;
+		countDown = true;
 	}
 
 	public double getFade() {
-		return Math.abs(Math.pow(-1, 2) * (tickCount / 60D));
+		if (tickCount > fadeCount)
+			return 1D;
+		return Math.abs(Math.pow(-1, 2) * ((double) tickCount / (double) fadeCount));
+	}
+
+	public void forceFade() {
+		if (forceFade)
+			return;
+		tickCount = 10;
+		fadeCount = 10;
+		forceFade = true;
 	}
 
 	private boolean modsAreLoaded() {
@@ -99,8 +123,11 @@ public class Tooltip implements Comparable<Tooltip> {
 		return (int) (o.distanceToPlayer * 10000 - distanceToPlayer * 10000);
 	}
 
-	public void reset() {
-		tickCount = 240;
+	public boolean reset() {
+		if (forceFade)
+			return false;
+		countDown = false;
+		return true;
 	}
 
 	public EntityItem getEntity() {

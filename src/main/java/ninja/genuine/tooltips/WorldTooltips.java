@@ -1,5 +1,10 @@
 package ninja.genuine.tooltips;
 
+import ninja.genuine.tooltips.client.config.Config;
+import ninja.genuine.tooltips.client.gui.GuiConfigTooltips;
+import ninja.genuine.tooltips.client.render.TooltipEvent;
+import ninja.genuine.utils.ModUtils;
+
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.Minecraft;
@@ -17,10 +22,6 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent;
-import ninja.genuine.tooltips.client.config.Config;
-import ninja.genuine.tooltips.client.gui.GuiConfigTooltips;
-import ninja.genuine.tooltips.client.render.RenderEvent;
-import ninja.genuine.utils.ModUtils;
 
 @Mod(modid = Constants.MODID, name = Constants.NAME, version = Constants.VERSION, canBeDeactivated = true, clientSideOnly = true, updateJSON = Constants.URL
 		+ "update.json", useMetadata = true, guiFactory = "ninja.genuine.tooltips.client.TooltipsGuiFactory")
@@ -28,7 +29,7 @@ public class WorldTooltips {
 
 	@Instance(Constants.MODID)
 	public static WorldTooltips instance;
-	private RenderEvent events = new RenderEvent();
+	private TooltipEvent events = new TooltipEvent();
 	private KeyBinding configKey = new KeyBinding(Constants.NAME + " Configuration", Keyboard.KEY_SUBTRACT, Constants.NAME);
 
 	public WorldTooltips() {
@@ -37,7 +38,8 @@ public class WorldTooltips {
 
 	@EventHandler
 	public void pre(FMLPreInitializationEvent event) {
-		Config.setConfiguration(new Configuration(event.getSuggestedConfigurationFile(), Constants.VERSION));
+		Configuration cfg = new Configuration(event.getSuggestedConfigurationFile(), Constants.VERSION);
+		Config.setConfiguration(cfg);
 		Config.populate();
 		Config.save();
 		ClientRegistry.registerKeyBinding(configKey);

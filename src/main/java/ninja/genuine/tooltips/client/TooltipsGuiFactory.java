@@ -2,10 +2,11 @@ package ninja.genuine.tooltips.client;
 
 import java.util.Set;
 
+import ninja.genuine.tooltips.client.gui.GuiConfigTooltips;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.fml.client.IModGuiFactory;
-import ninja.genuine.tooltips.client.gui.GuiConfigTooltips;
 
 public class TooltipsGuiFactory implements IModGuiFactory {
 
