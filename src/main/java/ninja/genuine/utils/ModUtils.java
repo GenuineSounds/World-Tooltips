@@ -78,6 +78,10 @@ public class ModUtils {
 		return modName;
 	}
 
+	public static Optional<EntityItem> getMouseOver() {
+		return getMouseOver(Minecraft.getMinecraft().world, Minecraft.getMinecraft().player, 0);
+	}
+
 	public static Optional<EntityItem> getMouseOver(World world, Entity player, float partialTicks) throws ConcurrentModificationException {
 		if (world == null || player == null)
 			return Optional.empty();

@@ -2,6 +2,7 @@ package ninja.genuine.tooltips.client.render;
 
 import java.util.LinkedList;
 import java.util.Objects;
+import java.util.Optional;
 
 import ninja.genuine.tooltips.client.Tooltip;
 import ninja.genuine.tooltips.client.config.Config;
@@ -24,34 +25,28 @@ public class TooltipEvent {
 	public void tick(ClientTickEvent event) {
 		if (event.phase != Phase.START)
 			return;
-		EntityItem entity = null;
-		try {
-			entity = ModUtils.getMouseOver(Minecraft.getMinecraft().world, Minecraft.getMinecraft().player, 0).get();
-		} catch (Exception e) {}
-		synchronized (tooltips) {
-			tooltips.removeIf(Objects::isNull);
-			tooltips.removeIf(Tooltip::isDead);
-			tooltips.forEach(Tooltip::tick);
+		tooltips.removeIf(Objects::isNull);
+		tooltips.removeIf(Tooltip::isDead);
+		tooltips.forEach(Tooltip::tick);
+		Optional<EntityItem> mouseOver = ModUtils.getMouseOver();
+		if (mouseOver.isPresent()) {
 			boolean createTooltip = true;
+			EntityItem entity = mouseOver.get();
 			for (Tooltip tooltip : tooltips)
-				if (tooltip.getEntity() == entity) {
-					createTooltip = false;
-					tooltip.reset();
-				}
-			if (createTooltip && entity != null)
+				if (tooltip.getEntity() == entity)
+					createTooltip = !tooltip.reset();
+			if (createTooltip)
 				tooltips.addFirst(new Tooltip(Minecraft.getMinecraft().player, entity));
-			for (int i = Config.getInstance().getMaxTooltips(); i < tooltips.size(); i++)
-				tooltips.get(i).forceFade();
 		}
+		for (int i = Config.getInstance().getMaxTooltips(); i < tooltips.size(); i++)
+			tooltips.get(i).forceFade();
 	}
 
 	@SubscribeEvent
 	public void render(RenderWorldLastEvent event) {
 		if (!Config.getInstance().isEnabled() || Minecraft.getMinecraft().world == null)
 			return;
-		synchronized (tooltips) {
-			for (Tooltip tooltip : tooltips)
-				RenderHelper.renderTooltip(tooltip, event.getPartialTicks());
-		}
+		for (Tooltip tooltip : tooltips)
+			RenderHelper.renderTooltip(tooltip, event.getPartialTicks());
 	}
 }
