@@ -1,6 +1,6 @@
 package ninja.genuine.tooltips;
 
-import ninja.genuine.tooltips.client.config.Config;
+import ninja.genuine.tooltips.client.config.TooltipConfig;
 import ninja.genuine.tooltips.client.gui.GuiConfigTooltips;
 import ninja.genuine.tooltips.client.render.TooltipEvent;
 import ninja.genuine.utils.ModUtils;
@@ -39,9 +39,9 @@ public class WorldTooltips {
 	@EventHandler
 	public void pre(FMLPreInitializationEvent event) {
 		Configuration cfg = new Configuration(event.getSuggestedConfigurationFile(), Constants.VERSION);
-		Config.setConfiguration(cfg);
-		Config.populate();
-		Config.save();
+		TooltipConfig.getInstance().setConfiguration(cfg);
+		TooltipConfig.getInstance().populate();
+		TooltipConfig.getInstance().save();
 		ClientRegistry.registerKeyBinding(configKey);
 	}
 
@@ -69,6 +69,6 @@ public class WorldTooltips {
 
 	@SubscribeEvent
 	public void onConfigChanged(OnConfigChangedEvent event) {
-		Config.save();
+		TooltipConfig.getInstance().save();
 	}
 }

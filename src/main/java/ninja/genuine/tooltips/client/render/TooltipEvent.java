@@ -5,7 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import ninja.genuine.tooltips.client.Tooltip;
-import ninja.genuine.tooltips.client.config.Config;
+import ninja.genuine.tooltips.client.config.TooltipConfig;
 import ninja.genuine.utils.ModUtils;
 
 import net.minecraft.client.Minecraft;
@@ -38,13 +38,13 @@ public class TooltipEvent {
 			if (createTooltip)
 				tooltips.addFirst(new Tooltip(Minecraft.getMinecraft().player, entity));
 		}
-		for (int i = Config.getInstance().getMaxTooltips(); i < tooltips.size(); i++)
+		for (int i = TooltipConfig.getMaxTooltips(); i < tooltips.size(); i++)
 			tooltips.get(i).forceFade();
 	}
 
 	@SubscribeEvent
 	public void render(RenderWorldLastEvent event) {
-		if (!Config.getInstance().isEnabled() || Minecraft.getMinecraft().world == null)
+		if (!TooltipConfig.isEnabled() || Minecraft.getMinecraft().world == null)
 			return;
 		for (Tooltip tooltip : tooltips)
 			RenderHelper.renderTooltip(tooltip, event.getPartialTicks());

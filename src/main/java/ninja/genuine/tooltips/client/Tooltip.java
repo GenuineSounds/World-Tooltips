@@ -7,7 +7,7 @@ import static com.mojang.realmsclient.gui.ChatFormatting.RESET;
 import java.util.ArrayList;
 import java.util.List;
 
-import ninja.genuine.tooltips.client.config.Config;
+import ninja.genuine.tooltips.client.config.TooltipConfig;
 import ninja.genuine.utils.ModUtils;
 
 import net.minecraft.client.Minecraft;
@@ -21,8 +21,7 @@ import net.minecraftforge.fml.common.Loader;
 public class Tooltip implements Comparable<Tooltip> {
 
 	private static final Minecraft mc = Minecraft.getMinecraft();
-	private static final Config cfg = Config.getInstance();
-	private ScaledResolution sr = new ScaledResolution(mc);
+	private ScaledResolution sr;
 	private EntityItem entity;
 	private EntityPlayer player;
 	private TextFormatting textFormatting;
@@ -40,19 +39,20 @@ public class Tooltip implements Comparable<Tooltip> {
 	private boolean countDown = true;
 
 	public Tooltip(EntityPlayer player, EntityItem entity) {
+		sr = new ScaledResolution(mc);
 		this.player = player;
 		this.entity = entity;
 		textFormatting = entity.getItem().getRarity().rarityColor;
 		generateTooltip(player);
 		calculateSize();
-		fadeCount = cfg.getFadeTime();
-		tickCount = cfg.getShowTime() + fadeCount;
+		fadeCount = TooltipConfig.getFadeTime();
+		tickCount = TooltipConfig.getShowTime() + fadeCount;
 	}
 
 	private void generateTooltip(EntityPlayer player) {
 		boolean advanced = mc.gameSettings.advancedItemTooltips;
 		text = entity.getItem().getTooltip(player, advanced ? TooltipFlags.ADVANCED : TooltipFlags.NORMAL);
-		if (!modsAreLoaded() && !cfg.isHidingModName())
+		if (!modsAreLoaded() && !TooltipConfig.isHidingModName())
 			text.add(BLUE.toString() + ITALIC.toString() + ModUtils.getModName(entity) + RESET.toString());
 		if (entity.getItem().getCount() > 1)
 			text.set(0, entity.getItem().getCount() + " x " + text.get(0));
@@ -78,24 +78,24 @@ public class Tooltip implements Comparable<Tooltip> {
 		if (countDown)
 			tickCount--;
 		else
-			tickCount += cfg.getFadeTime() / 4;
+			tickCount += TooltipConfig.getFadeTime() / 4;
 		if (tickCount < 0)
 			tickCount = 0;
-		if (tickCount > cfg.getShowTime() + fadeCount)
-			tickCount = cfg.getShowTime() + fadeCount;
+		if (tickCount > TooltipConfig.getShowTime() + fadeCount)
+			tickCount = TooltipConfig.getShowTime() + fadeCount;
 		generateTooltip(player);
 		calculateSize();
 		distanceToPlayer = entity.getDistance(player);
 		scale = distanceToPlayer / ((6 - sr.getScaleFactor()) * 160);
 		if (scale < 0.01)
 			scale = 0.01;
-		scale *= cfg.getScale().getDouble();
-		if (getFade() > cfg.getOpacity().getDouble())
-			alpha = ((int) (cfg.getOpacity().getDouble() * 0xFF) & 0xFF) << 24;
+		scale *= TooltipConfig.getScale().getDouble();
+		if (getFade() > TooltipConfig.getOpacity().getDouble())
+			alpha = ((int) (TooltipConfig.getOpacity().getDouble() * 0xFF) & 0xFF) << 24;
 		else
 			alpha = ((int) (getFade() * 0xFF) & 0xFF) << 24;
-		colorBackground = cfg.getBackgroundColor() | alpha;
-		colorOutline = ((cfg.isOverridingOutline() ? cfg.getOutlineColor() : ModUtils.getRarityColor(this)) | alpha) & 0xFFE0E0E0;
+		colorBackground = TooltipConfig.getBackgroundColor() | alpha;
+		colorOutline = ((TooltipConfig.isOverridingOutline() ? TooltipConfig.getOutlineColor() : ModUtils.getRarityColor(this)) | alpha) & 0xFFE0E0E0;
 		colorOutlineShade = ((colorOutline & 0xFEFEFE) >> 1) | alpha;
 		countDown = true;
 	}

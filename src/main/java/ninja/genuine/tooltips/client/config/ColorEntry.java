@@ -25,14 +25,24 @@ public class ColorEntry extends StringEntry {
 
 	@Override
 	public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected, float partial) {
-		boolean isChanged = isChanged();
 		if (drawLabel) {
-			String label = (!isValidValue ? RED.toString() : (isChanged ? WHITE.toString() : GRAY.toString())) + (isChanged ? ITALIC.toString() : "") + name;
-			mc.fontRenderer.drawString(label, owningScreen.entryList.labelX, y + slotHeight / 2 - mc.fontRenderer.FONT_HEIGHT / 2, 16777215);
+			// String label = (!isValidValue ? RED.toString() : (isChanged ?
+			// WHITE.toString() : GRAY.toString())) + (isChanged ? ITALIC.toString() : "") +
+			// name;
+			String label = name;
+			if (isChanged())
+				label = ITALIC.toString() + label;
+			if (!isValidValue)
+				label = RED.toString() + label;
+			else if (isChanged())
+				label = WHITE.toString() + label;
+			else
+				label = GRAY.toString() + label;
+			mc.fontRenderer.drawString(label, owningScreen.entryList.labelX, y + slotHeight / 2 - mc.fontRenderer.FONT_HEIGHT / 2, 0xFFFFFF);
 		}
 		btnUndoChanges.x = owningEntryList.scrollBarX - 44;
 		btnUndoChanges.y = y;
-		btnUndoChanges.enabled = enabled() && isChanged;
+		btnUndoChanges.enabled = enabled() && isChanged();
 		btnUndoChanges.drawButton(mc, mouseX, mouseY, partial);
 		btnDefault.x = owningEntryList.scrollBarX - 22;
 		btnDefault.y = y;
@@ -63,6 +73,6 @@ public class ColorEntry extends StringEntry {
 	@Override
 	public void keyTyped(char eventChar, int eventKey) {
 		super.keyTyped(eventChar, eventKey);
-		Config.save();
+		TooltipConfig.getInstance().save();
 	}
 }
