@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import ninja.genuine.tooltips.client.Tooltip;
-import ninja.genuine.tooltips.client.config.TooltipConfig;
+import ninja.genuine.tooltips.client.config.Config;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -45,11 +45,11 @@ public class ModUtils {
 	}
 
 	public static int getRarityColor(TextFormatting format) {
-		return formatting_color.getOrDefault(format, TooltipConfig.getOutlineColor());
+		return formatting_color.getOrDefault(format, Config.getInstance().getOutlineColor());
 	}
 
 	public static int getRarityColor(Tooltip tooltip) {
-		return formatting_color.getOrDefault(tooltip.formattingColor(), TooltipConfig.getOutlineColor());
+		return formatting_color.getOrDefault(tooltip.formattingColor(), Config.getInstance().getOutlineColor());
 	}
 
 	public static String getModName(Tooltip tooltip) {
@@ -86,7 +86,7 @@ public class ModUtils {
 		if (world == null || player == null)
 			return Optional.empty();
 		final Entity viewer = player;
-		final int range = TooltipConfig.getRenderDistance();
+		final int range = Config.getInstance().getRenderDistance();
 		final Vec3d eyes = viewer.getPositionEyes(partialTicks);
 		final Vec3d look = viewer.getLook(partialTicks);
 		final Vec3d view = eyes.addVector(look.x * range, look.y * range, look.z * range);
