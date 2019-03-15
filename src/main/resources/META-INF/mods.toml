@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[23,)"
+issueTrackerURL="https://github.com/GenuineSounds/World-Tooltips/issues"
+[[mods]]
+modId="worldtooltips"
+version="${file.jarVersion}"
+displayName="World Tooltips"
+updateJSONURL="http://genuine.ninja/worldtooltips/update.json"
+displayURL="http://genuine.ninja/worldtooltips/"
+logoFile="logo.png"
+credits="Thanks for this example mod goes to Java"
+authors="GenuineSounds"
+description=""
+[[dependencies.worldtooltips]]
+	modId="forge"
+	mandatory=true
+	versionRange="[23,)"
+	ordering="NONE"
+	side="BOTH"
+# Here's another dependency
+[[dependencies.worldtooltips]]
+	modId="minecraft"
+	mandatory=true
+	versionRange="[1.13.2]"
+	ordering="NONE"
+	side="BOTH"

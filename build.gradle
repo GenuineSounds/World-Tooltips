@@ -1,51 +1,71 @@
 buildscript {
-	repositories {
-		jcenter()
-		maven { url = "http://files.minecraftforge.net/maven" }
-	}
-	dependencies {
-		classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-	}
+    repositories {
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+    }
 }
+
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
 
 plugins {
 	id "se.bjurr.gitchangelog.git-changelog-gradle-plugin" version "1.32"
 }
 
-apply plugin: 'net.minecraftforge.gradle.forge'
-
-archivesBaseName = "World-Tooltips"
-
-group = "ninja.genuine.tooltips"
 ext.revision = 'git rev-list --count HEAD'.execute().text.trim()
 version = "1.12.2-1.3.0-${revision}"
+group = "ninja.genuine.tooltips"
+archivesBaseName = "World-Tooltips"
 
-sourceCompatibility = targetCompatibility = "1.8"
-compileJava {
-	sourceCompatibility = targetCompatibility = '1.8'
-}
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 minecraft {
-	version = "1.12.2-14.23.5.2807"
-	runDir = "run"
-	mappings = "snapshot_20171003"
+    mappings channel: 'snapshot', version: '20180921-1.13'
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                worldtooltips {
+                    source sourceSets.main
+                }
+            }
+        }
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                worldtooltips {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
 }
 
 dependencies {
+    minecraft 'net.minecraftforge:forge:1.13.2-25.0.84'
 }
 
-processResources {
-	inputs.property "version", project.version
-	inputs.property "mcversion", project.minecraft.version
-
-	from(sourceSets.main.resources.srcDirs) {
-		include 'mcmod.info'
-		expand 'version':project.version, 'mcversion':project.minecraft.version
-	}
-
-	from(sourceSets.main.resources.srcDirs) {
-		exclude 'mcmod.info'
-	}
+jar {
+    manifest {
+        attributes([
+            "Specification-Title": "worldtooltips",
+            "Specification-Vendor": "GenuineSounds",
+            "Specification-Version": "${version}", // We are version 1 of ourselves
+            "Implementation-Title": project.name,
+            "Implementation-Version": "${version}",
+            "Implementation-Vendor" :"GenuineSounds",
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
 }
 
 allprojects {
